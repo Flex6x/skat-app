@@ -82,6 +82,43 @@ body {
     font-weight: bold;
 }
 
+/* === Stats Table === */
+.stats-table-container {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+#stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e0e0e0;
+    text-align: center;
+}
+
+#stats-table th {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+}
+
+#stats-table td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#stats-table tbody tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+#stats-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
 /* === In-Game UI === */
 #game-container {
     width: 100vw;
@@ -94,11 +131,18 @@ body {
     transition: opacity 0.4s ease, filter 0.4s ease;
 }
 
-/* Home Button */
-.floating-btn {
+/* Floating Controls Right */
+.top-right-controls {
     position: absolute;
     top: 20px;
     right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 50;
+}
+
+.floating-btn {
     width: 50px;
     height: 50px;
     border-radius: 25px;
@@ -110,8 +154,14 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    z-index: 50;
     transition: all 0.2s ease;
+}
+
+.floating-btn.smaller {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    margin-left: 5px; /* centers slightly under the larger one */
 }
 
 .floating-btn:hover {
@@ -417,6 +467,24 @@ body {
     font-weight: bold;
     transform: rotate(180deg);
     line-height: 1;
+}
+
+/* Trick Viewer inside Overlay */
+.trick-viewer {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    min-height: 180px;
+}
+
+.trick-viewer .card-face {
+    position: relative; /* override absolute if appended from game */
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 /* Player cards interactions */

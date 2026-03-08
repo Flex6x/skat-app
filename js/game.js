@@ -58,6 +58,14 @@ class Game {
         
         this.trickCount = 0;
         this.aborted = false;
+        this.lastTrick = null;
+        
+        // Setup Last trick binding
+        this.ui.showLastTrickBtn(() => {
+            if (this.lastTrick) {
+                this.ui.showLastTrick(this.lastTrick);
+            }
+        });
     }
     
     abort() {
@@ -101,7 +109,6 @@ class Game {
         this.players.forEach(p => this.sortHand(p.hand));
         
         this.ui.setDeclarer('-');
-        this.phase = PHASES.DEALING;
         
         // Animate sequence
         await this.animations.animateDealSequence(this.forehandIndex, this.players);
@@ -330,6 +337,14 @@ class Game {
         
         const winnerId = this.determineTrickWinner();
         
+        // Save trick for "Last Trick" review before clearing
+        this.lastTrick = [...this.currentTrick.cards];
+        this.ui.showLastTrickBtn(() => {
+            if (this.lastTrick) {
+                this.ui.showLastTrick(this.lastTrick);
+            }
+        });
+        
         // Animate trick collection
         await this.animations.animateCollectTrick(winnerId);
         if (this.aborted) return;
@@ -399,36 +414,55 @@ class Game {
         return highest.playerId;
     }
 
-    endGame(immediateNullWin = null) {
+    endGame() {
         this.phase = PHASES.GAME_OVER;
         
-        // Add skat to declarer's tricks
-        if (this.declarerIndex !== -1) {
-            this.players[this.declarerIndex].tricks.push(...this.skat);
-        }
-
-        // Calculate points
+        // Count points
         let declarerPoints = 0;
-        let opponentsPoints = 0;
-
-        this.players.forEach(p => {
-            const points = p.tricks.reduce((sum, card) => sum + card.value, 0);
-            p.score = points;
-            if (p.id === this.declarerIndex) {
-                declarerPoints += points;
+        let defendersPoints = 0;
+        
+        for (let i = 0; i < 3; i++) {
+            const pts = this.calculatePoints(this.players[i].tricks);
+            if (i === this.declarerIndex) {
+                declarerPoints += pts;
             } else {
-                opponentsPoints += points;
+                defendersPoints += pts;
             }
-        });
-
-        // 120 points total in the deck
-        let declarerWon = declarerPoints > 60;
-        if (immediateNullWin !== null) {
-            declarerWon = immediateNullWin;
         }
         
-        this.ui.showGameOver(declarerWon, declarerPoints, opponentsPoints);
+        // Add skat points to declarer
+        declarerPoints += this.calculatePoints(this.skat);
+        
+        const won = declarerPoints > 60;
+        const resultMsg = won 
+            ? `${this.players[this.declarerIndex].name} gewinnt mit ${declarerPoints} Augen!` 
+            : `Gegner gewinnen mit ${defendersPoints} Augen!`;
+            
+        this.saveGameResult(
+            won ? this.players[this.declarerIndex].name : "Die Gegner",
+            won ? declarerPoints : defendersPoints,
+            this.trumpMode ? `Farbspiel (${this.trumpMode})` : "Grand" // Changed trumpSuit to trumpMode
+        );
+            
+        this.ui.showGameOver(resultMsg);
         this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
+    }
+    
+    saveGameResult(winner, score, gameType) {
+        let stats = JSON.parse(localStorage.getItem("skatStats")) || [];
+        stats.push({
+            date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            winner: winner,
+            score: score,
+            gameType: gameType
+        });
+        
+        // Keep only last 10 games
+        if (stats.length > 10) {
+            stats = stats.slice(-10);
+        }
+        
+        localStorage.setItem("skatStats", JSON.stringify(stats));
     }
 
     endGamePassedIn() {

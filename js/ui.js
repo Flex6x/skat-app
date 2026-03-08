@@ -30,9 +30,19 @@ class UI {
             currentBid: document.getElementById('current-bid'),
             
             mainMenu: document.getElementById('main-menu'),
+            menuPrimary: document.getElementById('menu-primary'),
+            statsView: document.getElementById('stats-view'),
+            statsTableBody: document.getElementById('stats-table-body'),
             gameContainer: document.getElementById('game-container'),
+            
             btnStartGame: document.getElementById('btn-start-game'),
+            btnShowStats: document.getElementById('btn-show-stats'),
+            btnBackMenu: document.getElementById('btn-back-menu'),
             btnHome: document.getElementById('btn-home'),
+            btnLastTrick: document.getElementById('btn-last-trick'),
+            
+            lastTrickOverlay: document.getElementById('last-trick-overlay'),
+            lastTrickCards: document.getElementById('last-trick-cards'),
             
             btnPass: document.getElementById('btn-pass'),
             btnBid: document.getElementById('btn-bid'),
@@ -65,6 +75,8 @@ class UI {
 
     showMainMenu(onStart) {
         this.els.mainMenu.classList.remove('hidden');
+        this.els.menuPrimary.classList.remove('hidden');
+        this.els.statsView.classList.add('hidden');
         this.els.gameContainer.classList.add('hidden');
         
         // Ensure old listeners are cleared by cloning the button if necessary or simply replacing onclick
@@ -72,6 +84,73 @@ class UI {
             this.hideMainMenu();
             onStart();
         };
+        
+        this.els.btnShowStats.onclick = () => {
+            this.showStatsView();
+        };
+        
+        this.els.btnBackMenu.onclick = () => {
+             this.els.statsView.classList.add('hidden');
+             this.els.menuPrimary.classList.remove('hidden');
+        };
+    }
+    
+    showStatsView() {
+        this.els.menuPrimary.classList.add('hidden');
+        this.els.statsView.classList.remove('hidden');
+        this.renderStats();
+    }
+    
+    // --- Last Trick UI Methods ---
+    showLastTrickBtn(onClick) {
+        this.els.btnLastTrick.classList.remove('hidden');
+        this.els.btnLastTrick.onclick = () => onClick();
+    }
+    
+    hideLastTrickBtn() {
+        this.els.btnLastTrick.classList.add('hidden');
+    }
+    
+    showLastTrick(cardsArray) {
+        this.els.lastTrickOverlay.classList.remove('hidden');
+        this.els.lastTrickCards.innerHTML = '';
+        
+        cardsArray.forEach(trickItem => {
+            // trickItem could just be the physical Card object, we create DOM
+            // Usually the game engine gives us {playerId, card}
+            const c = trickItem.card || trickItem; 
+            const el = c.createDOMElement();
+            // Prevent dragging from the viewer
+            el.draggable = false;
+            this.els.lastTrickCards.appendChild(el);
+        });
+        
+        // Close on click anywhere
+        this.els.lastTrickOverlay.onclick = () => {
+             this.els.lastTrickOverlay.classList.add('hidden');
+        };
+    }
+    
+    renderStats() {
+        const stats = JSON.parse(localStorage.getItem("skatStats")) || [];
+        this.els.statsTableBody.innerHTML = '';
+        
+        if (stats.length === 0) {
+            this.els.statsTableBody.innerHTML = '<tr><td colspan="4">Noch keine Spiele absolviert.</td></tr>';
+            return;
+        }
+        
+        // Show newest first
+        [...stats].reverse().forEach(game => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${game.date}</td>
+                <td>${game.winner}</td>
+                <td>${game.score}</td>
+                <td>${game.gameType}</td>
+            `;
+            this.els.statsTableBody.appendChild(tr);
+        });
     }
 
     hideMainMenu() {

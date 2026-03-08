@@ -10,18 +10,44 @@
 <body>
     <!-- Main Start Menu -->
     <div id="main-menu" class="menu-overlay">
-        <div class="menu-content">
+        <div class="menu-content" id="menu-primary">
             <h1>Skat</h1>
             <p class="subtitle">Minimalist Web Game</p>
             <div class="menu-buttons">
-                <button id="btn-start-game" class="btn primary large-btn">Neues Spiel starten</button>
+                <button id="btn-start-game" class="btn primary large-btn">Neues Spiel</button>
+                <button id="btn-show-stats" class="btn large-btn">Stats</button>
+            </div>
+        </div>
+        
+        <div class="menu-content hidden" id="stats-view">
+            <h2>Letzte Spiele</h2>
+            <div class="stats-table-container">
+                <table id="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Zeit</th>
+                            <th>Gewinner</th>
+                            <th>Punkte</th>
+                            <th>Spieltyp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-table-body">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="menu-buttons">
+                <button id="btn-back-menu" class="btn primary large-btn">Zurück</button>
             </div>
         </div>
     </div>
 
     <div id="game-container" class="hidden">
-        <!-- In-Game Home Button -->
-        <button id="btn-home" class="floating-btn" title="Zurück zum Hauptmenü">🏠</button>
+        <!-- In-Game Home Button & Details -->
+        <div class="top-right-controls">
+            <button id="btn-home" class="floating-btn" title="Zurück zum Hauptmenü">🏠</button>
+            <button id="btn-last-trick" class="floating-btn smaller hidden" title="Letzten Stich ansehen">👁️</button>
+        </div>
         
         <!-- Top Bots Area -->
         <div id="bots-area">
@@ -93,11 +119,20 @@
                 </div>
             </div>
             
-            <div id="game-over-overlay" class="overlay hidden">
-                <h2>Spielende</h2>
-                <div id="results"></div>
-                <button id="btn-restart" class="btn primary">Neues Spiel</button>
-            </div>
+     <!-- GameOver Overlay -->
+    <div id="game-over-overlay" class="overlay hidden">
+        <h2 id="game-result-msg">Gewonnen!</h2>
+        <button id="btn-restart" class="btn primary">Neues Spiel</button>
+    </div>
+
+    <!-- Last Trick Overlay -->
+    <div id="last-trick-overlay" class="overlay hidden">
+        <h2>Letzter Stich</h2>
+        <div id="last-trick-cards" class="trick-viewer">
+            <!-- Cards appended here -->
+        </div>
+        <p class="subtitle" style="margin-top: 20px;">Klicke irgendwo zum Schließen</p>
+    </div>
         </div>
 
         <!-- Bottom Player Area -->

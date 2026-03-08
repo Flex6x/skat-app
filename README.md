@@ -16,3 +16,11 @@
 - Überreizt einfügen
 - in die info box notieren bis wohin der alleinspieler gereizt hat
 - letzten stich überprüfen
+- stats verschönern
+- besseres design
+- geben in päckchen
+
+## Bugs:
+
+- Wenn ein Bot das Spiel nimmt, ist das Game stuck
+- Wenn das Game vorbei ist, ist es stuck und man bekommt keine zusammenfassung
