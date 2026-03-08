@@ -102,9 +102,15 @@ class UI {
     }
 
     updateSkatZone(skatCards) {
-        // Hidden by default until revealed at end of game or during discard
         const slots = this.els.skatZone.querySelectorAll('.card-slot');
-        slots.forEach(s => s.innerHTML = '');
+        slots.forEach(s => {
+            s.innerHTML = '';
+            const cardBack = document.createElement('div');
+            cardBack.classList.add('card', 'card-back');
+            cardBack.style.width = '100%';
+            cardBack.style.height = '100%';
+            s.appendChild(cardBack);
+        });
     }
 
     showBiddingOverlay(nextBid, onBid, onPass) {

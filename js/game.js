@@ -59,7 +59,11 @@ class Game {
         this.trickCount = 0;
     }
 
-    start() {
+    async start() {
+        if (!this.animations) {
+            this.animations = new CardAnimations(this.ui);
+        }
+
         this.deck.initialize();
         this.deck.shuffle();
         const dealt = this.deck.deal();
@@ -72,9 +76,14 @@ class Game {
         // Sort hands
         this.players.forEach(p => this.sortHand(p.hand));
         
+        this.ui.setDeclarer('-');
+        this.phase = PHASES.DEALING;
+        
+        // Animate sequence
+        await this.animations.animateDealSequence(this.forehandIndex, this.players);
+        
         this.ui.renderAllHands(this.players);
         this.ui.updateSkatZone(this.skat);
-        this.ui.setDeclarer('-');
         
         this.phase = PHASES.BIDDING;
         this.startBiddingPhase();
@@ -283,14 +292,18 @@ class Game {
     }
 
     async resolveTrick() {
-        await this.delay(1500); // Wait for players to see the trick
+        await this.delay(1000); // Shorter wait before animating
+        
+        if (!this.animations) this.animations = new CardAnimations(this.ui);
         
         const winnerId = this.determineTrickWinner();
-        const trickCards = this.currentTrick.cards.map(c => c.card);
         
+        // Animate trick collection
+        await this.animations.animateCollectTrick(winnerId);
+        
+        const trickCards = this.currentTrick.cards.map(c => c.card);
         this.players[winnerId].tricks.push(...trickCards);
         
-        this.ui.clearTrickZone();
         this.ui.showMessage(`${this.players[winnerId].name} gewinnt den Stich!`);
         
         this.currentTrick = { cards: [], leadSuit: null };

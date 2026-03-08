@@ -135,6 +135,39 @@ body {
     align-items: center;
 }
 
+#deck-zone {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    width: 80px;
+    height: 120px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#skat-zone {
+    position: absolute;
+    top: 50%;
+    left: 40px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#skat-zone .card-slot {
+    width: 80px;
+    height: 120px;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #played-card-bot2 { top: 20px; left: 20px; transform: rotate(-15deg); }
 #played-card-bot1 { top: 20px; right: 20px; transform: rotate(15deg); }
 #played-card-player { bottom: 20px; left: 50%; transform: translateX(-50%); }

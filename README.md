@@ -16,3 +16,5 @@
 - Null Ouvert usw implementieren
 - Überreizt einfügen
 - Vorder, Mittelhand, Rückhand Logistik einfügen.
+- in die info box notieren bis wohin der alleinspieler gereizt hat
+- letzten stich überprüfen
