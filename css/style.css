@@ -1,0 +1,355 @@
+/* === Variables & Defaults === */
+:root {
+    --bg-color: #121212;
+    --table-color: #1a1a2e; /* Dark subtly bluish tone */
+    --text-color: #e0e0e0;
+    --accent-color: #3f51b5;
+    --accent-hover: #5c6bc0;
+    --card-bg: #fff;
+    --card-border: #333;
+    
+    /* Deutsches Blatt Colors */
+    --color-eichel: #6b4c3a; /* Brown for Acorns */
+    --color-gruen: #2e7d32;  /* Green for Leaves */
+    --color-rot: #d32f2f;    /* Red for Hearts */
+    --color-schellen: #f9a825; /* Yellow/Gold for Bells */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+}
+
+/* === Top Bots Area === */
+#bots-area {
+    display: flex;
+    justify-content: space-between;
+    height: 20%;
+}
+
+.player-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.player-info {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+
+.score {
+    color: #ffb74d;
+    margin-left: 10px;
+}
+
+.cards-container {
+    display: flex;
+    gap: -30px; /* Overlap cards */
+    justify-content: center;
+    min-height: 100px;
+}
+
+.bot-cards .card {
+    /* Back of card styling for bots */
+    width: 60px;
+    height: 90px;
+    background: repeating-linear-gradient(
+        45deg,
+        #444,
+        #444 10px,
+        #333 10px,
+        #333 20px
+    );
+    border: 2px solid #fff;
+    border-radius: 6px;
+    margin-left: -40px; /* Overlap */
+    box-shadow: -2px 2px 5px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+}
+
+.bot-cards .card:first-child {
+    margin-left: 0;
+}
+
+/* === Center Table Area === */
+#table-area {
+    flex-grow: 1;
+    background: var(--table-color);
+    border-radius: 200px; /* Oval table shape */
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 10px solid #2a2a3e;
+}
+
+#trick-zone {
+    width: 300px;
+    height: 300px;
+    position: relative;
+}
+
+.played-card-slot {
+    position: absolute;
+    width: 80px;
+    height: 120px;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#played-card-bot2 { top: 20px; left: 20px; transform: rotate(-15deg); }
+#played-card-bot1 { top: 20px; right: 20px; transform: rotate(15deg); }
+#played-card-player { bottom: 20px; left: 50%; transform: translateX(-50%); }
+
+/* Overlays */
+.overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(30, 30, 40, 0.95);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    text-align: center;
+    z-index: 100;
+    min-width: 300px;
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(5px);
+}
+
+.overlay h2 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    background: #444;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+    background: #555;
+    transform: translateY(-2px);
+}
+
+.btn.primary {
+    background: var(--accent-color);
+}
+
+.btn.primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Skat discard slot */
+#skat-discard-slots {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.skat-slot {
+    width: 70px;
+    height: 105px;
+    border: 2px dashed #666;
+    border-radius: 8px;
+}
+
+/* === Bottom Player Area === */
+#player-area {
+    height: 25%;
+    display: flex;
+    align-items: center;
+}
+
+.game-info {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+#player-hand {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    gap: -40px; /* Strong overlap for hand cards */
+}
+
+/* === Cards === */
+.card-face {
+    width: 80px;
+    height: 120px;
+    background-color: var(--card-bg);
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 6px;
+    position: relative;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    border: 1px solid var(--card-border);
+}
+
+/* German Deck styling */
+.suit-Eichel { color: var(--color-eichel); }
+.suit-Grün { color: var(--color-gruen); }
+.suit-Rot { color: var(--color-rot); }
+.suit-Schellen { color: var(--color-schellen); }
+
+.card-top-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.card-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-bottom-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    transform: rotate(180deg);
+    line-height: 1;
+}
+
+/* Player cards interactions */
+.player-cards .card-face:hover {
+    transform: translateY(-20px) scale(1.05);
+    box-shadow: 0 15px 20px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+.player-cards .card-face:active {
+    cursor: grabbing;
+}
+
+/* Stacking trick cards appropriately */
+.played-card {
+    animation: dropCard 0.3s ease-out;
+}
+
+@keyframes dropCard {
+    0% { transform: scale(1.5) translate(0, -50px); opacity: 0; }
+    100% { transform: scale(1) translate(0, 0); opacity: 1; }
+}
+
+.speech-bubble {
+    position: absolute;
+    background: white;
+    color: black;
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    top: 100px;
+    z-index: 50;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+
+#bot2 .speech-bubble { right: -20px; }
+#bot1 .speech-bubble { left: -20px; }
+#player-area .speech-bubble { top: -40px; }
+
+/* Trump Selection */
+#trump-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.trump-btn { display: flex; align-items: center; justify-content: center; gap: 8px;}
+.suit-icon { font-size: 1.2rem; }
+
+/* Drag and Drop Visuals */
+.card-face.dragging {
+    opacity: 0.5;
+}
+.droppable.drag-over {
+    border-color: #fff;
+    background: rgba(255,255,255,0.1);
+}
+
+.valid-move {
+    /* Style for highlighting valid cards during turn */
+    box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.4);
+}
+.invalid-move {
+    filter: brightness(0.5);
+    pointer-events: none;
+}
