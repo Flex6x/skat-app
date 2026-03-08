@@ -78,35 +78,99 @@ class Game {
         this.startBiddingPhase();
     }
 
-    // A simplified bidding phase: Highest bidder becomes declarer (very simplified for this demo)
     async startBiddingPhase() {
+        this.biddingEngine = new BiddingEngine();
+        this.botBidding = new BotBidding();
+        
+        // Evaluate bot hands
+        this.botData = [];
+        this.players.forEach(p => {
+            if (p.type === PLAYER_TYPES.BOT) {
+                this.botData[p.id] = this.botBidding.evaluateHand(p.hand);
+            }
+        });
+
         this.ui.showMessage('Die Reiz-Phase beginnt.');
         await this.delay(1000);
         
-        // For simplicity: Bot 1 passes, Bot 2 passes, Human decides.
-        // In a real game, this is a complex negotiation.
-        this.ui.showSpeechBubble(1, 'Passe');
-        await this.delay(1000);
+        // Active bidders who haven't passed. (1 = Forehand, 2 = Middlehand, 0 = Rearhand)
+        this.activeBidders = [1, 2, 0]; 
+        this.currentBid = 0;
+        this.currentBidderIndex = 0;
+        this.highestBidder = -1;
         
-        this.ui.showSpeechBubble(0, 'Passe');
-        await this.delay(1000);
-        
-        // Human's turn to bid
-        this.ui.showBiddingOverlay(() => {
-            // Human is declarer
-            this.declarerIndex = 2;
-            this.ui.hideBiddingOverlay();
+        this.processBiddingTurn();
+    }
+
+    async processBiddingTurn() {
+        if (this.activeBidders.length === 1) {
+            // Only one left!
+            if (this.currentBid === 0) {
+                // Everyone passed
+                this.declarerIndex = 2; // Default to human
+                this.ui.showMessage('Niemand reizt. Du musst spielen!');
+                this.phase = PHASES.SKAT_DECISION;
+                this.startSkatDecision();
+                return;
+            }
+            // Winner found
+            this.declarerIndex = this.activeBidders[0];
+            this.ui.showMessage(`${this.players[this.declarerIndex].name} gewinnt das Reizen mit ${this.currentBid}.`);
+            await this.delay(1500);
             this.phase = PHASES.SKAT_DECISION;
             this.startSkatDecision();
-        }, () => {
-             // Human passes. For simplified version: if all pass, Human is forced to play a Grand Hand or redeal. 
-             // Let's just make the Human declarer by default if all pass to ensure gameplay continues.
-             this.declarerIndex = 2;
-             this.ui.hideBiddingOverlay();
-             this.ui.showMessage('Niemand reizt. Du musst spielen!');
-             this.phase = PHASES.SKAT_DECISION;
-             this.startSkatDecision();
-        });
+            return;
+        }
+
+        const playerId = this.activeBidders[this.currentBidderIndex];
+        const nextBidValue = this.currentBid === 0 ? 18 : this.biddingEngine.getNextBid(this.currentBid);
+
+        if (!nextBidValue) {
+            // Reached 264
+            this.activeBidders = [this.highestBidder];
+            this.processBiddingTurn();
+            return;
+        }
+
+        this.ui.updateTurn(playerId); // Highlight active bidder
+
+        if (this.players[playerId].type === PLAYER_TYPES.HUMAN) {
+            this.ui.showBiddingOverlay(nextBidValue, () => {
+                // On Bid
+                this.currentBid = nextBidValue;
+                this.highestBidder = playerId;
+                this.ui.showSpeechBubble(playerId, `Reize ${this.currentBid}`);
+                this.ui.hideBiddingOverlay();
+                this.currentBidderIndex = (this.currentBidderIndex + 1) % this.activeBidders.length;
+                this.processBiddingTurn();
+            }, () => {
+                // On Pass
+                this.ui.showSpeechBubble(playerId, 'Passe');
+                this.ui.hideBiddingOverlay();
+                this.activeBidders.splice(this.currentBidderIndex, 1);
+                if (this.currentBidderIndex >= this.activeBidders.length) {
+                    this.currentBidderIndex = 0;
+                }
+                this.processBiddingTurn();
+            });
+        } else {
+            // Bot turn
+            await this.delay(1000 + Math.random() * 500);
+            const data = this.botData[playerId];
+            if (this.botBidding.decideBid(nextBidValue, data)) {
+                this.currentBid = nextBidValue;
+                this.highestBidder = playerId;
+                this.ui.showSpeechBubble(playerId, `Reize ${this.currentBid}`);
+                this.currentBidderIndex = (this.currentBidderIndex + 1) % this.activeBidders.length;
+            } else {
+                this.ui.showSpeechBubble(playerId, 'Passe');
+                this.activeBidders.splice(this.currentBidderIndex, 1);
+                if (this.currentBidderIndex >= this.activeBidders.length) {
+                    this.currentBidderIndex = 0;
+                }
+            }
+            this.processBiddingTurn();
+        }
     }
 
     startSkatDecision() {
@@ -130,8 +194,34 @@ class Game {
                 }
             );
         } else {
-            // AI declarer logic (not needed in simplified 1P+2Bots where Bots pass)
+            this.simulateBotSkatDecision();
         }
+    }
+
+    async simulateBotSkatDecision() {
+        this.ui.showMessage(`${this.players[this.declarerIndex].name} nimmt den Skat auf.`);
+        await this.delay(1500);
+        
+        const botHand = this.players[this.declarerIndex].hand;
+        botHand.push(...this.skat);
+        this.skat = [];
+        
+        // Use evaluated trump logic from bot Data
+        const data = this.botData[this.declarerIndex];
+        this.trumpMode = data.trumpSuit; 
+        this.ui.setTrump(this.trumpMode);
+        
+        this.sortHand(botHand);
+        
+        const d1 = botHand.pop();
+        const d2 = botHand.pop();
+        this.skat.push(d1, d2);
+        
+        this.ui.renderBotHand(this.declarerIndex, botHand.length);
+        this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt ${this.trumpMode}.`);
+        await this.delay(1500);
+        
+        this.startGameplay();
     }
 
     removeCardFromHand(playerId, cardId) {

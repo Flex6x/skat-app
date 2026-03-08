@@ -104,8 +104,10 @@ class UI {
         slots.forEach(s => s.innerHTML = '');
     }
 
-    showBiddingOverlay(onBid, onPass) {
+    showBiddingOverlay(nextBidValue, onBid, onPass) {
         this.els.biddingOverlay.classList.remove('hidden');
+        document.getElementById('bidding-status').textContent = `Reize auf ${nextBidValue} Punkte?`;
+        this.els.btnBid.textContent = `Reizen (${nextBidValue})`;
         
         this.els.btnBid.onclick = () => { onBid(); };
         this.els.btnPass.onclick = () => { onPass(); };

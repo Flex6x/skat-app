@@ -6,8 +6,8 @@
 
 ## To Do:
 
-- Bug: Spieler bekommt am anfang nur 8 Karten.
-- Bug: Augen werden nicht korrekt gezählt.
+- Hand Sortierung 
+- Bug: Augen werden nicht korrekt gezählt. 
 - Karten - Icons austauschen.
 - Reizen verbessern - Bots sollen auch reizen, wenn sie ein gutes Blatt haben (vllt mit random modus, dass wenn die 5-10 potenzielle trümpfe haben ihre reiz chance steigt)
 - Reizregeln etablieren
