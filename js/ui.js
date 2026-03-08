@@ -249,27 +249,39 @@ class UI {
         const validIds = validCards.map(c => c.id);
         const cardEls = this.els.player2Cards.querySelectorAll('.card-face');
         
-        // Handle Drag & Drop logic for playing to trick
+        // Handle Drag & Drop logic for playing to trick on the entire table-area
+        const tableArea = document.getElementById('table-area');
         
-        // Clean up previous event listeners by cloning player trick area
-        const newTrickPlayer = this.els.trickPlayer.cloneNode(true);
-        this.els.trickPlayer.parentNode.replaceChild(newTrickPlayer, this.els.trickPlayer);
-        this.els.trickPlayer = newTrickPlayer;
+        // Clean up previous event listeners by cloning table area is dangerous since it holds overlays,
+        // so we use named functions and attach/detach them instead.
         
-        this.els.trickPlayer.addEventListener('dragover', e => { e.preventDefault(); this.els.trickPlayer.classList.add('drag-over'); });
-        this.els.trickPlayer.addEventListener('dragleave', () => this.els.trickPlayer.classList.remove('drag-over'));
+        const removeListeners = () => {
+            tableArea.removeEventListener('dragover', this._dragOverHandler);
+            tableArea.removeEventListener('dragleave', this._dragLeaveHandler);
+            tableArea.removeEventListener('drop', this._dropHandler);
+        };
         
-        this.els.trickPlayer.addEventListener('drop', e => {
+        removeListeners(); // Clean up if they existed
+        
+        this._dragOverHandler = (e) => { e.preventDefault(); tableArea.style.boxShadow = 'inset 0 0 50px rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.5)'; };
+        this._dragLeaveHandler = () => { tableArea.style.boxShadow = ''; };
+        
+        this._dropHandler = (e) => {
             e.preventDefault();
-            this.els.trickPlayer.classList.remove('drag-over');
+            tableArea.style.boxShadow = '';
             const cardId = e.dataTransfer.getData('text/plain');
             
             if (validIds.includes(cardId)) {
+                removeListeners();
                 onPlay(cardId);
             } else {
                 this.showMessage("Karte darf nicht gespielt werden!");
             }
-        });
+        };
+
+        tableArea.addEventListener('dragover', this._dragOverHandler);
+        tableArea.addEventListener('dragleave', this._dragLeaveHandler);
+        tableArea.addEventListener('drop', this._dropHandler);
 
         // Make cards draggable / clickable
         cardEls.forEach(el => {
