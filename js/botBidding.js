@@ -132,7 +132,7 @@ if (typeof module !== 'undefined' && module.exports) {
 if (typeof require !== 'undefined' && require.main === module) {
     console.log("--- Bot Bidding Logic Tests ---");
     const botBidding = new BotBidding();
-    
+
     // Mock Hand 1: 2 Unter, 4 Eichel, kein extra Ass (Score = 2 + 4 + 0 = 6) -> 55% Chance, Eichel(12) * (2+1)=3 = 36 maxBid
     const hand1 = [
         { suit: 'Eichel', rank: 'U' },

@@ -29,6 +29,7 @@ class Game {
     constructor(ui, aiControllers) {
         this.ui = ui;
         this.aiControllers = aiControllers; // Array of AI instances
+        this.dealerIndex = 0; // Initialize dealer once
         
         this.reset();
     }
@@ -43,8 +44,8 @@ class Game {
         this.skat = [];
         
         this.phase = PHASES.DEALING;
-        this.dealerIndex = 0;
-        this.forehandIndex = 1; // Left of dealer
+        // Compute roles relative to dealer
+        this.forehandIndex = (this.dealerIndex + 1) % 3;
         this.turnIndex = this.forehandIndex;
         
         this.declarerIndex = -1;
@@ -83,96 +84,36 @@ class Game {
         this.biddingEngine = new BiddingEngine();
         this.botBidding = new BotBidding();
         
-        // Evaluate bot hands
-        this.botData = [];
-        this.players.forEach(p => {
-            if (p.type === PLAYER_TYPES.BOT) {
-                this.botData[p.id] = this.botBidding.evaluateHand(p.hand);
+        this.biddingController = new BiddingController(
+            this.biddingEngine, 
+            this.botBidding, 
+            this.ui, 
+            this.players, 
+            this.dealerIndex, 
+            (declarerId, finalBid) => {
+                this.onBiddingComplete(declarerId, finalBid);
             }
-        });
+        );
 
-        this.ui.showMessage('Die Reiz-Phase beginnt.');
-        await this.delay(1000);
-        
-        // Active bidders who haven't passed. (1 = Forehand, 2 = Middlehand, 0 = Rearhand)
-        this.activeBidders = [1, 2, 0]; 
-        this.currentBid = 0;
-        this.currentBidderIndex = 0;
-        this.highestBidder = -1;
-        
-        this.processBiddingTurn();
+        this.biddingController.start();
     }
 
-    async processBiddingTurn() {
-        if (this.activeBidders.length === 1) {
-            // Only one left!
-            if (this.currentBid === 0) {
-                // Everyone passed
-                this.declarerIndex = -1;
-                this.ui.setDeclarer('-');
-                this.ui.showMessage('Eingepasst! Niemand möchte spielen.');
-                await this.delay(1500);
-                this.endGamePassedIn();
-                return;
-            }
+    async onBiddingComplete(declarerId, finalBid) {
+        if (declarerId === null) {
+            // Passed in
+            this.declarerIndex = -1;
+            this.ui.setDeclarer('-');
+            this.ui.showMessage('Eingepasst! Niemand möchte spielen.');
+            await this.delay(1500);
+            this.endGamePassedIn();
+        } else {
             // Winner found
-            this.declarerIndex = this.activeBidders[0];
+            this.declarerIndex = declarerId;
             this.ui.setDeclarer(this.players[this.declarerIndex].name);
-            this.ui.showMessage(`${this.players[this.declarerIndex].name} gewinnt das Reizen mit ${this.currentBid}.`);
+            this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt (${finalBid}).`);
             await this.delay(1500);
             this.phase = PHASES.SKAT_DECISION;
             this.startSkatDecision();
-            return;
-        }
-
-        const playerId = this.activeBidders[this.currentBidderIndex];
-        const nextBidValue = this.currentBid === 0 ? 18 : this.biddingEngine.getNextBid(this.currentBid);
-
-        if (!nextBidValue) {
-            // Reached 264
-            this.activeBidders = [this.highestBidder];
-            this.processBiddingTurn();
-            return;
-        }
-
-        this.ui.updateTurn(playerId); // Highlight active bidder
-
-        if (this.players[playerId].type === PLAYER_TYPES.HUMAN) {
-            this.ui.showBiddingOverlay(nextBidValue, () => {
-                // On Bid
-                this.currentBid = nextBidValue;
-                this.highestBidder = playerId;
-                this.ui.showSpeechBubble(playerId, `Reize ${this.currentBid}`);
-                this.ui.hideBiddingOverlay();
-                this.currentBidderIndex = (this.currentBidderIndex + 1) % this.activeBidders.length;
-                this.processBiddingTurn();
-            }, () => {
-                // On Pass
-                this.ui.showSpeechBubble(playerId, 'Passe');
-                this.ui.hideBiddingOverlay();
-                this.activeBidders.splice(this.currentBidderIndex, 1);
-                if (this.currentBidderIndex >= this.activeBidders.length) {
-                    this.currentBidderIndex = 0;
-                }
-                this.processBiddingTurn();
-            });
-        } else {
-            // Bot turn
-            await this.delay(1000 + Math.random() * 500);
-            const data = this.botData[playerId];
-            if (this.botBidding.decideBid(nextBidValue, data)) {
-                this.currentBid = nextBidValue;
-                this.highestBidder = playerId;
-                this.ui.showSpeechBubble(playerId, `Reize ${this.currentBid}`);
-                this.currentBidderIndex = (this.currentBidderIndex + 1) % this.activeBidders.length;
-            } else {
-                this.ui.showSpeechBubble(playerId, 'Passe');
-                this.activeBidders.splice(this.currentBidderIndex, 1);
-                if (this.currentBidderIndex >= this.activeBidders.length) {
-                    this.currentBidderIndex = 0;
-                }
-            }
-            this.processBiddingTurn();
         }
     }
 
@@ -441,11 +382,13 @@ class Game {
         }
         
         this.ui.showGameOver(declarerWon, declarerPoints, opponentsPoints);
+        this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
     }
 
     endGamePassedIn() {
         this.phase = PHASES.GAME_OVER;
         this.ui.showGameOverPassedIn();
+        this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
     }
 
     sortHand(hand) {

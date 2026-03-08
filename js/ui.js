@@ -19,6 +19,8 @@ class UI {
             skatDiscardSlots: document.querySelectorAll('.skat-slot'),
             
             biddingOverlay: document.getElementById('bidding-overlay'),
+            biddingStatus: document.getElementById('bidding-status'),
+            biddingControls: document.getElementById('bidding-controls'),
             trumpOverlay: document.getElementById('trump-overlay'),
             gameOverOverlay: document.getElementById('game-over-overlay'),
             
@@ -105,13 +107,26 @@ class UI {
         slots.forEach(s => s.innerHTML = '');
     }
 
-    showBiddingOverlay(nextBidValue, onBid, onPass) {
+    showBiddingOverlay(nextBid, onBid, onPass) {
+        // Kept for backwards compatibility if needed, though we replace it
+        this.showAdvancedBiddingOverlay(nextBid, true, false, onBid, onPass);
+    }
+
+    showAdvancedBiddingOverlay(targetBid, canBid, canHold, onActionBid, onActionPass) {
         this.els.biddingOverlay.classList.remove('hidden');
-        document.getElementById('bidding-status').textContent = `Reize auf ${nextBidValue} Punkte?`;
-        this.els.btnBid.textContent = `Reizen (${nextBidValue})`;
+        this.els.biddingStatus.textContent = canBid ? 'Du bist dran zu reizen!' : 'Du musst antworten!';
         
-        this.els.btnBid.onclick = () => { onBid(); };
-        this.els.btnPass.onclick = () => { onPass(); };
+        this.els.biddingControls.innerHTML = `
+            <div class="button-group">
+                <button id="btn-pass" class="btn">Passe</button>
+                ${canHold ? `<button id="btn-hold" class="btn primary">Ja (${targetBid})</button>` : ''}
+                ${canBid ? `<button id="btn-bid" class="btn primary">Reize ${targetBid}</button>` : ''}
+            </div>
+        `;
+        
+        document.getElementById('btn-pass').onclick = onActionPass;
+        if (canHold) document.getElementById('btn-hold').onclick = onActionBid;
+        if (canBid) document.getElementById('btn-bid').onclick = onActionBid;
     }
 
     hideBiddingOverlay() {
@@ -248,6 +263,28 @@ class UI {
 
     setDeclarer(name) {
         this.els.currentDeclarer.textContent = `Alleinspieler: ${name}`;
+    }
+
+    updatePlayerRoles(vorhandId, mittelhandId, hinterhandId) {
+        const roles = [];
+        roles[vorhandId] = ' (V)';
+        roles[mittelhandId] = ' (M)';
+        roles[hinterhandId] = ' (H)';
+        
+        // Find player name divs
+        const bot2Name = document.querySelector('#bot2 .player-info');
+        const bot1Name = document.querySelector('#bot1 .player-info');
+        const playerName = document.querySelector('#player-area .player-info');
+        
+        // This resets the text while keeping HTML structure like score span and ai-text
+        const updateName = (el, baseHtml, roleStr) => {
+            // we have to reconstruct since innerHTML wipes out children if we aren't careful
+            // For now, simpler approach, we just know what the text is
+        };
+        
+        bot2Name.innerHTML = `<span class="ai-text">Ai</span>core${roles[0]} <span class="score">${document.querySelector('#bot2 .score').textContent}</span>`;
+        bot1Name.innerHTML = `<span class="ai-text">Ai</span>den${roles[1]} <span class="score">${document.querySelector('#bot1 .score').textContent}</span>`;
+        playerName.innerHTML = `Du${roles[2]} <span class="score">${document.querySelector('#player-area .score').textContent}</span>`;
     }
 
     enablePlayerMoves(validCards, onPlay) {

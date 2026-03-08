@@ -235,6 +235,13 @@ body {
     font-size: 0.9rem;
 }
 
+#player-area .player-info {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    margin-bottom: 0;
+}
+
 #player-hand {
     margin-top: 10px;
     margin-bottom: 20px;
