@@ -6,7 +6,7 @@
 class CardAnimations {
     constructor(ui) {
         this.ui = ui;
-        this.dealDuration = 300; // ms
+        this.dealDuration = 450; // ms
         this.trickDuration = 300; // ms
         this.delayBetweenDeals = 50; // ms
     }
@@ -40,6 +40,26 @@ class CardAnimations {
     }
 
     /**
+     * Creates a stack of cards for dealing packets
+     */
+    createTempPacket(count) {
+        const container = document.createElement('div');
+        container.style.position = 'relative';
+        container.style.width = '80px';
+        container.style.height = '120px';
+
+        for (let i = 0; i < count; i++) {
+            const cardBack = this.createTempCard();
+            cardBack.style.position = 'absolute';
+            // Slight offset for stacked look
+            cardBack.style.top = `${-i * 2}px`;
+            cardBack.style.left = `${-i * 2}px`;
+            container.appendChild(cardBack);
+        }
+        return container;
+    }
+
+    /**
      * Wait for ms
      */
     delay(ms) {
@@ -55,7 +75,7 @@ class CardAnimations {
             const endPos = this.getCenterPos(endEl);
 
             document.body.appendChild(cardElement);
-            
+
             // Initial positioning using inline styles for absolute position
             cardElement.style.position = 'fixed';
             cardElement.style.left = `${startPos.x - 40}px`; // 40 is half card width
@@ -94,7 +114,7 @@ class CardAnimations {
     async animateDealSequence(forehandIndex, uiPlayers) {
         const deckEl = document.getElementById('deck-zone');
         const skatSlots = this.ui.els.skatZone.querySelectorAll('.card-slot');
-        
+
         // Ensure #skat-zone is not hidden and clear old cards
         this.ui.els.skatZone.classList.remove('hidden');
         deckEl.innerHTML = '';
@@ -131,23 +151,24 @@ class CardAnimations {
         let skatReceived = 0;
 
         for (const step of sequence) {
-            for (let i = 0; i < step.count; i++) {
-                const tempCard = this.createTempCard();
-                let targetEl;
+            const tempPacket = this.createTempPacket(step.count);
+            let targetEl;
 
-                if (step.target === 'skat') {
-                    targetEl = skatSlots[skatReceived];
-                } else {
-                    targetEl = step.target === 0 ? this.ui.els.player0Cards : 
-                               step.target === 1 ? this.ui.els.player1Cards : 
-                               this.ui.els.player2Cards;
-                }
+            if (step.target === 'skat') {
+                targetEl = skatSlots[skatReceived]; // target the first empty slot for packet drop
+            } else {
+                targetEl = step.target === 0 ? this.ui.els.player0Cards :
+                    step.target === 1 ? this.ui.els.player1Cards :
+                        this.ui.els.player2Cards;
+            }
 
-                if (targetEl) {
-                    await this.animateCardMove(tempCard, deckEl, targetEl, this.dealDuration);
-                    
+            if (targetEl) {
+                await this.animateCardMove(tempPacket, deckEl, targetEl, this.dealDuration);
+
+                // Once the packet arrives, instantiate the actual individual cards there
+                for (let i = 0; i < step.count; i++) {
                     if (step.target === 'skat') {
-                        // Place a static back card in the Skat zone
+                        // Place a static back card in the Skat zone in the correct slot
                         const placedCard = this.createTempCard();
                         placedCard.style.position = 'static';
                         placedCard.style.margin = '0';
@@ -173,8 +194,8 @@ class CardAnimations {
                             targetEl.appendChild(botCard);
                         }
                     }
-                    await this.delay(this.delayBetweenDeals);
                 }
+                await this.delay(this.delayBetweenDeals);
             }
         }
 
@@ -188,23 +209,23 @@ class CardAnimations {
     async animateCollectTrick(winnerId) {
         const trickZones = [
             this.ui.els.trickBot2.firstElementChild, // slot 0 might be under another bot? 
-            this.ui.els.trickBot1.firstElementChild, 
+            this.ui.els.trickBot1.firstElementChild,
             this.ui.els.trickPlayer.firstElementChild
         ];
 
-        const winnerContainer = winnerId === 0 ? document.getElementById('bot2') : 
-                               winnerId === 1 ? document.getElementById('bot1') : 
-                               document.getElementById('player-area');
+        const winnerContainer = winnerId === 0 ? document.getElementById('bot2') :
+            winnerId === 1 ? document.getElementById('bot1') :
+                document.getElementById('player-area');
 
         const animations = [];
-        
+
         trickZones.forEach(el => {
             if (el) {
                 // Clone the played card for animation
                 const animatedCard = el.cloneNode(true);
                 // Hide the static played card
                 el.style.opacity = '0';
-                
+
                 // Animate the cloned card
                 animations.push(this.animateCardMove(animatedCard, el.parentElement, winnerContainer, this.trickDuration));
             }
