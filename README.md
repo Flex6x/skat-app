@@ -6,8 +6,7 @@
 
 ## To Do:
 
-- Menü Einfügen mit "Spiel Starten"
-- Stats einfügen - LocalStorage
+
 - Kurze Spiel Übersicht nach jedem Spiel - wer gewonnen hat mit wie vielen augen
 - Tutorial
 - Settings
@@ -18,9 +17,6 @@
 - stats verschönern
 - besseres design
 - geben in päckchen
-- größere und schickere info boxen
 
 ## Bugs:
 
-- Wenn ein Bot das Spiel nimmt, ist das Game stuck
-- Wenn das Game vorbei ist, ist es stuck und man bekommt keine zusammenfassung
