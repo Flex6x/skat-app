@@ -557,23 +557,29 @@ class UI {
         this.els.trickPlayer.innerHTML = '';
     }
 
-    showGameOver(won, declarerPoints, oppPoints) {
+    showGameOver(won, resultMsg, declarerPoints, oppPoints) {
         this.els.gameOverOverlay.classList.remove('hidden');
         const resDiv = document.getElementById('results');
         
+        // Use the title based on won
+        const title = won ? 'Spiel gewonnen!' : 'Spiel verloren!';
+        document.getElementById('game-result-msg').textContent = title;
+        
         resDiv.innerHTML = `
-            <h3>${won ? 'Du hast gewonnen!' : 'Du hast verloren!'}</h3>
-            <p>Deine Punkte: ${declarerPoints}</p>
-            <p>Gegner Punkte: ${oppPoints}</p>
+            <p class="result-summary">${resultMsg}</p>
+            <div class="result-details">
+                <p>Alleinspieler: ${declarerPoints} Augen</p>
+                <p>Gegner: ${oppPoints} Augen</p>
+            </div>
         `;
     }
 
     showGameOverPassedIn() {
         this.els.gameOverOverlay.classList.remove('hidden');
+        document.getElementById('game-result-msg').textContent = 'Eingepasst!';
         const resDiv = document.getElementById('results');
         
         resDiv.innerHTML = `
-            <h3>Eingepasst!</h3>
             <p>Niemand hat gereizt. Das Spiel wird neu gegeben.</p>
         `;
     }

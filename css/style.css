@@ -340,6 +340,33 @@ body {
     margin-top: 20px;
 }
 
+#results {
+    margin: 20px 0;
+    line-height: 1.5;
+}
+
+.result-summary {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #ffd700;
+}
+
+.result-details {
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.result-details p {
+    margin: 5px 0;
+}
+
+#btn-restart {
+    margin-top: 10px;
+}
+
 .btn {
     padding: 10px 20px;
     border: none;

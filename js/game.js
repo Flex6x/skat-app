@@ -414,7 +414,11 @@ class Game {
         return highest.playerId;
     }
 
-    endGame() {
+    calculatePoints(cards) {
+        return cards.reduce((sum, card) => sum + (CARD_VALUES[card.rank] || 0), 0);
+    }
+
+    endGame(wonOverride = null) {
         this.phase = PHASES.GAME_OVER;
         
         // Count points
@@ -433,18 +437,27 @@ class Game {
         // Add skat points to declarer
         declarerPoints += this.calculatePoints(this.skat);
         
-        const won = declarerPoints > 60;
-        const resultMsg = won 
-            ? `${this.players[this.declarerIndex].name} gewinnt mit ${declarerPoints} Augen!` 
-            : `Gegner gewinnen mit ${defendersPoints} Augen!`;
+        let won = wonOverride !== null ? wonOverride : (declarerPoints > 60);
+        
+        // Message construction
+        let resultMsg;
+        if (this.trumpMode === TRUMP_MODES.NULL) {
+            resultMsg = won
+                ? `${this.players[this.declarerIndex].name} gewinnt das Null-Spiel!`
+                : `${this.players[this.declarerIndex].name} verliert das Null-Spiel (Stich gewonnen).`;
+        } else {
+            resultMsg = won 
+                ? `${this.players[this.declarerIndex].name} gewinnt mit ${declarerPoints} Augen!` 
+                : `Gegner gewinnen mit ${defendersPoints} Augen!`;
+        }
             
         this.saveGameResult(
             won ? this.players[this.declarerIndex].name : "Die Gegner",
-            won ? declarerPoints : defendersPoints,
-            this.trumpMode ? `Farbspiel (${this.trumpMode})` : "Grand" // Changed trumpSuit to trumpMode
+            won ? (this.trumpMode === TRUMP_MODES.NULL ? 0 : declarerPoints) : (this.trumpMode === TRUMP_MODES.NULL ? 0 : defendersPoints),
+            this.trumpMode ? `${this.trumpMode}` : "Grand"
         );
             
-        this.ui.showGameOver(resultMsg);
+        this.ui.showGameOver(won, resultMsg, declarerPoints, defendersPoints);
         this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
     }
     
