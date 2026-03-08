@@ -90,9 +90,9 @@ class Deck {
         // Skat deal: 3 - 4 - 3. We'll just deal array chunks.
         // Player 1, Player 2, Player 3, Skat
         return {
-            p1: [...this.cards.slice(0, 3), ...this.cards.slice(11, 15), ...this.cards.slice(22, 25)],
-            p2: [...this.cards.slice(3, 6), ...this.cards.slice(15, 19), ...this.cards.slice(25, 28)],
-            p3: [...this.cards.slice(6, 9), ...this.cards.slice(19, 22), ...this.cards.slice(28, 30)],
+            p1: [...this.cards.slice(0, 3), ...this.cards.slice(11, 15), ...this.cards.slice(23, 26)],
+            p2: [...this.cards.slice(3, 6), ...this.cards.slice(15, 19), ...this.cards.slice(26, 29)],
+            p3: [...this.cards.slice(6, 9), ...this.cards.slice(19, 23), ...this.cards.slice(29, 32)],
             skat: this.cards.slice(9, 11)
         };
     }
