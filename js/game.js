@@ -197,7 +197,7 @@ class Game {
         this.skat = [];
         
         // Use evaluated trump logic from bot Data
-        const data = this.botData[this.declarerIndex];
+        const data = this.botBidding.evaluateHand(botHand);
         this.trumpMode = data.trumpSuit; 
         this.ui.setTrump(this.trumpMode);
         

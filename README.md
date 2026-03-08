@@ -15,10 +15,10 @@
 - Null Ouvert usw implementieren
 - Überreizt einfügen
 - in die info box notieren bis wohin der alleinspieler gereizt hat
-- letzten stich überprüfen
 - stats verschönern
 - besseres design
 - geben in päckchen
+- größere und schickere info boxen
 
 ## Bugs:
 
