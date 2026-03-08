@@ -57,6 +57,30 @@ class Game {
         };
         
         this.trickCount = 0;
+        this.aborted = false;
+    }
+    
+    abort() {
+        this.aborted = true;
+        
+        // Remove active elements/bindings quickly
+        const cardEls = this.ui.els.player2Cards.querySelectorAll('.card-face');
+        cardEls.forEach(el => {
+            el.onclick = null;
+            el.ondragstart = null;
+            el.ondragend = null;
+            el.draggable = false;
+        });
+        
+        // Hide running overlays
+        this.ui.hideBiddingOverlay();
+        this.ui.els.skatDecisionOverlay.classList.add('hidden');
+        this.ui.els.trumpOverlay.classList.add('hidden');
+        this.ui.els.gameOverOverlay.classList.add('hidden');
+        this.ui.els.skatDiscardArea.classList.add('hidden');
+        
+        // Cancel possible delays/bindings in bidding controller by signaling to bidding Engine indirectly 
+        // (Usually handled natively if we don't re-trigger async await chains, or checking this.aborted frequently)
     }
 
     async start() {
@@ -251,7 +275,7 @@ class Game {
     }
 
     async processTurn() {
-        if (this.phase !== PHASES.PLAYING) return;
+        if (this.phase !== PHASES.PLAYING || this.aborted) return;
 
         this.ui.updateTurn(this.turnIndex);
 
@@ -298,7 +322,9 @@ class Game {
     }
 
     async resolveTrick() {
+        if (this.aborted) return;
         await this.delay(1000); // Shorter wait before animating
+        if (this.aborted) return;
         
         if (!this.animations) this.animations = new CardAnimations(this.ui);
         
@@ -306,6 +332,7 @@ class Game {
         
         // Animate trick collection
         await this.animations.animateCollectTrick(winnerId);
+        if (this.aborted) return;
         
         const trickCards = this.currentTrick.cards.map(c => c.card);
         this.players[winnerId].tricks.push(...trickCards);

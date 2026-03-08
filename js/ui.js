@@ -29,6 +29,11 @@ class UI {
             currentDeclarer: document.getElementById('current-declarer'),
             currentBid: document.getElementById('current-bid'),
             
+            mainMenu: document.getElementById('main-menu'),
+            gameContainer: document.getElementById('game-container'),
+            btnStartGame: document.getElementById('btn-start-game'),
+            btnHome: document.getElementById('btn-home'),
+            
             btnPass: document.getElementById('btn-pass'),
             btnBid: document.getElementById('btn-bid'),
             btnSkatHand: document.getElementById('btn-skat-hand'),
@@ -56,6 +61,26 @@ class UI {
             slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('drag-over'); });
             slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
         });
+    }
+
+    showMainMenu(onStart) {
+        this.els.mainMenu.classList.remove('hidden');
+        this.els.gameContainer.classList.add('hidden');
+        
+        // Ensure old listeners are cleared by cloning the button if necessary or simply replacing onclick
+        this.els.btnStartGame.onclick = () => {
+            this.hideMainMenu();
+            onStart();
+        };
+    }
+
+    hideMainMenu() {
+        this.els.mainMenu.classList.add('hidden');
+        this.els.gameContainer.classList.remove('hidden');
+    }
+
+    bindHomeButton(onHomeClick) {
+        this.els.btnHome.onclick = () => onHomeClick();
     }
 
     showMessage(msg) {

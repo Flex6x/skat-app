@@ -8,7 +8,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="game-container">
+    <!-- Main Start Menu -->
+    <div id="main-menu" class="menu-overlay">
+        <div class="menu-content">
+            <h1>Skat</h1>
+            <p class="subtitle">Minimalist Web Game</p>
+            <div class="menu-buttons">
+                <button id="btn-start-game" class="btn primary large-btn">Neues Spiel starten</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden">
+        <!-- In-Game Home Button -->
+        <button id="btn-home" class="floating-btn" title="Zurück zum Hauptmenü">🏠</button>
+        
         <!-- Top Bots Area -->
         <div id="bots-area">
             <div id="bot2" class="player-zone">
