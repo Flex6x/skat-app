@@ -24,6 +24,7 @@ class UI {
             
             currentTrump: document.getElementById('current-trump'),
             currentTurn: document.getElementById('current-turn'),
+            currentDeclarer: document.getElementById('current-declarer'),
             
             btnPass: document.getElementById('btn-pass'),
             btnBid: document.getElementById('btn-bid'),
@@ -235,7 +236,7 @@ class UI {
     }
 
     updateTurn(turnIndex) {
-        const names = ['Bot 2', 'Bot 1', 'Du'];
+        const names = ['Aicore', 'Aiden', 'Du'];
         this.els.currentTurn.textContent = `Zug: ${names[turnIndex]}`;
         
         // Highlight active player
@@ -243,6 +244,10 @@ class UI {
         if (turnIndex === 0) document.getElementById('bot2').style.opacity = '1';
         else if (turnIndex === 1) document.getElementById('bot1').style.opacity = '1';
         else document.getElementById('player-area').style.opacity = '1';
+    }
+
+    setDeclarer(name) {
+        this.els.currentDeclarer.textContent = `Alleinspieler: ${name}`;
     }
 
     enablePlayerMoves(validCards, onPlay) {
@@ -347,6 +352,16 @@ class UI {
             <h3>${won ? 'Du hast gewonnen!' : 'Du hast verloren!'}</h3>
             <p>Deine Punkte: ${declarerPoints}</p>
             <p>Gegner Punkte: ${oppPoints}</p>
+        `;
+    }
+
+    showGameOverPassedIn() {
+        this.els.gameOverOverlay.classList.remove('hidden');
+        const resDiv = document.getElementById('results');
+        
+        resDiv.innerHTML = `
+            <h3>Eingepasst!</h3>
+            <p>Niemand hat gereizt. Das Spiel wird neu gegeben.</p>
         `;
     }
 }

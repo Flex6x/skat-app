@@ -36,8 +36,8 @@ class Game {
     reset() {
         this.deck = new Deck();
         this.players = [
-            { id: 0, type: PLAYER_TYPES.BOT, name: 'Bot 2', hand: [], score: 0, tricks: [] },
-            { id: 1, type: PLAYER_TYPES.BOT, name: 'Bot 1', hand: [], score: 0, tricks: [] },
+            { id: 0, type: PLAYER_TYPES.BOT, name: 'Aicore', hand: [], score: 0, tricks: [] },
+            { id: 1, type: PLAYER_TYPES.BOT, name: 'Aiden', hand: [], score: 0, tricks: [] },
             { id: 2, type: PLAYER_TYPES.HUMAN, name: 'Du', hand: [], score: 0, tricks: [] }
         ]; // Player 2 is the human for easier indexing locally
         this.skat = [];
@@ -73,6 +73,7 @@ class Game {
         
         this.ui.renderAllHands(this.players);
         this.ui.updateSkatZone(this.skat);
+        this.ui.setDeclarer('-');
         
         this.phase = PHASES.BIDDING;
         this.startBiddingPhase();
@@ -107,14 +108,16 @@ class Game {
             // Only one left!
             if (this.currentBid === 0) {
                 // Everyone passed
-                this.declarerIndex = 2; // Default to human
-                this.ui.showMessage('Niemand reizt. Du musst spielen!');
-                this.phase = PHASES.SKAT_DECISION;
-                this.startSkatDecision();
+                this.declarerIndex = -1;
+                this.ui.setDeclarer('-');
+                this.ui.showMessage('Eingepasst! Niemand möchte spielen.');
+                await this.delay(1500);
+                this.endGamePassedIn();
                 return;
             }
             // Winner found
             this.declarerIndex = this.activeBidders[0];
+            this.ui.setDeclarer(this.players[this.declarerIndex].name);
             this.ui.showMessage(`${this.players[this.declarerIndex].name} gewinnt das Reizen mit ${this.currentBid}.`);
             await this.delay(1500);
             this.phase = PHASES.SKAT_DECISION;
@@ -438,6 +441,11 @@ class Game {
         }
         
         this.ui.showGameOver(declarerWon, declarerPoints, opponentsPoints);
+    }
+
+    endGamePassedIn() {
+        this.phase = PHASES.GAME_OVER;
+        this.ui.showGameOverPassedIn();
     }
 
     sortHand(hand) {

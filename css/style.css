@@ -70,6 +70,12 @@ body {
     margin-left: 10px;
 }
 
+.ai-text {
+    color: #00e5ff;
+    text-shadow: 0 0 8px #00e5ff, 0 0 15px rgba(0, 229, 255, 0.5);
+    font-weight: 700;
+}
+
 .cards-container {
     display: flex;
     gap: -30px; /* Overlap cards */
