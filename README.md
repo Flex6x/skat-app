@@ -7,7 +7,6 @@
 ## To Do:
 
 - Hand Sortierung 
-- Bug: Augen werden nicht korrekt gezählt. 
 - Karten - Icons austauschen.
 - Reizen verbessern - Bots sollen auch reizen, wenn sie ein gutes Blatt haben (vllt mit random modus, dass wenn die 5-10 potenzielle trümpfe haben ihre reiz chance steigt)
 - Reizregeln etablieren
@@ -17,3 +16,4 @@
 - Kurze Spiel Übersicht nach jedem Spiel - wer gewonnen hat mit wie vielen augen
 - Tutorial
 - Settings
+- Listen erstellen: also immer einen Satz von ... Spielen starten

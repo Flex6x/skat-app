@@ -231,7 +231,7 @@ class UI {
         if (SUIT_SYMBOLS[trump]) {
             symbol = `${trump} ${SUIT_SYMBOLS[trump]}`;
         }
-        this.els.currentTrump.textContent = `Trumpf: ${symbol}`;
+        this.els.currentTrump.innerHTML = `Trumpf: ${symbol}`;
     }
 
     updateTurn(turnIndex) {

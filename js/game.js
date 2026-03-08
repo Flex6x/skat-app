@@ -352,8 +352,13 @@ class Game {
         this.currentTrick = { cards: [], leadSuit: null };
         this.trickCount++;
 
+        if (this.trumpMode === TRUMP_MODES.NULL && winnerId === this.declarerIndex) {
+            this.endGame(false); // Null declarer loses immediately on winning a trick
+            return;
+        }
+
         if (this.trickCount === 10) {
-            this.endGame();
+            this.endGame(this.trumpMode === TRUMP_MODES.NULL ? true : null);
         } else {
             // Winner leads the next trick
             this.turnIndex = winnerId;
@@ -364,6 +369,7 @@ class Game {
     determineTrickWinner() {
         const leadCardOpt = this.currentTrick.cards[0];
         let highest = leadCardOpt;
+        const rp = this.trumpMode === TRUMP_MODES.NULL ? NULL_RANK_POWER : RANK_POWER;
         
         for (let i = 1; i < 3; i++) {
             const current = this.currentTrick.cards[i];
@@ -386,14 +392,14 @@ class Game {
                     // highest stays highest
                 } else {
                     // Both are regular trumps, compare rank power
-                    if (RANK_POWER[current.card.rank] > RANK_POWER[highest.card.rank]) {
+                    if (rp[current.card.rank] > rp[highest.card.rank]) {
                         highest = current;
                     }
                 }
             } else if (!this.isTrump(current.card) && !this.isTrump(highest.card)) {
                 // Must be of lead suit to win
                 if (current.card.suit === highest.card.suit) {
-                    if (RANK_POWER[current.card.rank] > RANK_POWER[highest.card.rank]) {
+                    if (rp[current.card.rank] > rp[highest.card.rank]) {
                         highest = current;
                     }
                 }
@@ -403,7 +409,7 @@ class Game {
         return highest.playerId;
     }
 
-    endGame() {
+    endGame(immediateNullWin = null) {
         this.phase = PHASES.GAME_OVER;
         
         // Add skat to declarer's tricks
@@ -426,13 +432,18 @@ class Game {
         });
 
         // 120 points total in the deck
-        const declarerWon = declarerPoints > 60;
+        let declarerWon = declarerPoints > 60;
+        if (immediateNullWin !== null) {
+            declarerWon = immediateNullWin;
+        }
         
         this.ui.showGameOver(declarerWon, declarerPoints, opponentsPoints);
     }
 
     sortHand(hand) {
         // Sort: Trumps first (Unters => Trumps), then other suits (Rank order)
+        const rp = this.trumpMode === TRUMP_MODES.NULL ? NULL_RANK_POWER : RANK_POWER;
+        
         hand.sort((a, b) => {
             const aTrump = this.isTrump(a);
             const bTrump = this.isTrump(b);
@@ -447,7 +458,7 @@ class Game {
                     const order = [SUITS.SCHELLEN, SUITS.ROT, SUITS.GRUEN, SUITS.EICHEL];
                     return order.indexOf(b.suit) - order.indexOf(a.suit); // Eichel first
                 }
-                return RANK_POWER[b.rank] - RANK_POWER[a.rank];
+                return rp[b.rank] - rp[a.rank];
             }
             
             // Neither is trump
@@ -455,7 +466,7 @@ class Game {
                 return a.suit.localeCompare(b.suit);
             }
             
-            return RANK_POWER[b.rank] - RANK_POWER[a.rank];
+            return rp[b.rank] - rp[a.rank];
         });
     }
 

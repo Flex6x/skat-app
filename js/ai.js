@@ -56,19 +56,22 @@ class AIController {
     }
 
     getLowestCard(cards, trumpMode) {
-        // Sort by value basically. Simplification.
+        const rp = trumpMode === 'Null' ? NULL_RANK_POWER : RANK_POWER;
         return cards.reduce((lowest, current) => {
             if (this.isTrump(lowest, trumpMode) && !this.isTrump(current, trumpMode)) return current; // non-trump lower
             if (!this.isTrump(lowest, trumpMode) && this.isTrump(current, trumpMode)) return lowest; // non-trump lower
-            return lowest.value < current.value ? lowest : current;
+            const pLowest = rp[lowest.rank] || 0;
+            const pCurrent = rp[current.rank] || 0;
+            return pLowest < pCurrent ? lowest : current;
         }, cards[0]);
     }
 
     getHighestCard(cards, trumpMode) {
+        const rp = trumpMode === 'Null' ? NULL_RANK_POWER : RANK_POWER;
         return cards.reduce((highest, current) => {
              // Basic rank comparison
-             const powerCurrent = RANK_POWER[current.rank] || 0;
-             const powerHighest = RANK_POWER[highest.rank] || 0;
+             const powerCurrent = rp[current.rank] || 0;
+             const powerHighest = rp[highest.rank] || 0;
              return powerCurrent > powerHighest ? current : highest;
         }, cards[0]);
     }
@@ -84,6 +87,7 @@ class AIController {
     }
 
     beatsCard(candidate, currentHighest, leadSuit, trumpMode) {
+        const rp = trumpMode === 'Null' ? NULL_RANK_POWER : RANK_POWER;
         if (this.isTrump(candidate, trumpMode) && !this.isTrump(currentHighest, trumpMode)) return true;
         if (this.isTrump(candidate, trumpMode) && this.isTrump(currentHighest, trumpMode)) {
             // Both trumps.
@@ -94,12 +98,12 @@ class AIController {
             if (candidate.rank === 'U') return true;
             if (currentHighest.rank === 'U') return false;
             
-            return RANK_POWER[candidate.rank] > RANK_POWER[currentHighest.rank];
+            return rp[candidate.rank] > rp[currentHighest.rank];
         }
         // Neither is trump
         if (this.getEffectiveSuit(candidate, trumpMode) === leadSuit && this.getEffectiveSuit(currentHighest, trumpMode) !== leadSuit) return true;
         if (this.getEffectiveSuit(candidate, trumpMode) === leadSuit && this.getEffectiveSuit(currentHighest, trumpMode) === leadSuit) {
-            return RANK_POWER[candidate.rank] > RANK_POWER[currentHighest.rank];
+            return rp[candidate.rank] > rp[currentHighest.rank];
         }
         return false;
     }

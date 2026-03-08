@@ -10,10 +10,10 @@ const SUITS = {
 };
 
 const SUIT_SYMBOLS = {
-    'Eichel': '🌿',
-    'Grün': '🍃',
-    'Rot': '❤️',
-    'Schellen': '🔔'
+    'Eichel': '<img src="media/eichel.png" class="suit-icon" alt="Eichel">',
+    'Grün': '<img src="media/gruen.png" class="suit-icon" alt="Grün">',
+    'Rot': '<img src="media/rot.png" class="suit-icon" alt="Rot">',
+    'Schellen': '<img src="media/schellen.png" class="suit-icon" alt="Schellen">'
 };
 
 const RANKS = ['7', '8', '9', '10', 'U', 'O', 'K', 'A']; // Unter (Bube), Ober (Dame), König, Ass
@@ -26,9 +26,12 @@ const CARD_VALUES = {
 
 // Base sorting power (higher is stronger) for a non-trump suit
 const RANK_POWER = {
-    '7': 1, '8': 2, '9': 3, 'K': 4, '10': 5, 'A': 6
-    // U (Unter) is always trump unless Null
-    // O (Ober) is rank 7 here, but we will handle trumps separately
+    '7': 1, '8': 2, '9': 3, 'O': 4, 'K': 5, '10': 6, 'A': 7
+};
+
+// Power specifically for Null games
+const NULL_RANK_POWER = {
+    '7': 1, '8': 2, '9': 3, '10': 4, 'U': 5, 'O': 6, 'K': 7, 'A': 8
 };
 
 class Card {
@@ -52,12 +55,10 @@ class Card {
         el.innerHTML = `
             <div class="card-top-left">
                 <span>${this.rank}</span>
-                <span style="font-size: 0.8em">${symbol}</span>
             </div>
             <div class="card-center">${symbol}</div>
             <div class="card-bottom-right">
                 <span>${this.rank}</span>
-                <span style="font-size: 0.8em">${symbol}</span>
             </div>
         `;
         return el;
