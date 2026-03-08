@@ -27,6 +27,7 @@ class UI {
             currentTrump: document.getElementById('current-trump'),
             currentTurn: document.getElementById('current-turn'),
             currentDeclarer: document.getElementById('current-declarer'),
+            currentBid: document.getElementById('current-bid'),
             
             btnPass: document.getElementById('btn-pass'),
             btnBid: document.getElementById('btn-bid'),
@@ -152,41 +153,86 @@ class UI {
         };
     }
 
-    // Handles picking up skat and discarding 2 cards
-    showSkatDiscardUI(hand, onConfirm) {
+    showSkatDiscardUI(hand, skatCards, onConfirm) {
         this.els.btnSkatTake.style.display = 'none';
         this.els.btnSkatHand.style.display = 'none';
         
         this.els.skatDiscardArea.classList.remove('hidden');
         
-        // Reset slots
-        this.els.skatDiscardSlots.forEach(s => {
+        // Render Skat Cards onto the slots completely fresh
+        this.els.skatDiscardSlots.forEach((s, index) => {
             s.innerHTML = '';
-            s.dataset.cardId = '';
+            if (skatCards[index]) {
+                const cardEl = skatCards[index].createDOMElement();
+                s.appendChild(cardEl);
+                s.dataset.cardId = skatCards[index].id;
+            } else {
+                s.dataset.cardId = '';
+            }
         });
         
-        const discardedIds = [];
+        const discardedIds = [skatCards[0].id, skatCards[1].id]; // Initially both are in Skat
+        const handContainer = this.els.player2Cards;
         
-        // Setup draggable on hand cards for skat targeting
-        const cardEls = this.els.player2Cards.querySelectorAll('.card-face');
-        cardEls.forEach(el => {
-            el.addEventListener('dragstart', e => {
+        // Function to make a single card fully interactive (Drag & Click toggle)
+        const bindCardInteractable = (el) => {
+            el.draggable = true;
+            
+            // Re-bind nicely without stacking listeners
+            el.ondragstart = e => {
                 e.dataTransfer.setData('text/plain', el.dataset.id);
                 el.classList.add('dragging');
-            });
-            el.addEventListener('dragend', () => el.classList.remove('dragging'));
+            };
+            el.ondragend = () => el.classList.remove('dragging');
+
+            el.onclick = () => {
+                const parentSlot = el.parentElement;
+                if (parentSlot.classList.contains('skat-slot')) {
+                    // Move from skat exactly to hand
+                    handContainer.appendChild(el);
+                    parentSlot.dataset.cardId = '';
+                    
+                    const index = discardedIds.indexOf(el.dataset.id);
+                    if (index > -1) discardedIds.splice(index, 1);
+                    this.els.btnConfirmSkat.disabled = true;
+                } else {
+                    // Move from hand exactly to the first available skat slot
+                    const emptySlot = Array.from(this.els.skatDiscardSlots).find(s => !s.dataset.cardId);
+                    if (emptySlot) {
+                        emptySlot.appendChild(el);
+                        emptySlot.dataset.cardId = el.dataset.id;
+                        discardedIds.push(el.dataset.id);
+                        if (discardedIds.length === 2) {
+                            this.els.btnConfirmSkat.disabled = false;
+                        }
+                    } else {
+                        this.showMessage("Drücke zuerst eine Karte zurück auf die Hand!");
+                    }
+                }
+            };
+        };
+
+        // Bind all current hand cards
+        const cardEls = handContainer.querySelectorAll('.card-face');
+        cardEls.forEach(bindCardInteractable);
+
+        // Bind the 2 newly created cards residing in the skat slots
+        this.els.skatDiscardSlots.forEach(s => {
+            const cardInSlot = s.querySelector('.card-face');
+            if (cardInSlot) bindCardInteractable(cardInSlot);
         });
 
-        // Setup dropping on skat slots
+        // Setup drop zones for the skat slots
         this.els.skatDiscardSlots.forEach(slot => {
-            slot.addEventListener('drop', e => {
+            slot.ondragover = e => { e.preventDefault(); slot.classList.add('drag-over'); };
+            slot.ondragleave = () => slot.classList.remove('drag-over');
+            slot.ondrop = e => {
                 e.preventDefault();
                 slot.classList.remove('drag-over');
                 
                 const cardId = e.dataTransfer.getData('text/plain');
                 if (!cardId) return;
 
-                // Move visual card to slot
                 const cardEl = document.querySelector(`[data-id="${cardId}"]`);
                 if (cardEl && !slot.hasChildNodes()) {
                     slot.appendChild(cardEl);
@@ -200,33 +246,48 @@ class UI {
                         this.els.btnConfirmSkat.disabled = false;
                     }
                 }
-            });
+            };
         });
 
-        // Allow taking card back
-        this.els.player2Cards.addEventListener('dragover', e => e.preventDefault());
-        this.els.player2Cards.addEventListener('drop', e => {
+        // Allow taking card back to hand via drag and drop
+        handContainer.ondragover = e => e.preventDefault();
+        handContainer.ondrop = e => {
             e.preventDefault();
             const cardId = e.dataTransfer.getData('text/plain');
             if (!cardId) return;
 
-            // Find if it came from skat slot
+            // Only act if the card came from a skat slot
             const slot = Array.from(this.els.skatDiscardSlots).find(s => s.dataset.cardId === cardId);
             if (slot) {
                 const cardEl = slot.querySelector('.card-face');
-                this.els.player2Cards.appendChild(cardEl);
-                slot.dataset.cardId = '';
-                
-                const index = discardedIds.indexOf(cardId);
-                if (index > -1) discardedIds.splice(index, 1);
-                
-                this.els.btnConfirmSkat.disabled = true;
+                if (cardEl) {
+                    handContainer.appendChild(cardEl);
+                    slot.dataset.cardId = '';
+                    
+                    const index = discardedIds.indexOf(cardId);
+                    if (index > -1) discardedIds.splice(index, 1);
+                    
+                    this.els.btnConfirmSkat.disabled = true;
+                }
             }
-        });
+        };
 
+        // Confirmation Callback
+        this.els.btnConfirmSkat.disabled = false; // Initially 2 cards are in the skat
         this.els.btnConfirmSkat.onclick = () => {
              this.els.skatDecisionOverlay.classList.add('hidden');
-             onConfirm(discardedIds);
+             
+             // Extract physical cards from slots to form the final skat
+             const finalSkatId1 = this.els.skatDiscardSlots[0].dataset.cardId;
+             const finalSkatId2 = this.els.skatDiscardSlots[1].dataset.cardId;
+             
+             // Cleanly remove bindings before continuing
+             const allCards = [...handContainer.querySelectorAll('.card-face'), ...document.querySelectorAll('.skat-slot .card-face')];
+             allCards.forEach(c => { c.onclick = null; c.ondragstart = null; c.ondragend = null; });
+             handContainer.ondragover = null; handContainer.ondrop = null;
+             
+             this.updateSkatZone(); 
+             onConfirm([finalSkatId1, finalSkatId2]);
         };
     }
 
@@ -267,8 +328,13 @@ class UI {
         else document.getElementById('player-area').style.opacity = '1';
     }
 
-    setDeclarer(name) {
+    setDeclarer(name, bidValue) {
         this.els.currentDeclarer.textContent = `Alleinspieler: ${name}`;
+        if (bidValue) {
+            this.els.currentBid.textContent = `Reizwert: ${bidValue}`;
+        } else {
+            this.els.currentBid.textContent = `Reizwert: -`;
+        }
     }
 
     updatePlayerRoles(vorhandId, mittelhandId, hinterhandId) {

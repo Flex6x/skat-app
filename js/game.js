@@ -118,25 +118,31 @@ class Game {
         } else {
             // Winner found
             this.declarerIndex = declarerId;
-            this.ui.setDeclarer(this.players[this.declarerIndex].name);
+            this.ui.setDeclarer(this.players[this.declarerIndex].name, finalBid);
             this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt (${finalBid}).`);
             await this.delay(1500);
             this.phase = PHASES.SKAT_DECISION;
-            this.startSkatDecision();
+            this.startSkatDecision(finalBid);
         }
     }
 
-    startSkatDecision() {
+    startSkatDecision(finalBid) {
         if (this.players[this.declarerIndex].type === PLAYER_TYPES.HUMAN) {
             this.ui.showSkatDecisionOverlay(
                 // Take Skat
                 () => {
-                    this.players[this.declarerIndex].hand.push(...this.skat);
-                    this.skat = [];
-                    this.sortHand(this.players[this.declarerIndex].hand);
-                    this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
-                    this.ui.showSkatDiscardUI(this.players[this.declarerIndex].hand, (discardedIds) => {
+                    // Start dragging game: The two cards in this.skat are shown in slots
+                    this.ui.showSkatDiscardUI(this.players[this.declarerIndex].hand, this.skat, (discardedIds) => {
+                        // The user confirmed physically what 2 cards go into skat. 
+                        // Those MUST be extracted from the combination of "hand + old skat"
+                        // So first, add the OLD skat to hand
+                        this.players[this.declarerIndex].hand.push(...this.skat);
+                        
+                        // Then remove the newly chosen discardedIds from hand
                         this.skat = discardedIds.map(id => this.removeCardFromHand(this.declarerIndex, id));
+                        
+                        // Resort and Re-render hand legally
+                        this.sortHand(this.players[this.declarerIndex].hand);
                         this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
                         this.startTrumpSelection();
                     });
