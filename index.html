@@ -286,6 +286,20 @@
                     <button id="btn-skat-hand" class="btn">Hand spielen</button>
                     <button id="btn-skat-take" class="btn primary">Aufnehmen</button>
                 </div>
+
+                <!-- Announcements (only for Hand) -->
+                <div id="hand-announcements" class="announcements-container hidden">
+                    <label class="toggle-label mini">
+                        <input type="checkbox" id="chk-announce-schneider">
+                        <span class="toggle-switch"></span>
+                        <span data-i18n="announce_schneider">Schneider ansagen</span>
+                    </label>
+                    <label class="toggle-label mini">
+                        <input type="checkbox" id="chk-announce-schwarz">
+                        <span class="toggle-switch"></span>
+                        <span data-i18n="announce_schwarz">Schwarz ansagen</span>
+                    </label>
+                </div>
                 <!-- Skat discard area -->
                 <div id="skat-discard-area" class="hidden">
                     <p>Lege 2 Karten in den Skat (Drag & Drop oder Klick)</p>

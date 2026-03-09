@@ -888,6 +888,22 @@ body {
     color: #64748b;
 }
 
+/* Announcements */
+.announcements-container {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+[data-theme="light"] .announcements-container {
+    background: rgba(7, 89, 133, 0.05);
+}
+
 /* === Top Info Box === */
 .game-info-top {
     position: absolute;

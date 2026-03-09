@@ -64,7 +64,9 @@ const TRANSLATIONS = {
         bid_value: "Reizwert",
         trump: "Trumpf",
         original_skat: "Original Skat",
-        discarded_cards: "Gedrückt"
+        discarded_cards: "Gedrückt",
+        announce_schneider: "Schneider ansagen",
+        announce_schwarz: "Schwarz ansagen"
     },
     en: {
         select_rounds: "Select Rounds",
@@ -127,7 +129,9 @@ const TRANSLATIONS = {
         bid_value: "Bid Value",
         trump: "Trump",
         original_skat: "Original Skat",
-        discarded_cards: "Discarded"
+        discarded_cards: "Discarded",
+        announce_schneider: "Announce Schneider",
+        announce_schwarz: "Announce Schwarz"
     }
 };
 
@@ -259,6 +263,26 @@ class UI {
 
         // Hash Navigation Listener
         window.onhashchange = () => this.handleHashNavigation();
+    }
+
+    resetAllOverlays() {
+        const overlays = [
+            this.els.biddingOverlay,
+            this.els.skatDecisionOverlay,
+            this.els.skatDiscardArea,
+            this.els.trumpOverlay,
+            this.els.gameOverOverlay,
+            this.els.lastTrickOverlay,
+            this.els.scoreboardDrawer
+        ];
+        overlays.forEach(o => {
+            if (o) o.classList.add('hidden');
+        });
+        
+        // Also hide speech bubbles
+        this.els.bot1Speech.classList.add('hidden');
+        this.els.bot2Speech.classList.add('hidden');
+        this.els.playerSpeech.classList.add('hidden');
     }
 
     handleHashNavigation() {

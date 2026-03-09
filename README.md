@@ -11,8 +11,7 @@
 - besseres design
 - RESPONSIV
 - mehr audio, z.b. beim austeilen
-- reiz und skat aufnehm fenster bei menu rückkehr komplett löschen. sonst collidierung mit neuem spiel.
-- bei Handspiel: man kann Schneider oder Schwarz ansagen.
+- bei Handspiel: man kann Schneider oder Schwarz ansagen. - funktioiniert noch nicht.
 
 ## Bugs:
 

@@ -106,10 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Setup Home Button (In-Game Menu Returning)
     ui.bindHomeButton(() => {
-        if (window.confirm("Willst du wirklich das Spiel verlassen? Der Fortschritt in dieser Liste geht verloren.")) {
-            game.abort();
-            ui.clearTrickZone();
-            ui.showMainMenu(startNewSession);
+        const msg = ui.getTranslation('home_confirm');
+        if (window.confirm(msg)) {
+            // Force reload to completely wipe any buggy state/listeners
+            window.location.href = window.location.pathname; 
         }
     });
 
