@@ -12,13 +12,21 @@
 <body>
     <!-- Main Start Menu -->
     <div id="main-menu" class="menu-overlay">
-        <div class="menu-content" id="menu-primary">
-            <h1>Skat</h1>
-            <p class="subtitle">Minimalist Web - Game</p>
+        <header class="menu-header">
+            <div class="header-left">
+                <div class="app-logo">S</div>
+                <span class="app-name">Skat</span>
+            </div>
+            <nav class="header-right">
+                <button id="btn-show-stats" class="nav-link">Stats</button>
+                <button id="btn-show-settings" class="nav-link">Settings</button>
+            </nav>
+        </header>
+
+        <div class="menu-content hero-section" id="menu-primary">
+            <h1 class="glow-text">Skat</h1>
             <div class="menu-buttons">
-                <button id="btn-start-game" class="btn primary large-btn">Neues Spiel</button>
-                <button id="btn-show-stats" class="btn large-btn">Stats</button>
-                <button id="btn-show-settings" class="btn large-btn">Settings</button>
+                <button id="btn-start-game" class="btn primary play-now-btn">Play Now</button>
             </div>
         </div>
 

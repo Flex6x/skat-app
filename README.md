@@ -12,5 +12,7 @@
 - stats verschönern
 - besseres design
 - RESPONSIV
+- Reiz-zahlen bei Eingepasst nicht anzeigen
+- Stats: pro Liste anschauen.
 
 ## Bugs:
