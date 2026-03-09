@@ -57,6 +57,20 @@ class UI {
             bot2Speech: document.querySelector('#bot2 .speech-bubble'),
             playerSpeech: document.querySelector('#player-area .speech-bubble'),
             
+            // Scoreboard
+            scoreboardDrawer: document.getElementById('scoreboard-drawer'),
+            scoreboardBody: document.getElementById('scoreboard-body'),
+            btnShowScoreboard: document.getElementById('btn-show-scoreboard'),
+            btnCloseScoreboard: document.getElementById('btn-close-scoreboard'),
+            totalPlayer0: document.getElementById('total-player0'),
+            totalPlayer1: document.getElementById('total-player1'),
+            totalPlayer2: document.getElementById('total-player2'),
+            
+            // Round selection
+            roundSelectionView: document.getElementById('round-selection-view'),
+            roundBtns: document.querySelectorAll('.round-btn'),
+            btnCancelRounds: document.getElementById('btn-cancel-rounds'),
+            
             // Settings
             settingsView: document.getElementById('settings-view'),
             btnShowSettings: document.getElementById('btn-show-settings'),
@@ -77,6 +91,73 @@ class UI {
             slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('drag-over'); });
             slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
         });
+
+        // Scoreboard toggle
+        this.els.btnShowScoreboard.onclick = () => {
+            this.els.scoreboardDrawer.classList.toggle('hidden');
+        };
+        this.els.btnCloseScoreboard.onclick = () => {
+            this.els.scoreboardDrawer.classList.add('hidden');
+        };
+    }
+
+    showRoundSelection(onSelect, onCancel) {
+        this.els.menuPrimary.classList.add('hidden');
+        this.els.roundSelectionView.classList.remove('hidden');
+        
+        this.els.roundBtns.forEach(btn => {
+            btn.onclick = () => {
+                this.els.roundSelectionView.classList.add('hidden');
+                onSelect(parseInt(btn.dataset.rounds));
+            };
+        });
+        
+        this.els.btnCancelRounds.onclick = () => {
+            this.els.roundSelectionView.classList.add('hidden');
+            this.els.menuPrimary.classList.remove('hidden');
+            onCancel();
+        };
+    }
+
+    updateScoreboard(history) {
+        this.els.scoreboardBody.innerHTML = '';
+        let totals = [0, 0, 0];
+
+        history.forEach(game => {
+            const tr = document.createElement('tr');
+            for (let i = 0; i < 3; i++) {
+                const td = document.createElement('td');
+                if (game.declarerId === i) {
+                    const val = game.won ? game.value : -game.value;
+                    td.textContent = val;
+                    td.className = val >= 0 ? 'score-pos' : 'score-neg';
+                    totals[i] += val;
+                } else {
+                    td.textContent = '-';
+                }
+                tr.appendChild(td);
+            }
+            this.els.scoreboardBody.appendChild(tr);
+        });
+
+        this.els.totalPlayer0.textContent = totals[0];
+        this.els.totalPlayer1.textContent = totals[1];
+        this.els.totalPlayer2.textContent = totals[2];
+
+        // Apply same classes to totals
+        this.els.totalPlayer0.className = totals[0] >= 0 ? 'score-pos' : 'score-neg';
+        this.els.totalPlayer1.className = totals[1] >= 0 ? 'score-pos' : 'score-neg';
+        this.els.totalPlayer2.className = totals[2] >= 0 ? 'score-pos' : 'score-neg';
+    }
+
+    resetScoreboard() {
+        this.els.scoreboardBody.innerHTML = '';
+        this.els.totalPlayer0.textContent = '0';
+        this.els.totalPlayer1.textContent = '0';
+        this.els.totalPlayer2.textContent = '0';
+        this.els.totalPlayer0.className = '';
+        this.els.totalPlayer1.className = '';
+        this.els.totalPlayer2.className = '';
     }
 
     showMainMenu(onStart) {
@@ -84,11 +165,11 @@ class UI {
         this.els.menuPrimary.classList.remove('hidden');
         this.els.statsView.classList.add('hidden');
         this.els.settingsView.classList.add('hidden');
+        this.els.roundSelectionView.classList.add('hidden');
         this.els.gameContainer.classList.add('hidden');
         
         // Ensure old listeners are cleared by cloning the button if necessary or simply replacing onclick
         this.els.btnStartGame.onclick = () => {
-            this.hideMainMenu();
             onStart();
         };
         

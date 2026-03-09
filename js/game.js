@@ -96,7 +96,8 @@ class Game {
         // (Usually handled natively if we don't re-trigger async await chains, or checking this.aborted frequently)
     }
 
-    async start() {
+    async start(onGameEnd) {
+        this.onGameEnd = onGameEnd;
         if (!this.animations) {
             this.animations = new CardAnimations(this.ui);
         }
@@ -497,6 +498,15 @@ class Game {
         const humanWon = this.declarerIndex === 2 ? won : !won;
         this.ui.showGameOver(humanWon, resultMsg, declarerPoints, defendersPoints, evaluation);
         this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
+
+        if (this.onGameEnd) {
+            this.onGameEnd({
+                passedIn: false,
+                declarerId: this.declarerIndex,
+                gameValue: evaluation.gameValue,
+                won: evaluation.won
+            });
+        }
     }
     
     saveGameResult(winner, score, gameType) {
@@ -520,6 +530,12 @@ class Game {
         this.phase = PHASES.GAME_OVER;
         this.ui.showGameOverPassedIn();
         this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
+
+        if (this.onGameEnd) {
+            this.onGameEnd({
+                passedIn: true
+            });
+        }
     }
 
     sortHand(hand) {

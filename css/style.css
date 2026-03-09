@@ -1191,3 +1191,187 @@ body {
         left: 10px;
     }
 }
+
+/* === Round Selection === */
+.round-options {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.round-btn {
+    min-width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+/* === Scoreboard Drawer === */
+.drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 350px;
+    height: 100%;
+    background: rgba(25, 25, 35, 0.98);
+    backdrop-filter: blur(15px);
+    z-index: 2000;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.drawer.hidden {
+    transform: translateX(100%);
+    display: flex !important; /* Keep it flex to allow transform animation */
+    pointer-events: none;
+}
+
+.drawer-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.drawer-header h2 {
+    font-size: 1.5rem;
+    color: #fff;
+    margin: 0;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.btn-close:hover {
+    color: #fff;
+}
+
+.drawer-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
+#scoreboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e0e0e0;
+}
+
+#scoreboard-table th {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px 10px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: sticky;
+    top: 0;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+#scoreboard-table td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 1.1rem;
+}
+
+#scoreboard-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+#scoreboard-table tr.total-row td {
+    background: rgba(63, 81, 181, 0.2);
+    border-top: 2px solid var(--accent-color);
+    font-weight: 700;
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+.score-pos {
+    color: #4caf50;
+}
+
+.score-neg {
+    color: #ff5252;
+}
+
+/* === Light Theme for Drawer === */
+[data-theme="light"] .drawer {
+    background: rgba(240, 242, 245, 0.98);
+    border-left-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+}
+
+[data-theme="light"] .drawer-header h2 {
+    color: var(--text-color);
+}
+
+[data-theme="light"] #scoreboard-table th {
+    background: rgba(0, 0, 0, 0.05);
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] #scoreboard-table td {
+    border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] #scoreboard-table tr.total-row td {
+    background: rgba(63, 81, 181, 0.1);
+    color: var(--text-color);
+}
+
+[data-theme="light"] .score-pos {
+    color: #2e7d32;
+}
+
+[data-theme="light"] .score-neg {
+    color: #d32f2f;
+}
+
+/* === Custom Scrollbar for Drawer === */
+.drawer-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.drawer-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.drawer-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+[data-theme="light"] .drawer-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments for drawer */
+@media screen and (max-width: 1024px) {
+    .drawer {
+        width: 100%;
+        max-width: 400px;
+    }
+}

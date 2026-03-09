@@ -22,6 +22,21 @@
             </div>
         </div>
 
+        <div class="menu-content hidden" id="round-selection-view">
+            <h2>Rundenanzahl wählen</h2>
+            <p class="subtitle">Wie viele Spiele sollen absolviert werden?</p>
+            <div class="round-options">
+                <button class="btn round-btn" data-rounds="3">3</button>
+                <button class="btn round-btn" data-rounds="6">6</button>
+                <button class="btn round-btn" data-rounds="9">9</button>
+                <button class="btn round-btn" data-rounds="12">12</button>
+                <button class="btn round-btn" data-rounds="15">15</button>
+            </div>
+            <div class="menu-buttons" style="margin-top: 30px;">
+                <button id="btn-cancel-rounds" class="btn large-btn">Abbrechen</button>
+            </div>
+        </div>
+
         <div class="menu-content hidden" id="stats-view">
             <h2>Letzte Spiele</h2>
             <div class="stats-table-container">
@@ -105,7 +120,37 @@
         <!-- In-Game Home Button & Details -->
         <div class="top-right-controls">
             <button id="btn-home" class="floating-btn" title="Zurück zum Hauptmenü">🏠</button>
+            <button id="btn-show-scoreboard" class="floating-btn" title="Spielliste anzeigen">📋</button>
             <button id="btn-last-trick" class="floating-btn smaller hidden" title="Letzten Stich ansehen">👁️</button>
+        </div>
+
+        <!-- Scoreboard Drawer/Overlay -->
+        <div id="scoreboard-drawer" class="drawer hidden">
+            <div class="drawer-header">
+                <h2>Spielliste</h2>
+                <button id="btn-close-scoreboard" class="btn-close">×</button>
+            </div>
+            <div class="drawer-content">
+                <table id="scoreboard-table">
+                    <thead>
+                        <tr>
+                            <th id="player0-name">Aicore</th>
+                            <th id="player1-name">Aiden</th>
+                            <th id="player2-name">Du</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreboard-body">
+                        <!-- Rows added by JS -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td id="total-player0">0</td>
+                            <td id="total-player1">0</td>
+                            <td id="total-player2">0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
 
         <!-- Top Bots Area -->
