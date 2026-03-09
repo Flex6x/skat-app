@@ -1030,6 +1030,10 @@ body {
         max-width: 100%;
         padding: 10px;
         gap: 10px;
+        /* Overall scale down to fit more on screen */
+        transform: scale(0.9);
+        transform-origin: center top;
+        height: 111vh; /* Compensate for scale(0.9) to fill screen */
     }
 
     .menu-content {
@@ -1043,58 +1047,77 @@ body {
 
     /* Scale cards slightly smaller */
     .card {
-        width: 70px !important;
-        height: 105px !important;
+        width: 65px !important;
+        height: 100px !important;
     }
 
     .card-face {
-        width: 70px !important;
-        height: 105px !important;
+        width: 65px !important;
+        height: 100px !important;
     }
 
     /* Adjust bot card sizes */
     .bot-cards .card {
-        width: 60px !important;
-        height: 90px !important;
+        width: 55px !important;
+        height: 85px !important;
+        margin-left: -35px;
     }
 
     /* Scale slots */
     .card-slot, .played-card-slot, .skat-slot {
-        width: 70px !important;
-        height: 105px !important;
+        width: 65px !important;
+        height: 100px !important;
     }
 
     /* Larger buttons for touch */
     .btn {
-        padding: 15px 25px;
-        font-size: 1.1rem;
-        min-height: 50px;
+        padding: 12px 20px;
+        font-size: 1rem;
+        min-height: 44px;
     }
 
     .floating-btn {
-        width: 60px;
-        height: 60px;
-        border-radius: 30px;
-        font-size: 1.8rem;
+        width: 55px;
+        height: 55px;
+        border-radius: 28px;
+        font-size: 1.6rem;
     }
 
     .player-info {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+        padding: 8px 15px;
     }
 
     .game-info {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         padding: 10px;
+        /* Move inside the screen */
+        left: 10px;
+        top: 0;
+        transform: translateX(0);
+        white-space: normal;
+        max-width: 150px;
     }
 
     /* Adjust table area for smaller height */
     #table-area {
-        height: 45%;
+        height: 40%;
+        border-radius: 100px;
+        border-width: 6px;
+    }
+
+    #trick-zone {
+        width: 250px;
+        height: 250px;
     }
 
     /* Ensure trick cards are visible */
     .played-card {
-        transform: scale(0.9);
+        transform: scale(0.8);
+    }
+
+    #player-hand {
+        gap: -35px;
     }
 
     /* Settings UI adjustments */
@@ -1103,30 +1126,37 @@ body {
     }
 
     .radio-label, .toggle-label {
-        padding: 12px 15px;
-        font-size: 1.1rem;
+        padding: 10px 12px;
+        font-size: 1rem;
     }
 
     .toggle-switch {
-        width: 54px;
-        height: 30px;
-        border-radius: 15px;
+        width: 48px;
+        height: 26px;
+        border-radius: 13px;
     }
 
     .toggle-switch::after {
-        width: 26px;
-        height: 26px;
+        width: 22px;
+        height: 22px;
     }
 
     .toggle-label input[type="checkbox"]:checked + .toggle-switch::after {
-        transform: translateX(24px);
+        transform: translateX(22px);
+    }
+
+    #player-area .player-info {
+        right: 10px;
+        top: 10px;
     }
 }
 
 @media screen and (max-height: 800px) and (max-width: 1024px) {
-    /* Landcape iPad / Small tablets */
+    /* Landscape iPad / Small tablets */
     #game-container {
         gap: 5px;
+        transform: scale(0.85);
+        height: 117vh;
     }
     
     #bots-area {
@@ -1134,6 +1164,17 @@ body {
     }
     
     #table-area {
-        height: 50%;
+        height: 45%;
     }
-}
+
+    .game-info {
+        font-size: 0.75rem;
+        padding: 8px;
+        max-width: 130px;
+    }
+
+    #player-hand {
+        margin-bottom: 10px;
+    }
+}
+
