@@ -1026,19 +1026,34 @@ body {
 
 /* === iPad Responsiveness (768px - 1024px) === */
 @media screen and (max-width: 1024px) {
+    body {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+    }
+
     #game-container {
-        max-width: 100%;
+        max-width: none;
         padding: 10px;
-        gap: 10px;
-        /* Overall scale down to fit more on screen */
-        transform: scale(0.9);
-        transform-origin: center top;
-        height: 111vh; /* Compensate for scale(0.9) to fill screen */
+        gap: 5px;
+        
+        /* Robust Zoom-out: Scale the container and compensate with dimensions */
+        width: 125vw !important;
+        height: 125vh !important;
+        position: absolute !important;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8) !important;
+        transform-origin: center center;
+        display: flex;
+        flex-direction: column;
     }
 
     .menu-content {
         padding: 40px 60px;
         width: 90%;
+        max-width: 600px;
     }
 
     .menu-content h1 {
@@ -1046,78 +1061,79 @@ body {
     }
 
     /* Scale cards slightly smaller */
-    .card {
+    .card, .card-face {
         width: 65px !important;
-        height: 100px !important;
+        height: 95px !important;
     }
 
-    .card-face {
-        width: 65px !important;
-        height: 100px !important;
-    }
-
-    /* Adjust bot card sizes */
     .bot-cards .card {
         width: 55px !important;
         height: 85px !important;
         margin-left: -35px;
     }
 
-    /* Scale slots */
     .card-slot, .played-card-slot, .skat-slot {
         width: 65px !important;
-        height: 100px !important;
+        height: 95px !important;
     }
 
-    /* Larger buttons for touch */
     .btn {
-        padding: 12px 20px;
-        font-size: 1rem;
-        min-height: 44px;
+        padding: 10px 18px;
+        font-size: 0.95rem;
+        min-height: 40px;
     }
 
     .floating-btn {
-        width: 55px;
-        height: 55px;
-        border-radius: 28px;
-        font-size: 1.6rem;
+        width: 50px;
+        height: 50px;
+        border-radius: 25px;
+        font-size: 1.4rem;
     }
 
     .player-info {
-        font-size: 1.1rem;
-        padding: 8px 15px;
+        font-size: 1rem;
+        padding: 6px 15px;
     }
 
     .game-info {
+        position: absolute;
+        left: 20px;
+        top: -80px; /* Positioned above the player hand but within view */
+        background: rgba(0, 0, 0, 0.85);
+        padding: 10px 15px;
+        border-radius: 10px;
         font-size: 0.85rem;
-        padding: 10px;
-        /* Move inside the screen */
-        left: 10px;
-        top: 0;
-        transform: translateX(0);
-        white-space: normal;
-        max-width: 150px;
+        line-height: 1.4;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        white-space: nowrap;
+        z-index: 100;
+        pointer-events: none; /* Don't block interaction */
     }
 
-    /* Adjust table area for smaller height */
     #table-area {
         height: 40%;
-        border-radius: 100px;
-        border-width: 6px;
+        border-radius: 120px;
+        border-width: 8px;
     }
 
     #trick-zone {
-        width: 250px;
-        height: 250px;
+        width: 240px;
+        height: 240px;
     }
 
-    /* Ensure trick cards are visible */
     .played-card {
         transform: scale(0.8);
     }
 
     #player-hand {
         gap: -35px;
+        margin-bottom: 5px;
+    }
+
+    #player-area .player-info {
+        right: 10px;
+        top: 0;
     }
 
     /* Settings UI adjustments */
@@ -1126,55 +1142,24 @@ body {
     }
 
     .radio-label, .toggle-label {
-        padding: 10px 12px;
-        font-size: 1rem;
-    }
-
-    .toggle-switch {
-        width: 48px;
-        height: 26px;
-        border-radius: 13px;
-    }
-
-    .toggle-switch::after {
-        width: 22px;
-        height: 22px;
-    }
-
-    .toggle-label input[type="checkbox"]:checked + .toggle-switch::after {
-        transform: translateX(22px);
-    }
-
-    #player-area .player-info {
-        right: 10px;
-        top: 10px;
+        padding: 8px 10px;
+        font-size: 0.95rem;
     }
 }
 
-@media screen and (max-height: 800px) and (max-width: 1024px) {
-    /* Landscape iPad / Small tablets */
+@media screen and (max-height: 850px) and (max-width: 1024px) {
+    /* Very short viewports (like iPad with browser UI) */
     #game-container {
-        gap: 5px;
-        transform: scale(0.85);
-        height: 117vh;
-    }
-    
-    #bots-area {
-        height: 15%;
-    }
-    
-    #table-area {
-        height: 45%;
+        transform: translate(-50%, -50%) scale(0.75) !important;
+        width: 133vw !important;
+        height: 133vh !important;
     }
 
     .game-info {
-        font-size: 0.75rem;
-        padding: 8px;
-        max-width: 130px;
-    }
-
-    #player-hand {
-        margin-bottom: 10px;
+        font-size: 0.8rem;
+        top: -60px;
+        left: 10px;
     }
 }
+
 
