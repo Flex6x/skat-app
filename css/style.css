@@ -1032,7 +1032,7 @@ body {
 }
 
 /* === iPad Responsiveness (768px - 1024px) === */
-@media screen and (max-width: 2160px) {
+@media screen and (max-width: 1024px) {
     body {
         overflow: hidden;
         position: fixed;
