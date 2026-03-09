@@ -26,9 +26,10 @@ const PLAYER_TYPES = {
 };
 
 class Game {
-    constructor(ui, aiControllers) {
+    constructor(ui, aiControllers, settings) {
         this.ui = ui;
         this.aiControllers = aiControllers; // Array of AI instances
+        this.settings = settings;
         this.dealerIndex = 0; // Initialize dealer once
         
         this.reset();
@@ -63,6 +64,7 @@ class Game {
         this.aborted = false;
         this.lastTrick = null;
         
+        this.ui.resetLiveScore();
         // Setup Last trick binding
         this.ui.showLastTrickBtn(() => {
             if (this.lastTrick) {
@@ -366,6 +368,9 @@ class Game {
         this.currentTrick = { cards: [], leadSuit: null };
         this.trickCount++;
 
+        // Update live score if enabled
+        this.updateLiveScore();
+
         if (this.trumpMode === TRUMP_MODES.NULL && winnerId === this.declarerIndex) {
             this.endGame(false); // Null declarer loses immediately on winning a trick
             return;
@@ -549,5 +554,28 @@ class Game {
 
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
+     * Calculates the current points for declarer and defenders and updates the UI.
+     */
+    updateLiveScore() {
+        let declarerPoints = 0;
+        let defenderPoints = 0;
+
+        this.players.forEach(p => {
+            const pts = this.calculatePoints(p.tricks);
+            if (p.id === this.declarerIndex) {
+                declarerPoints += pts;
+            } else {
+                defenderPoints += pts;
+            }
+        });
+
+        // Add skat points to declarer if they are the declarer
+        const skatPoints = this.calculatePoints(this.skat);
+        const totalDeclarerPoints = declarerPoints + (this.declarerIndex !== -1 ? skatPoints : 0);
+
+        this.ui.updateLiveScore(totalDeclarerPoints, defenderPoints, this.settings.current.showLiveScore);
     }
 }

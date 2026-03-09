@@ -55,7 +55,13 @@ class UI {
             
             bot1Speech: document.querySelector('#bot1 .speech-bubble'),
             bot2Speech: document.querySelector('#bot2 .speech-bubble'),
-            playerSpeech: document.querySelector('#player-area .speech-bubble')
+            playerSpeech: document.querySelector('#player-area .speech-bubble'),
+            
+            // Settings
+            settingsView: document.getElementById('settings-view'),
+            btnShowSettings: document.getElementById('btn-show-settings'),
+            btnBackSettings: document.getElementById('btn-back-settings'),
+            liveScore: document.getElementById('live-score')
         };
         
         this.bindGlobalEvents();
@@ -77,6 +83,7 @@ class UI {
         this.els.mainMenu.classList.remove('hidden');
         this.els.menuPrimary.classList.remove('hidden');
         this.els.statsView.classList.add('hidden');
+        this.els.settingsView.classList.add('hidden');
         this.els.gameContainer.classList.add('hidden');
         
         // Ensure old listeners are cleared by cloning the button if necessary or simply replacing onclick
@@ -89,8 +96,17 @@ class UI {
             this.showStatsView();
         };
         
+        this.els.btnShowSettings.onclick = () => {
+            this.showSettingsView();
+        };
+        
         this.els.btnBackMenu.onclick = () => {
              this.els.statsView.classList.add('hidden');
+             this.els.menuPrimary.classList.remove('hidden');
+        };
+        
+        this.els.btnBackSettings.onclick = () => {
+             this.els.settingsView.classList.add('hidden');
              this.els.menuPrimary.classList.remove('hidden');
         };
     }
@@ -99,6 +115,60 @@ class UI {
         this.els.menuPrimary.classList.add('hidden');
         this.els.statsView.classList.remove('hidden');
         this.renderStats();
+    }
+    
+    showSettingsView() {
+        this.els.menuPrimary.classList.add('hidden');
+        this.els.settingsView.classList.remove('hidden');
+    }
+    
+    /**
+     * Binds the settings form controls to a Settings instance.
+     */
+    bindSettingsForm(settings) {
+        const s = settings.current;
+        
+        // Theme radios
+        const themeRadios = document.querySelectorAll('input[name="theme"]');
+        themeRadios.forEach(r => {
+            r.checked = (r.value === s.theme);
+            r.addEventListener('change', () => {
+                settings.set('theme', r.value);
+            });
+        });
+        
+        // Animation speed radios
+        const speedRadios = document.querySelectorAll('input[name="animSpeed"]');
+        speedRadios.forEach(r => {
+            r.checked = (parseFloat(r.value) === s.animationSpeed);
+            r.addEventListener('change', () => {
+                settings.set('animationSpeed', parseFloat(r.value));
+            });
+        });
+        
+        // Live score toggle
+        const liveScoreChk = document.getElementById('chk-live-score');
+        liveScoreChk.checked = s.showLiveScore;
+        liveScoreChk.addEventListener('change', () => {
+            settings.set('showLiveScore', liveScoreChk.checked);
+        });
+    }
+    
+    /**
+     * Updates the live score display during gameplay.
+     */
+    updateLiveScore(declarerPoints, defenderPoints, showLiveScore) {
+        if (showLiveScore) {
+            this.els.liveScore.classList.remove('hidden');
+            this.els.liveScore.textContent = `Alleinspieler: ${declarerPoints} | Gegner: ${defenderPoints}`;
+        } else {
+            this.els.liveScore.classList.add('hidden');
+        }
+    }
+    
+    resetLiveScore() {
+        this.els.liveScore.classList.add('hidden');
+        this.els.liveScore.textContent = 'Punkte: -';
     }
     
     // --- Last Trick UI Methods ---

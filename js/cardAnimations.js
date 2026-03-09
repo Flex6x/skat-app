@@ -6,9 +6,15 @@
 class CardAnimations {
     constructor(ui) {
         this.ui = ui;
-        this.dealDuration = 450; // ms
-        this.trickDuration = 300; // ms
         this.delayBetweenDeals = 50; // ms
+    }
+
+    get dealDuration() {
+        return (typeof appSettings !== 'undefined') ? appSettings.getAnimationSpeedMs() : 450;
+    }
+
+    get trickDuration() {
+        return (typeof appSettings !== 'undefined') ? appSettings.getAnimationSpeedMs() * 0.67 : 300;
     }
 
     /**

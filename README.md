@@ -16,4 +16,5 @@
 
 ## Bugs:
 
-- Überreizt Bidlschirm soll bei Eingepasst nicht kommen
+- Überreizt Bidlschirm soll bei Eingepasst nicht kommen  (manchmal)
+- wenn man verliert und nicht überreizt steh trotzdem "gewonnen " da (manchmal)

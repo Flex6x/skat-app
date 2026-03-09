@@ -729,3 +729,297 @@ body {
     color: #fff;
     box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
 }
+
+/* === Settings Form === */
+.settings-form {
+    text-align: left;
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.settings-group {
+    margin-bottom: 24px;
+}
+
+.settings-group h3 {
+    font-size: 0.95rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.radio-label:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.radio-label input[type="radio"] {
+    display: none;
+}
+
+.radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #666;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+    transition: border-color 0.2s;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom {
+    border-color: var(--accent-color);
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent-color);
+}
+
+/* Toggle Switch */
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.toggle-label:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.toggle-label input[type="checkbox"] {
+    display: none;
+}
+
+.toggle-switch {
+    width: 44px;
+    height: 24px;
+    background: #555;
+    border-radius: 12px;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.3s;
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.toggle-label input[type="checkbox"]:checked + .toggle-switch {
+    background: var(--accent-color);
+}
+
+.toggle-label input[type="checkbox"]:checked + .toggle-switch::after {
+    transform: translateX(20px);
+}
+
+/* Live Score Display */
+.live-score {
+    color: #4caf50;
+    font-weight: 600;
+}
+
+/* === Light Theme === */
+[data-theme="light"] {
+    --bg-color: #f0f2f5;
+    --table-color: #c8d6e5;
+    --text-color: #1a1a2e;
+    --accent-color: #3f51b5;
+    --accent-hover: #5c6bc0;
+    --card-bg: #fff;
+    --card-border: #ccc;
+}
+
+[data-theme="light"] body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+[data-theme="light"] .menu-overlay {
+    background: radial-gradient(circle at center, rgba(220, 225, 235, 0.95), var(--bg-color));
+}
+
+[data-theme="light"] .menu-content {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    color: var(--text-color);
+}
+
+[data-theme="light"] .menu-content h1 {
+    color: #1a1a2e;
+    text-shadow: none;
+}
+
+[data-theme="light"] .menu-content .subtitle {
+    color: #666;
+}
+
+[data-theme="light"] #table-area {
+    background: var(--table-color);
+    border-color: #aab5c6;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.15), 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .overlay {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+}
+
+[data-theme="light"] .overlay h2 {
+    color: var(--text-color);
+}
+
+[data-theme="light"] .player-info {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+}
+
+[data-theme="light"] .game-info {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+}
+
+[data-theme="light"] .btn {
+    background: #ddd;
+    color: #333;
+}
+
+[data-theme="light"] .btn:hover:not(:disabled) {
+    background: #ccc;
+}
+
+[data-theme="light"] .btn.primary {
+    background: var(--accent-color);
+    color: #fff;
+}
+
+[data-theme="light"] .btn.primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+[data-theme="light"] .floating-btn {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #333;
+}
+
+[data-theme="light"] .card-face {
+    border-color: #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .speech-bubble {
+    background: #e8e8e8;
+    color: #333;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .score {
+    color: #e65100;
+}
+
+[data-theme="light"] .ai-text {
+    color: #0288d1;
+    text-shadow: none;
+}
+
+[data-theme="light"] .result-summary {
+    color: #e65100;
+}
+
+[data-theme="light"] .result-details {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .game-value-details {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .game-value-line {
+    color: #555;
+}
+
+[data-theme="light"] .settings-group h3 {
+    color: #666;
+}
+
+[data-theme="light"] .radio-label:hover,
+[data-theme="light"] .toggle-label:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .toggle-switch {
+    background: #ccc;
+}
+
+[data-theme="light"] .radio-custom {
+    border-color: #aaa;
+}
+
+[data-theme="light"] #stats-table {
+    color: var(--text-color);
+}
+
+[data-theme="light"] #stats-table th {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] #stats-table td {
+    border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] #stats-table tbody tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] #stats-table tbody tr:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .bot-cards .card {
+    background: repeating-linear-gradient(45deg, #bbb, #bbb 10px, #aaa 10px, #aaa 20px);
+    border-color: #888;
+}

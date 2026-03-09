@@ -3,8 +3,12 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Settings
+    window.appSettings = new Settings();
+
     // Initialize UI
     const ui = new UI();
+    ui.bindSettingsForm(window.appSettings);
     
     // Initialize AI Controllers
     const aiControllers = [
@@ -12,8 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
         new AIController(1, 'Bot 1')
     ];
     
-    // Initialize Game Engine
-    const game = new Game(ui, aiControllers);
+    // Initialize Game Engine (pass settings)
+    const game = new Game(ui, aiControllers, window.appSettings);
     
     // Setup Restart Button (Game Over Overlay)
     ui.els.btnRestart.addEventListener('click', () => {
