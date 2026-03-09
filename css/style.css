@@ -676,8 +676,15 @@ body {
 }
 
 @keyframes pulseWarning {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.03); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.03);
+    }
 }
 
 .game-value-details {
@@ -784,11 +791,11 @@ body {
     transition: border-color 0.2s;
 }
 
-.radio-label input[type="radio"]:checked + .radio-custom {
+.radio-label input[type="radio"]:checked+.radio-custom {
     border-color: var(--accent-color);
 }
 
-.radio-label input[type="radio"]:checked + .radio-custom::after {
+.radio-label input[type="radio"]:checked+.radio-custom::after {
     content: '';
     position: absolute;
     top: 3px;
@@ -841,11 +848,11 @@ body {
     transition: transform 0.3s;
 }
 
-.toggle-label input[type="checkbox"]:checked + .toggle-switch {
+.toggle-label input[type="checkbox"]:checked+.toggle-switch {
     background: var(--accent-color);
 }
 
-.toggle-label input[type="checkbox"]:checked + .toggle-switch::after {
+.toggle-label input[type="checkbox"]:checked+.toggle-switch::after {
     transform: translateX(20px);
 }
 
@@ -1025,7 +1032,7 @@ body {
 }
 
 /* === iPad Responsiveness (768px - 1024px) === */
-@media screen and (max-width: 1024px) {
+@media screen and (max-width: 2160px) {
     body {
         overflow: hidden;
         position: fixed;
@@ -1037,7 +1044,7 @@ body {
         max-width: none;
         padding: 10px;
         gap: 5px;
-        
+
         /* Robust Zoom-out: Scale the container and compensate with dimensions */
         width: 125vw !important;
         height: 125vh !important;
@@ -1061,7 +1068,8 @@ body {
     }
 
     /* Scale cards slightly smaller */
-    .card, .card-face {
+    .card,
+    .card-face {
         width: 65px !important;
         height: 95px !important;
     }
@@ -1072,7 +1080,9 @@ body {
         margin-left: -35px;
     }
 
-    .card-slot, .played-card-slot, .skat-slot {
+    .card-slot,
+    .played-card-slot,
+    .skat-slot {
         width: 65px !important;
         height: 95px !important;
     }
@@ -1098,7 +1108,8 @@ body {
     .game-info {
         position: absolute;
         left: 20px;
-        top: -80px; /* Positioned above the player hand but within view */
+        top: -80px;
+        /* Positioned above the player hand but within view */
         background: rgba(0, 0, 0, 0.85);
         padding: 10px 15px;
         border-radius: 10px;
@@ -1108,7 +1119,8 @@ body {
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         white-space: nowrap;
         z-index: 100;
-        pointer-events: none; /* Don't block interaction */
+        pointer-events: none;
+        /* Don't block interaction */
     }
 
     #table-area {
@@ -1141,13 +1153,15 @@ body {
         max-width: 100%;
     }
 
-    .radio-label, .toggle-label {
+    .radio-label,
+    .toggle-label {
         padding: 8px 10px;
         font-size: 0.95rem;
     }
 }
 
 @media screen and (max-height: 850px) and (max-width: 1024px) {
+
     /* Very short viewports (like iPad with browser UI) */
     #game-container {
         transform: translate(-50%, -50%) scale(0.75) !important;
@@ -1161,5 +1175,3 @@ body {
         left: 10px;
     }
 }
-
-
