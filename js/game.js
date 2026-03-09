@@ -457,7 +457,11 @@ class Game {
             this.trumpMode ? `${this.trumpMode}` : "Grand"
         );
             
-        this.ui.showGameOver(won, resultMsg, declarerPoints, defendersPoints);
+        // Determine if the human player (id=2) won:
+        // - If human is the declarer: human wins when declarer wins (won === true)
+        // - If human is a defender: human wins when declarer loses (won === false)
+        const humanWon = this.declarerIndex === 2 ? won : !won;
+        this.ui.showGameOver(humanWon, resultMsg, declarerPoints, defendersPoints);
         this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
     }
     
