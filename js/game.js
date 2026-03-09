@@ -118,6 +118,7 @@ class Game {
         this.players[1].hand = dealt.p2;
         this.players[2].hand = dealt.p3;
         this.skat = dealt.skat;
+        this.initialSkat = [...dealt.skat]; // Capture initial skat
         
         // Sort hands
         this.players.forEach(p => this.sortHand(p.hand));
@@ -504,7 +505,7 @@ class Game {
         // - If human is the declarer: human wins when declarer wins (won === true)
         // - If human is a defender: human wins when declarer loses (won === false)
         const humanWon = this.declarerIndex === 2 ? won : !won;
-        this.ui.showGameOver(humanWon, resultMsg, declarerPoints, defendersPoints, evaluation);
+        this.ui.showGameOver(humanWon, resultMsg, declarerPoints, defendersPoints, evaluation, this.initialSkat, this.skat);
         this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
 
         if (this.onGameEnd) {

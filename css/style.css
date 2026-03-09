@@ -828,6 +828,66 @@ body {
     border-radius: 8px;
 }
 
+/* Skat Summary in Game Over */
+.skat-summary {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.skat-summary-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.skat-summary-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #aaa;
+    font-weight: 700;
+}
+
+.skat-summary-cards {
+    display: flex;
+    gap: 10px;
+}
+
+.skat-summary-cards .card-face {
+    width: 50px !important;
+    height: 75px !important;
+    font-size: 0.7rem;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    padding: 4px;
+}
+
+.skat-summary-cards .card-center {
+    font-size: 1.5rem;
+}
+
+.skat-summary-cards .card-top-left,
+.skat-summary-cards .card-bottom-right {
+    font-size: 0.8rem;
+}
+
+/* Light Theme Adjustments for Skat Summary */
+[data-theme="light"] .skat-summary {
+    background: rgba(7, 89, 133, 0.05);
+}
+
+[data-theme="light"] .skat-summary-label {
+    color: #64748b;
+}
+
 /* === Top Info Box === */
 .game-info-top {
     position: absolute;

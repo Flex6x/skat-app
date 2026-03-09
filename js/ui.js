@@ -62,7 +62,9 @@ const TRANSLATIONS = {
         close_info: "Klicke irgendwo zum Schließen",
         turn: "Zug",
         bid_value: "Reizwert",
-        trump: "Trumpf"
+        trump: "Trumpf",
+        original_skat: "Original Skat",
+        discarded_cards: "Gedrückt"
     },
     en: {
         select_rounds: "Select Rounds",
@@ -123,7 +125,9 @@ const TRANSLATIONS = {
         close_info: "Click anywhere to close",
         turn: "Turn",
         bid_value: "Bid Value",
-        trump: "Trump"
+        trump: "Trump",
+        original_skat: "Original Skat",
+        discarded_cards: "Discarded"
     }
 };
 
@@ -1112,7 +1116,7 @@ class UI {
         this.els.trickPlayer.innerHTML = '';
     }
 
-    showGameOver(won, resultMsg, declarerPoints, oppPoints, evaluation = null) {
+    showGameOver(won, resultMsg, declarerPoints, oppPoints, evaluation = null, initialSkat = [], finalSkat = []) {
         this.els.gameOverOverlay.classList.remove('hidden');
         const resDiv = document.getElementById('results');
         const overbidEl = document.getElementById('overbid-warning');
@@ -1120,8 +1124,9 @@ class UI {
         const valueLine = document.getElementById('game-value-line');
         const badgesEl = document.getElementById('game-badges');
         
-        // Translate result message if possible (it's often dynamic, but we can try)
-        // For simplicity we use provided message but translate labels
+        // Skat Summary elements
+        const originalSkatContainer = document.getElementById('original-skat-cards');
+        const finalSkatContainer = document.getElementById('final-skat-cards');
         
         // Use the title based on won
         const titleKey = won ? 'game_won' : 'game_lost';
@@ -1139,6 +1144,13 @@ class UI {
             </div>
         `;
         
+        // Render Skat Summary
+        originalSkatContainer.innerHTML = '';
+        initialSkat.forEach(c => originalSkatContainer.appendChild(c.createDOMElement()));
+        
+        finalSkatContainer.innerHTML = '';
+        finalSkat.forEach(c => finalSkatContainer.appendChild(c.createDOMElement()));
+
         // Reset elements
         overbidEl.classList.add('hidden');
         overbidEl.textContent = `⚠️ ${this.getTranslation('overbid')}`;
