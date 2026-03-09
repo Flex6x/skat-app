@@ -185,6 +185,57 @@ body {
     font-weight: bold;
 }
 
+/* Nickname Input */
+.nickname-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: #fff;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.nickname-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Language Switch */
+.language-switch {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 5px 10px;
+}
+
+.lang-label {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.toggle-label.mini {
+    padding: 0;
+}
+
+.toggle-label.mini .toggle-switch {
+    width: 36px;
+    height: 20px;
+}
+
+.toggle-label.mini .toggle-switch::after {
+    width: 16px;
+    height: 16px;
+}
+
+.toggle-label.mini input[type="checkbox"]:checked+.toggle-switch::after {
+    transform: translateX(16px);
+}
+
 /* === Statistics View === */
 #stats-view {
     width: 100vw;
@@ -288,6 +339,7 @@ body {
     padding: 18px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     color: #ccc;
+    text-align: left;
 }
 
 .stats-table-full-container tbody tr:hover {

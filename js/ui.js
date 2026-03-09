@@ -2,6 +2,131 @@
  * Skat DOM UI Manager
  */
 
+const TRANSLATIONS = {
+    de: {
+        select_rounds: "Rundenanzahl wählen",
+        how_many_games: "Wie viele Spiele sollen absolviert werden?",
+        cancel: "Abbrechen",
+        statistics: "Statistik",
+        total_lists: "Listen Gesamt",
+        win_ratio: "Siegquote",
+        best_streak: "Beste Serie",
+        date: "Datum",
+        winner: "Gewinner",
+        pts_aicore: "Aicore",
+        pts_aiden: "Aiden",
+        back_to_menu: "Hauptmenü",
+        settings: "Einstellungen",
+        nickname: "Nickname",
+        language: "Sprache",
+        theme: "Theme",
+        card_animation: "Kartenanimation",
+        fast: "Schnell",
+        normal: "Normal",
+        slow: "Langsam",
+        show_live_points: "Punkte live anzeigen",
+        activate_sounds: "Sounds aktivieren",
+        data: "Daten",
+        delete_stats: "Statistiken löschen",
+        back: "Zurück",
+        game_list: "Spielliste",
+        total: "Gesamt",
+        home_confirm: "Willst du wirklich das Spiel verlassen? Der Fortschritt in dieser Liste geht verloren.",
+        delete_confirm: "Möchtest du wirklich alle Statistiken unwiderruflich löschen?",
+        stats_deleted: "Statistiken gelöscht.",
+        no_lists: "Noch keine Listen absolviert.",
+        draw: "Unentschieden",
+        passed_in: "Eingepasst!",
+        nobody_bid: "Niemand hat gereizt. Das Spiel wird neu gegeben.",
+        game_won: "Spiel gewonnen!",
+        game_lost: "Spiel verloren!",
+        declarer: "Alleinspieler",
+        opponents: "Gegner",
+        eyes: "Augen",
+        game_value: "Spielwert",
+        overbid: "Überreizt!",
+        play_now: "Jetzt Spielen",
+        wait_bidding: "Warte auf Reiz-Phase...",
+        your_turn_bid: "Du bist dran zu reizen!",
+        you_must_answer: "Du musst antworten!",
+        pass: "Passe",
+        yes: "Ja",
+        bid: "Reize",
+        take_skat: "Skat aufnehmen?",
+        hand_game: "Hand spielen",
+        take: "Aufnehmen",
+        discard_info: "Lege 2 Karten in den Skat (Drag & Drop oder Klick)",
+        confirm: "Bestätigen",
+        choose_trump: "Trumpf wählen",
+        last_trick: "Letzter Stich",
+        close_info: "Klicke irgendwo zum Schließen",
+        turn: "Zug",
+        bid_value: "Reizwert",
+        trump: "Trumpf"
+    },
+    en: {
+        select_rounds: "Select Rounds",
+        how_many_games: "How many games should be played?",
+        cancel: "Cancel",
+        statistics: "Statistics",
+        total_lists: "Total Lists",
+        win_ratio: "Win Ratio",
+        best_streak: "Best Streak",
+        date: "Date",
+        winner: "Winner",
+        pts_aicore: "Aicore",
+        pts_aiden: "Aiden",
+        back_to_menu: "Main Menu",
+        settings: "Settings",
+        nickname: "Nickname",
+        language: "Language",
+        theme: "Theme",
+        card_animation: "Animation",
+        fast: "Fast",
+        normal: "Normal",
+        slow: "Slow",
+        show_live_points: "Show live points",
+        activate_sounds: "Enable sounds",
+        data: "Data",
+        delete_stats: "Delete Statistics",
+        back: "Back",
+        game_list: "Game List",
+        total: "Total",
+        home_confirm: "Do you really want to leave? Progress in this list will be lost.",
+        delete_confirm: "Do you really want to delete all statistics permanently?",
+        stats_deleted: "Statistics deleted.",
+        no_lists: "No lists completed yet.",
+        draw: "Draw",
+        passed_in: "Passed In!",
+        nobody_bid: "Nobody bid. The game will be redealt.",
+        game_won: "Game Won!",
+        game_lost: "Game Lost!",
+        declarer: "Declarer",
+        opponents: "Opponents",
+        eyes: "Points",
+        game_value: "Game Value",
+        overbid: "Overbid!",
+        play_now: "Play Now",
+        wait_bidding: "Waiting for bidding...",
+        your_turn_bid: "Your turn to bid!",
+        you_must_answer: "You must answer!",
+        pass: "Pass",
+        yes: "Yes",
+        bid: "Bid",
+        take_skat: "Take Skat?",
+        hand_game: "Play Hand",
+        take: "Take",
+        discard_info: "Put 2 cards in Skat (Drag & Drop or Click)",
+        confirm: "Confirm",
+        choose_trump: "Choose Trump",
+        last_trick: "Last Trick",
+        close_info: "Click anywhere to close",
+        turn: "Turn",
+        bid_value: "Bid Value",
+        trump: "Trump"
+    }
+};
+
 class UI {
     constructor() {
         this.els = {
@@ -80,7 +205,14 @@ class UI {
             btnShowSettings: document.getElementById('btn-show-settings'),
             btnBackSettings: document.getElementById('btn-back-settings'),
             btnDeleteStats: document.getElementById('btn-delete-stats'),
-            liveScore: document.getElementById('live-score')
+            inputNickname: document.getElementById('input-nickname'),
+            chkLanguage: document.getElementById('chk-language'),
+            liveScore: document.getElementById('live-score'),
+
+            // Named refs for names
+            playerNameInGame: document.querySelector('#player-area .player-info'),
+            playerNameInStatsHead: document.getElementById('stats-player-name-head'),
+            playerNameInListHead: document.getElementById('player2-name-list')
         };
         
         this.bindGlobalEvents();
@@ -107,12 +239,57 @@ class UI {
 
         // Delete Stats Logic
         this.els.btnDeleteStats.onclick = () => {
-            if (window.confirm("Möchtest du wirklich alle Statistiken unwiderruflich löschen?")) {
-                localStorage.removeItem("skatStats");
-                this.showMessage("Statistiken gelöscht.");
+            const msg = this.getTranslation('delete_confirm');
+            if (window.confirm(msg)) {
+                localStorage.removeItem("skatListStats");
+                this.showMessage(this.getTranslation('stats_deleted'));
                 this.renderStats();
             }
         };
+    }
+
+    getTranslation(key) {
+        const lang = (window.appSettings && window.appSettings.current.language) || 'de';
+        return TRANSLATIONS[lang][key] || key;
+    }
+
+    updateLanguageUI() {
+        const lang = (window.appSettings && window.appSettings.current.language) || 'de';
+        const dict = TRANSLATIONS[lang];
+        
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.dataset.i18n;
+            if (dict[key]) {
+                el.textContent = dict[key];
+            }
+        });
+
+        // Update "Play Now" button specifically because it's in hero
+        const playBtn = document.getElementById('btn-start-game');
+        if (playBtn) playBtn.textContent = dict.play_now;
+
+        this.updateNicknames();
+    }
+
+    updateNicknames() {
+        const name = (window.appSettings && window.appSettings.current.nickname) || 'Du';
+        
+        // Update in game area
+        if (this.els.playerNameInGame) {
+            const scoreSpan = this.els.playerNameInGame.querySelector('.score');
+            const score = scoreSpan ? scoreSpan.textContent : '0';
+            this.els.playerNameInGame.innerHTML = `${name} <span class="score">${score}</span>`;
+        }
+
+        // Update in Stats header
+        if (this.els.playerNameInStatsHead) {
+            this.els.playerNameInStatsHead.textContent = name;
+        }
+
+        // Update in Game List header
+        if (this.els.playerNameInListHead) {
+            this.els.playerNameInListHead.textContent = name;
+        }
     }
 
     showRoundSelection(onSelect, onCancel) {
@@ -136,6 +313,7 @@ class UI {
     updateScoreboard(history) {
         this.els.scoreboardBody.innerHTML = '';
         let totals = [0, 0, 0];
+        const names = ['Aicore', 'Aiden', (window.appSettings && window.appSettings.current.nickname) || 'Du'];
 
         history.forEach((game, index) => {
             const tr = document.createElement('tr');
@@ -174,6 +352,8 @@ class UI {
         this.els.totalPlayer0.className = totals[0] >= 0 ? 'score-pos' : 'score-neg';
         this.els.totalPlayer1.className = totals[1] >= 0 ? 'score-pos' : 'score-neg';
         this.els.totalPlayer2.className = totals[2] >= 0 ? 'score-pos' : 'score-neg';
+        
+        this.els.totalPlayerNum.textContent = this.getTranslation('total');
     }
 
     resetScoreboard() {
@@ -194,6 +374,8 @@ class UI {
         this.els.roundSelectionView.classList.add('hidden');
         this.els.gameContainer.classList.add('hidden');
         
+        this.updateLanguageUI();
+
         // Ensure old listeners are cleared by cloning the button if necessary or simply replacing onclick
         this.els.btnStartGame.onclick = () => {
             onStart();
@@ -235,6 +417,20 @@ class UI {
     bindSettingsForm(settings) {
         const s = settings.current;
         
+        // Nickname
+        this.els.inputNickname.value = s.nickname;
+        this.els.inputNickname.oninput = () => {
+            settings.set('nickname', this.els.inputNickname.value || 'Du');
+            this.updateNicknames();
+        };
+
+        // Language toggle
+        this.els.chkLanguage.checked = (s.language === 'en');
+        this.els.chkLanguage.onchange = () => {
+            settings.set('language', this.els.chkLanguage.checked ? 'en' : 'de');
+            this.updateLanguageUI();
+        };
+
         // Theme radios
         const themeRadios = document.querySelectorAll('input[name="theme"]');
         themeRadios.forEach(r => {
@@ -284,7 +480,9 @@ class UI {
     updateLiveScore(declarerPoints, defenderPoints, showLiveScore) {
         if (showLiveScore) {
             this.els.liveScore.classList.remove('hidden');
-            this.els.liveScore.textContent = `Alleinspieler: ${declarerPoints} | Gegner: ${defenderPoints}`;
+            const declLabel = this.getTranslation('declarer');
+            const oppLabel = this.getTranslation('opponents');
+            this.els.liveScore.textContent = `${declLabel}: ${declarerPoints} | ${oppLabel}: ${defenderPoints}`;
         } else {
             this.els.liveScore.classList.add('hidden');
         }
@@ -292,7 +490,7 @@ class UI {
     
     resetLiveScore() {
         this.els.liveScore.classList.add('hidden');
-        this.els.liveScore.textContent = 'Punkte: -';
+        this.els.liveScore.textContent = `${this.getTranslation('eyes')}: -`;
     }
     
     // --- Last Trick UI Methods ---
@@ -328,9 +526,10 @@ class UI {
     renderStats() {
         const stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
         this.els.statsTableBody.innerHTML = '';
+        const playerName = (window.appSettings && window.appSettings.current.nickname) || 'Du';
         
         if (stats.length === 0) {
-            this.els.statsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #666;">Noch keine Listen absolviert.</td></tr>';
+            this.els.statsTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px; color: #666;">${this.getTranslation('no_lists')}</td></tr>`;
             this.els.statTotalGames.textContent = '0';
             this.els.statWinRatio.textContent = '0%';
             this.els.statWinStreak.textContent = '0';
@@ -344,8 +543,7 @@ class UI {
 
         // Process Dashboard
         stats.forEach(list => {
-            const playerPoints = list.scores[2];
-            const isWinner = list.winner === 'Du';
+            const isWinner = list.winner === playerName || list.winner === 'Du';
             
             if (isWinner) {
                 wins++;
@@ -363,11 +561,15 @@ class UI {
         // Render Table (Newest first)
         [...stats].reverse().forEach(list => {
             const tr = document.createElement('tr');
-            const isWinner = list.winner === 'Du';
+            let winnerDisplay = list.winner;
+            if (winnerDisplay === 'Du') winnerDisplay = playerName;
+            if (winnerDisplay === 'Unentschieden') winnerDisplay = this.getTranslation('draw');
+
+            const isWinner = list.winner === playerName || list.winner === 'Du';
             
             tr.innerHTML = `
                 <td>${list.date}</td>
-                <td style="font-weight: bold; color: ${isWinner ? '#4caf50' : '#fff'}">${list.winner}</td>
+                <td style="font-weight: bold; color: ${isWinner ? '#4caf50' : '#fff'}">${winnerDisplay}</td>
                 <td>${list.scores[0]}</td>
                 <td>${list.scores[1]}</td>
                 <td>${list.scores[2]}</td>
@@ -397,7 +599,16 @@ class UI {
         else if (playerId === 1) el = this.els.bot1Speech;
         else el = this.els.playerSpeech;
         
-        el.textContent = text;
+        // Translate common short responses
+        let displayMsg = text;
+        if (text === 'Passe') displayMsg = this.getTranslation('pass');
+        if (text === 'Ja') displayMsg = this.getTranslation('yes');
+        if (text.startsWith('Reize')) {
+            const val = text.split(' ')[1];
+            displayMsg = `${this.getTranslation('bid')} ${val}`;
+        }
+
+        el.textContent = displayMsg;
         el.classList.remove('hidden');
         
         setTimeout(() => {
@@ -448,13 +659,13 @@ class UI {
 
     showAdvancedBiddingOverlay(targetBid, canBid, canHold, onActionBid, onActionPass) {
         this.els.biddingOverlay.classList.remove('hidden');
-        this.els.biddingStatus.textContent = canBid ? 'Du bist dran zu reizen!' : 'Du musst antworten!';
+        this.els.biddingStatus.textContent = canBid ? this.getTranslation('your_turn_bid') : this.getTranslation('you_must_answer');
         
         this.els.biddingControls.innerHTML = `
             <div class="button-group">
-                <button id="btn-pass" class="btn">Passe</button>
-                ${canHold ? `<button id="btn-hold" class="btn primary">Ja (${targetBid})</button>` : ''}
-                ${canBid ? `<button id="btn-bid" class="btn primary">Reize ${targetBid}</button>` : ''}
+                <button id="btn-pass" class="btn">${this.getTranslation('pass')}</button>
+                ${canHold ? `<button id="btn-hold" class="btn primary">${this.getTranslation('yes')} (${targetBid})</button>` : ''}
+                ${canBid ? `<button id="btn-bid" class="btn primary">${this.getTranslation('bid')} ${targetBid}</button>` : ''}
             </div>
         `;
         
@@ -588,9 +799,16 @@ class UI {
     showSkatDecisionOverlay(onTake, onHand) {
         this.els.skatDecisionOverlay.classList.remove('hidden');
         this.els.skatDiscardArea.classList.add('hidden');
+        
+        const h2 = this.els.skatDecisionOverlay.querySelector('h2');
+        h2.textContent = this.getTranslation('take_skat');
+
         this.els.btnSkatTake.style.display = 'block';
         this.els.btnSkatHand.style.display = 'block';
         
+        this.els.btnSkatTake.textContent = this.getTranslation('take');
+        this.els.btnSkatHand.textContent = this.getTranslation('hand_game');
+
         this.els.btnSkatTake.onclick = () => { onTake(); };
         this.els.btnSkatHand.onclick = () => {
             this.els.skatDecisionOverlay.classList.add('hidden');
@@ -604,6 +822,10 @@ class UI {
         
         this.els.skatDiscardArea.classList.remove('hidden');
         
+        const p = this.els.skatDiscardArea.querySelector('p');
+        p.textContent = this.getTranslation('discard_info');
+        this.els.btnConfirmSkat.textContent = this.getTranslation('confirm');
+
         // Render Skat Cards onto the slots completely fresh
         this.els.skatDiscardSlots.forEach((s, index) => {
             s.innerHTML = '';
@@ -663,7 +885,7 @@ class UI {
                             discardedIds.push(cardEl.dataset.id);
                             this.els.btnConfirmSkat.disabled = (discardedIds.length !== 2);
                         } else {
-                            this.showMessage("Drücke zuerst eine Karte zurück auf die Hand!");
+                            this.showMessage(this.getTranslation('discard_info'));
                         }
                     }
                 }
@@ -703,6 +925,8 @@ class UI {
 
     showTrumpSelectionOverlay(onSelect) {
         this.els.trumpOverlay.classList.remove('hidden');
+        const h2 = this.els.trumpOverlay.querySelector('h2');
+        h2.textContent = this.getTranslation('choose_trump');
         
         this.els.trumpBtns.forEach(btn => {
             // Remove previous listeners using clone node
@@ -724,12 +948,13 @@ class UI {
         if (SUIT_SYMBOLS[trump]) {
             symbol = `${trump} ${SUIT_SYMBOLS[trump]}`;
         }
-        this.els.currentTrump.innerHTML = `Trumpf: ${symbol}`;
+        this.els.currentTrump.innerHTML = `${this.getTranslation('trump')}: ${symbol}`;
     }
 
     updateTurn(turnIndex) {
-        const names = ['Aicore', 'Aiden', 'Du'];
-        this.els.currentTurn.textContent = `Zug: ${names[turnIndex]}`;
+        const playerName = (window.appSettings && window.appSettings.current.nickname) || 'Du';
+        const names = ['Aicore', 'Aiden', playerName];
+        this.els.currentTurn.textContent = `${this.getTranslation('turn')}: ${names[turnIndex]}`;
         
         // Highlight active player
         document.querySelectorAll('.player-zone').forEach(el => el.style.opacity = '0.5');
@@ -739,11 +964,12 @@ class UI {
     }
 
     setDeclarer(name, bidValue) {
-        this.els.currentDeclarer.textContent = `Alleinspieler: ${name}`;
+        const displayName = name === 'Du' ? ((window.appSettings && window.appSettings.current.nickname) || 'Du') : name;
+        this.els.currentDeclarer.textContent = `${this.getTranslation('declarer')}: ${displayName}`;
         if (bidValue) {
-            this.els.currentBid.textContent = `Reizwert: ${bidValue}`;
+            this.els.currentBid.textContent = `${this.getTranslation('bid_value')}: ${bidValue}`;
         } else {
-            this.els.currentBid.textContent = `Reizwert: -`;
+            this.els.currentBid.textContent = `${this.getTranslation('bid_value')}: -`;
         }
     }
 
@@ -753,20 +979,16 @@ class UI {
         roles[mittelhandId] = ' (M)';
         roles[hinterhandId] = ' (H)';
         
+        const playerName = (window.appSettings && window.appSettings.current.nickname) || 'Du';
+
         // Find player name divs
         const bot2Name = document.querySelector('#bot2 .player-info');
         const bot1Name = document.querySelector('#bot1 .player-info');
-        const playerName = document.querySelector('#player-area .player-info');
-        
-        // This resets the text while keeping HTML structure like score span and ai-text
-        const updateName = (el, baseHtml, roleStr) => {
-            // we have to reconstruct since innerHTML wipes out children if we aren't careful
-            // For now, simpler approach, we just know what the text is
-        };
+        const playerInfoEl = document.querySelector('#player-area .player-info');
         
         bot2Name.innerHTML = `<span class="ai-text">Ai</span>core${roles[0]} <span class="score">${document.querySelector('#bot2 .score').textContent}</span>`;
         bot1Name.innerHTML = `<span class="ai-text">Ai</span>den${roles[1]} <span class="score">${document.querySelector('#bot1 .score').textContent}</span>`;
-        playerName.innerHTML = `Du${roles[2]} <span class="score">${document.querySelector('#player-area .score').textContent}</span>`;
+        playerInfoEl.innerHTML = `${playerName}${roles[2]} <span class="score">${document.querySelector('#player-area .score').textContent}</span>`;
     }
 
     enablePlayerMoves(validCards, onPlay) {
@@ -845,27 +1067,35 @@ class UI {
         const valueLine = document.getElementById('game-value-line');
         const badgesEl = document.getElementById('game-badges');
         
-        // Use the title based on won
-        const title = won ? 'Spiel gewonnen!' : 'Spiel verloren!';
-        document.getElementById('game-result-msg').textContent = title;
+        // Translate result message if possible (it's often dynamic, but we can try)
+        // For simplicity we use provided message but translate labels
         
+        // Use the title based on won
+        const titleKey = won ? 'game_won' : 'game_lost';
+        document.getElementById('game-result-msg').textContent = this.getTranslation(titleKey);
+        
+        const declLabel = this.getTranslation('declarer');
+        const oppLabel = this.getTranslation('opponents');
+        const eyesLabel = this.getTranslation('eyes');
+
         resDiv.innerHTML = `
             <p class="result-summary">${resultMsg}</p>
             <div class="result-details">
-                <p>Alleinspieler: ${declarerPoints} Augen</p>
-                <p>Gegner: ${oppPoints} Augen</p>
+                <p>${declLabel}: ${declarerPoints} ${eyesLabel}</p>
+                <p>${oppLabel}: ${oppPoints} ${eyesLabel}</p>
             </div>
         `;
         
         // Reset elements
         overbidEl.classList.add('hidden');
+        overbidEl.textContent = `⚠️ ${this.getTranslation('overbid')}`;
         detailsEl.classList.add('hidden');
         badgesEl.innerHTML = '';
         
         if (evaluation) {
             // Show game value details
             detailsEl.classList.remove('hidden');
-            valueLine.textContent = `Spielwert: ${evaluation.details}`;
+            valueLine.textContent = `${this.getTranslation('game_value')}: ${evaluation.details}`;
             
             // Overbid warning
             if (evaluation.overbid) {
@@ -887,11 +1117,11 @@ class UI {
 
     showGameOverPassedIn() {
         this.els.gameOverOverlay.classList.remove('hidden');
-        document.getElementById('game-result-msg').textContent = 'Eingepasst!';
+        document.getElementById('game-result-msg').textContent = this.getTranslation('passed_in');
         const resDiv = document.getElementById('results');
         
         resDiv.innerHTML = `
-            <p>Niemand hat gereizt. Das Spiel wird neu gegeben.</p>
+            <p>${this.getTranslation('nobody_bid')}</p>
         `;
     }
 }

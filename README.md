@@ -9,7 +9,6 @@
 
 - Tutorial
 - Null Ouvert usw implementieren
-- stats verschönern
 - besseres design, light mode: Modern baby blue theme
 - RESPONSIV
 - Reiz-zahlen bei Eingepasst nicht anzeigen
@@ -18,8 +17,8 @@
 - wenn settings geöffnet sind und man stats öffnet (oder andersrum.): soll settings geschlossen werden
 - info box oben mittig platziern (auf allen geräten)
 - settings in neuem tab öffnen
-- end screen rechtschreibfehler: "Du gewinnt mit.."
 - mehr audio, z.b. beim austeilen
+- Stich Überprüfung: Hinschreiben von wem die Karte war, in einer dreiecks übersicht.
 
 ## Bugs:
 

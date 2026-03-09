@@ -9,7 +9,9 @@ class Settings {
         theme: 'dark',
         animationSpeed: 0.45,
         showLiveScore: false,
-        soundEnabled: true
+        soundEnabled: true,
+        nickname: 'Du',
+        language: 'de'
     };
 
     static SPEED_MAP = {
@@ -93,7 +95,10 @@ class Settings {
                 this.applyAnimationSpeed(value);
                 break;
             case 'showLiveScore':
-                // Applied at runtime by game logic
+            case 'soundEnabled':
+            case 'nickname':
+            case 'language':
+                // Handled at runtime or by UI observer
                 break;
         }
 

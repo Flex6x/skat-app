@@ -31,8 +31,8 @@
         </div>
 
         <div class="menu-content hidden" id="round-selection-view">
-            <h2>Rundenanzahl wählen</h2>
-            <p class="subtitle">Wie viele Spiele sollen absolviert werden?</p>
+            <h2 data-i18n="select_rounds">Rundenanzahl wählen</h2>
+            <p class="subtitle" data-i18n="how_many_games">Wie viele Spiele sollen absolviert werden?</p>
             <div class="round-options">
                 <button class="btn round-btn" data-rounds="3">3</button>
                 <button class="btn round-btn" data-rounds="6">6</button>
@@ -41,26 +41,26 @@
                 <button class="btn round-btn" data-rounds="15">15</button>
             </div>
             <div class="menu-buttons" style="margin-top: 30px;">
-                <button id="btn-cancel-rounds" class="btn large-btn">Abbrechen</button>
+                <button id="btn-cancel-rounds" class="btn large-btn" data-i18n="cancel">Abbrechen</button>
             </div>
         </div>
 
         <div class="menu-content hidden" id="stats-view">
             <header class="view-header">
-                <h1>Statistics</h1>
+                <h1 data-i18n="statistics">Statistics</h1>
             </header>
 
             <div class="stats-dashboard">
                 <div class="stat-card">
-                    <span class="stat-label">Total Lists</span>
+                    <span class="stat-label" data-i18n="total_lists">Total Lists</span>
                     <span id="stat-total-games" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Win Ratio</span>
+                    <span class="stat-label" data-i18n="win_ratio">Win Ratio</span>
                     <span id="stat-win-ratio" class="stat-value">0%</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Best Streak</span>
+                    <span class="stat-label" data-i18n="best_streak">Best Streak</span>
                     <span id="stat-win-streak" class="stat-value">0</span>
                 </div>
             </div>
@@ -69,11 +69,11 @@
                 <table id="stats-table">
                     <thead>
                         <tr>
-                            <th>Datum</th>
-                            <th>Gewinner</th>
-                            <th>Aicore</th>
-                            <th>Aiden</th>
-                            <th>Du</th>
+                            <th data-i18n="date">Datum</th>
+                            <th data-i18n="winner">Gewinner</th>
+                            <th data-i18n="pts_aicore">Aicore</th>
+                            <th data-i18n="pts_aiden">Aiden</th>
+                            <th id="stats-player-name-head">Du</th>
                         </tr>
                     </thead>
                     <tbody id="stats-table-body">
@@ -83,16 +83,35 @@
             </div>
 
             <div class="menu-buttons footer-actions">
-                <button id="btn-back-menu" class="btn primary large-btn">Zurück zum Menü</button>
+                <button id="btn-back-menu" class="btn primary large-btn" data-i18n="back_to_menu">Zurück zum Menü</button>
             </div>
         </div>
 
         <div class="menu-content hidden" id="settings-view">
-            <h2>Settings</h2>
+            <h2 data-i18n="settings">Settings</h2>
             <div class="settings-form">
+                <!-- Nickname -->
+                <div class="settings-group">
+                    <h3 data-i18n="nickname">Nickname</h3>
+                    <input type="text" id="input-nickname" class="nickname-input" maxlength="12" placeholder="Dein Name">
+                </div>
+
+                <!-- Language -->
+                <div class="settings-group">
+                    <h3 data-i18n="language">Sprache</h3>
+                    <div class="language-switch">
+                        <span class="lang-label">DE</span>
+                        <label class="toggle-label mini">
+                            <input type="checkbox" id="chk-language">
+                            <span class="toggle-switch"></span>
+                        </label>
+                        <span class="lang-label">EN</span>
+                    </div>
+                </div>
+
                 <!-- Theme -->
                 <div class="settings-group">
-                    <h3>Theme</h3>
+                    <h3 data-i18n="theme">Theme</h3>
                     <div class="radio-group">
                         <label class="radio-label">
                             <input type="radio" name="theme" value="dark" checked>
@@ -109,22 +128,22 @@
 
                 <!-- Animation Speed -->
                 <div class="settings-group">
-                    <h3>Kartenanimation</h3>
+                    <h3 data-i18n="card_animation">Kartenanimation</h3>
                     <div class="radio-group">
                         <label class="radio-label">
                             <input type="radio" name="animSpeed" value="0.3">
                             <span class="radio-custom"></span>
-                            Schnell
+                            <span data-i18n="fast">Schnell</span>
                         </label>
                         <label class="radio-label">
                             <input type="radio" name="animSpeed" value="0.45" checked>
                             <span class="radio-custom"></span>
-                            Normal
+                            <span data-i18n="normal">Normal</span>
                         </label>
                         <label class="radio-label">
                             <input type="radio" name="animSpeed" value="0.65">
                             <span class="radio-custom"></span>
-                            Langsam
+                            <span data-i18n="slow">Langsam</span>
                         </label>
                     </div>
                 </div>
@@ -134,7 +153,7 @@
                     <label class="toggle-label">
                         <input type="checkbox" id="chk-live-score">
                         <span class="toggle-switch"></span>
-                        Punkte während des Spiels anzeigen
+                        <span data-i18n="show_live_points">Punkte während des Spiels anzeigen</span>
                     </label>
                 </div>
 
@@ -143,19 +162,19 @@
                     <label class="toggle-label">
                         <input type="checkbox" id="chk-sound">
                         <span class="toggle-switch"></span>
-                        Sounds aktivieren
+                        <span data-i18n="activate_sounds">Sounds aktivieren</span>
                     </label>
                 </div>
 
                 <!-- Danger Zone -->
                 <div class="settings-group"
                     style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-                    <h3>Daten</h3>
-                    <button id="btn-delete-stats" class="btn danger" style="width: 100%;">Statistiken löschen</button>
+                    <h3 data-i18n="data">Daten</h3>
+                    <button id="btn-delete-stats" class="btn danger" style="width: 100%;" data-i18n="delete_stats">Statistiken löschen</button>
                 </div>
             </div>
             <div class="menu-buttons">
-                <button id="btn-back-settings" class="btn primary large-btn">Zurück</button>
+                <button id="btn-back-settings" class="btn primary large-btn" data-i18n="back">Zurück</button>
             </div>
         </div>
     </div>

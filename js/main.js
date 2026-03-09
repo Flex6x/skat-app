@@ -86,9 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Determine winner
+        const playerName = window.appSettings.current.nickname || 'Du';
         let winnerName = 'Aicore';
         if (totals[1] > totals[0] && totals[1] > totals[2]) winnerName = 'Aiden';
-        if (totals[2] > totals[0] && totals[2] > totals[1]) winnerName = 'Du';
+        if (totals[2] > totals[0] && totals[2] > totals[1]) winnerName = playerName;
         if (totals[0] === totals[1] && totals[0] === totals[2]) winnerName = 'Unentschieden';
 
         const listResult = {

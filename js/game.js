@@ -37,10 +37,11 @@ class Game {
 
     reset() {
         this.deck = new Deck();
+        const playerName = (this.settings && this.settings.current.nickname) || 'Du';
         this.players = [
             { id: 0, type: PLAYER_TYPES.BOT, name: 'Aicore', hand: [], score: 0, tricks: [] },
             { id: 1, type: PLAYER_TYPES.BOT, name: 'Aiden', hand: [], score: 0, tricks: [] },
-            { id: 2, type: PLAYER_TYPES.HUMAN, name: 'Du', hand: [], score: 0, tricks: [] }
+            { id: 2, type: PLAYER_TYPES.HUMAN, name: playerName, hand: [], score: 0, tricks: [] }
         ]; // Player 2 is the human for easier indexing locally
         this.skat = [];
         this.handGame = false;
