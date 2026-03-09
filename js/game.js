@@ -75,6 +75,9 @@ class Game {
     
     abort() {
         this.aborted = true;
+        if (this.animations) {
+            this.animations.abort();
+        }
         
         // Remove active elements/bindings quickly
         const cardEls = this.ui.els.player2Cards.querySelectorAll('.card-face');

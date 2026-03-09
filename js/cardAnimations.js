@@ -7,6 +7,14 @@ class CardAnimations {
     constructor(ui) {
         this.ui = ui;
         this.delayBetweenDeals = 50; // ms
+        this.isAborted = false;
+    }
+
+    abort() {
+        this.isAborted = true;
+        // Clean up any cards currently moving in the body
+        const floatingCards = document.querySelectorAll('body > .card');
+        floatingCards.forEach(c => c.remove());
     }
 
     get dealDuration() {
@@ -77,15 +85,19 @@ class CardAnimations {
      */
     animateCardMove(cardElement, startEl, endEl, duration) {
         return new Promise(resolve => {
+            if (this.isAborted) {
+                resolve();
+                return;
+            }
             const startPos = this.getCenterPos(startEl);
             const endPos = this.getCenterPos(endEl);
 
             document.body.appendChild(cardElement);
-
-            // Initial positioning using inline styles for absolute position
+            
+            // ... (rest of setup)
             cardElement.style.position = 'fixed';
-            cardElement.style.left = `${startPos.x - 40}px`; // 40 is half card width
-            cardElement.style.top = `${startPos.y - 60}px`; // 60 is half card height
+            cardElement.style.left = `${startPos.x - 40}px`;
+            cardElement.style.top = `${startPos.y - 60}px`;
             cardElement.style.zIndex = '1000';
             cardElement.style.margin = '0';
 
@@ -95,7 +107,7 @@ class CardAnimations {
             if (typeof cardElement.animate === 'function') {
                 const animation = cardElement.animate([
                     { transform: `translate(0px, 0px) rotate(0deg)` },
-                    { transform: `translate(${deltaX}px, ${deltaY}px) rotate(360deg)` } // Adds a spin effect
+                    { transform: `translate(${deltaX}px, ${deltaY}px) rotate(360deg)` }
                 ], {
                     duration: duration,
                     easing: 'ease-out',
@@ -106,22 +118,26 @@ class CardAnimations {
                     cardElement.remove();
                     resolve();
                 };
+                
+                // If already aborted or aborted during animation setup
+                if (this.isAborted) {
+                    animation.cancel();
+                    cardElement.remove();
+                    resolve();
+                }
             } else {
-                // Fallback: Just snap to end (no animation)
                 cardElement.remove();
                 resolve();
             }
         });
     }
 
-    /**
-     * Deals cards according to the specific 3 -> Skat -> 4 -> 3 sequence
-     */
     async animateDealSequence(forehandIndex, uiPlayers) {
+        this.isAborted = false; // Reset on start
         const deckEl = document.getElementById('deck-zone');
+        // ... (rest of initial setup)
         const skatSlots = this.ui.els.skatZone.querySelectorAll('.card-slot');
 
-        // Ensure #skat-zone is not hidden and clear old cards
         this.ui.els.skatZone.classList.remove('hidden');
         deckEl.innerHTML = '';
         this.ui.els.player0Cards.innerHTML = '';
@@ -129,17 +145,15 @@ class CardAnimations {
         this.ui.els.player2Cards.innerHTML = '';
         skatSlots.forEach(s => s.innerHTML = '');
 
-        // Show full deck at start
         const deckMockup = this.createTempCard();
         deckEl.appendChild(deckMockup);
 
         const dealOrder = [
-            forehandIndex,           // a) Spieler direkt links vom Geber
-            (forehandIndex + 1) % 3, // b) nächster Spieler
-            (forehandIndex + 2) % 3  // c) letzter Spieler (oft Geber)
+            forehandIndex,
+            (forehandIndex + 1) % 3,
+            (forehandIndex + 2) % 3
         ];
 
-        // The exact dealing logic step-by-step
         const sequence = [
             { target: dealOrder[0], count: 3 },
             { target: dealOrder[1], count: 3 },
@@ -157,11 +171,12 @@ class CardAnimations {
         let skatReceived = 0;
 
         for (const step of sequence) {
+            if (this.isAborted) break;
             const tempPacket = this.createTempPacket(step.count);
             let targetEl;
-
+            // ... (rest of loop)
             if (step.target === 'skat') {
-                targetEl = skatSlots[skatReceived]; // target the first empty slot for packet drop
+                targetEl = skatSlots[skatReceived];
             } else {
                 targetEl = step.target === 0 ? this.ui.els.player0Cards :
                     step.target === 1 ? this.ui.els.player1Cards :
@@ -170,11 +185,10 @@ class CardAnimations {
 
             if (targetEl) {
                 await this.animateCardMove(tempPacket, deckEl, targetEl, this.dealDuration);
+                if (this.isAborted) break;
 
-                // Once the packet arrives, instantiate the actual individual cards there
                 for (let i = 0; i < step.count; i++) {
                     if (step.target === 'skat') {
-                        // Place a static back card in the Skat zone in the correct slot
                         const placedCard = this.createTempCard();
                         placedCard.style.position = 'static';
                         placedCard.style.margin = '0';
@@ -183,10 +197,8 @@ class CardAnimations {
                         skatSlots[skatReceived].appendChild(placedCard);
                         skatReceived++;
                     } else {
-                        // Place appropriately in the player hand
                         receivedCards[step.target]++;
                         if (step.target === 2) {
-                            // Find the physical card object
                             const indexOffset = receivedCards[step.target] - 1;
                             const hCard = uiPlayers[step.target].hand[indexOffset];
                             if (hCard) {
@@ -194,7 +206,6 @@ class CardAnimations {
                                 this.ui.els.player2Cards.appendChild(cardDOM);
                             }
                         } else {
-                            // Bot gets a back card
                             const botCard = document.createElement('div');
                             botCard.classList.add('card', 'card-back');
                             targetEl.appendChild(botCard);
@@ -205,7 +216,6 @@ class CardAnimations {
             }
         }
 
-        // Remove the deck mockup when dealing is finished
         deckEl.innerHTML = '';
     }
 
