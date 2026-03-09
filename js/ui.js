@@ -276,9 +276,7 @@ class UI {
         
         // Update in game area
         if (this.els.playerNameInGame) {
-            const scoreSpan = this.els.playerNameInGame.querySelector('.score');
-            const score = scoreSpan ? scoreSpan.textContent : '0';
-            this.els.playerNameInGame.innerHTML = `${name} <span class="score">${score}</span>`;
+            this.els.playerNameInGame.textContent = name;
         }
 
         // Update in Stats header
@@ -986,9 +984,9 @@ class UI {
         const bot1Name = document.querySelector('#bot1 .player-info');
         const playerInfoEl = document.querySelector('#player-area .player-info');
         
-        bot2Name.innerHTML = `<span class="ai-text">Ai</span>core${roles[0]} <span class="score">${document.querySelector('#bot2 .score').textContent}</span>`;
-        bot1Name.innerHTML = `<span class="ai-text">Ai</span>den${roles[1]} <span class="score">${document.querySelector('#bot1 .score').textContent}</span>`;
-        playerInfoEl.innerHTML = `${playerName}${roles[2]} <span class="score">${document.querySelector('#player-area .score').textContent}</span>`;
+        bot2Name.innerHTML = `<span class="ai-text">Ai</span>core${roles[0]}`;
+        bot1Name.innerHTML = `<span class="ai-text">Ai</span>den${roles[1]}`;
+        playerInfoEl.textContent = `${playerName}${roles[2]}`;
     }
 
     enablePlayerMoves(validCards, onPlay) {

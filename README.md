@@ -17,6 +17,8 @@
 - settings in neuem tab öffnen
 - mehr audio, z.b. beim austeilen
 - Stich Überprüfung: Hinschreiben von wem die Karte war, in einer dreiecks übersicht.
+- am ende den skat anzeigen (bei zusammenfassung)
+- reiz und skat aufnehm fenster bei menu rückkehr komplett löschen. sonst collidierung mit neuem spiel.
 
 ## Bugs:
 
