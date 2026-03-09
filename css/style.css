@@ -904,12 +904,20 @@ body {
     background: rgba(7, 89, 133, 0.05);
 }
 
-/* === Top Info Box === */
-.game-info-top {
+/* === Top Info Box & Controls === */
+.game-info-container {
     position: absolute;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    z-index: 100;
+}
+
+.game-info-top {
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(10px);
     padding: 10px 30px;
@@ -918,7 +926,6 @@ body {
     gap: 25px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    z-index: 100;
     white-space: nowrap;
     font-size: 0.95rem;
     font-weight: 600;
@@ -926,9 +933,41 @@ body {
     align-items: center;
 }
 
+.game-controls-bottom {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
 .game-info-top div {
     display: flex;
     align-items: center;
+}
+
+.floating-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 1.3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.floating-btn:hover {
+    background: var(--accent-color);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--accent-hover);
+}
+
+.floating-btn.smaller {
+    width: 44px;
+    height: 44px;
 }
 
 /* === Bottom Player Area === */

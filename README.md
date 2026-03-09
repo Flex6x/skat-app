@@ -8,9 +8,7 @@
 
 
 - Tutorial
-- besseres design
 - RESPONSIV
-- mehr audio, z.b. beim austeilen
 - bei Handspiel: man kann Schneider oder Schwarz ansagen. - funktioiniert noch nicht.
 
 ## Bugs:

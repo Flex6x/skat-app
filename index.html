@@ -193,19 +193,21 @@
 
     <div id="game-container" class="hidden">
         <!-- In-Game Info Box Top Center -->
-        <div class="game-info-top">
-            <div id="current-declarer">Alleinspieler: -</div>
-            <div id="current-bid">Reizwert: -</div>
-            <div id="current-trump">Trumpf: -</div>
-            <div id="current-turn">Zug: -</div>
-            <div id="live-score" class="live-score hidden">Punkte: -</div>
-        </div>
+        <div class="game-info-container">
+            <div class="game-info-top">
+                <div id="current-declarer">Alleinspieler: -</div>
+                <div id="current-bid">Reizwert: -</div>
+                <div id="current-trump">Trumpf: -</div>
+                <div id="current-turn">Zug: -</div>
+                <div id="live-score" class="live-score hidden">Punkte: -</div>
+            </div>
 
-        <!-- In-Game Home Button & Details -->
-        <div class="top-right-controls">
-            <button id="btn-home" class="floating-btn" title="Zurück zum Hauptmenü">🏠</button>
-            <button id="btn-show-scoreboard" class="floating-btn" title="Spielliste anzeigen">📋</button>
-            <button id="btn-last-trick" class="floating-btn smaller hidden" title="Letzten Stich ansehen">👁️</button>
+            <!-- Controls below info -->
+            <div class="game-controls-bottom">
+                <button id="btn-home" class="floating-btn" title="Zurück zum Hauptmenü">🏠</button>
+                <button id="btn-show-scoreboard" class="floating-btn" title="Spielliste anzeigen">📋</button>
+                <button id="btn-last-trick" class="floating-btn smaller hidden" title="Letzten Stich ansehen">👁️</button>
+            </div>
         </div>
 
         <!-- Scoreboard Drawer/Overlay -->
