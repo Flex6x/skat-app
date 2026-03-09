@@ -448,8 +448,8 @@ body {
 
 .game-info {
     position: absolute;
-    left: -140px;
-    top: -40px;
+    left: 20px;
+    bottom: 40px;
     background: rgba(0, 0, 0, 0.7);
     padding: 15px 25px;
     border-radius: 12px;
@@ -458,6 +458,7 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     white-space: nowrap;
+    z-index: 10;
 }
 
 #player-area .player-info {
@@ -1032,7 +1033,7 @@ body {
 }
 
 /* === iPad Responsiveness (768px - 1024px) === */
-@media screen and (max-width: 2160px) {
+@media screen and (max-width: 1024px) {
     body {
         overflow: hidden;
         position: fixed;
@@ -1107,11 +1108,13 @@ body {
 
     .game-info {
         position: absolute;
-        left: 20px;
-        top: -80px;
-        /* Positioned above the player hand but within view */
+        left: 50%;
+        top: 20px;
+        bottom: auto;
+        transform: translateX(-50%);
+        /* Positioned at the top center */
         background: rgba(0, 0, 0, 0.85);
-        padding: 10px 15px;
+        padding: 10px 20px;
         border-radius: 10px;
         font-size: 0.85rem;
         line-height: 1.4;
@@ -1171,7 +1174,8 @@ body {
 
     .game-info {
         font-size: 0.8rem;
-        top: -60px;
-        left: 10px;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
     }
 }
