@@ -12,8 +12,6 @@
 - besseres design, light mode: Modern baby blue theme
 - RESPONSIV
 - Reiz-zahlen bei Eingepasst nicht anzeigen
-- Stats: pro Liste anschauen.
-- Deu / Eng
 - wenn settings geöffnet sind und man stats öffnet (oder andersrum.): soll settings geschlossen werden
 - info box oben mittig platziern (auf allen geräten)
 - settings in neuem tab öffnen
