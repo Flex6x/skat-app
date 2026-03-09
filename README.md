@@ -10,11 +10,9 @@
 - Tutorial
 - besseres design
 - RESPONSIV
-- Reiz-zahlen bei Eingepasst nicht anzeigen
 - mehr audio, z.b. beim austeilen
-- Stich Überprüfung: Hinschreiben von wem die Karte war, in einer dreiecks übersicht.
-- am ende den skat anzeigen (bei zusammenfassung)
 - reiz und skat aufnehm fenster bei menu rückkehr komplett löschen. sonst collidierung mit neuem spiel.
+- bei Handspiel: man kann Schneider oder Schwarz ansagen.
 
 ## Bugs:
 

@@ -1151,6 +1151,10 @@ class UI {
         finalSkatContainer.innerHTML = '';
         finalSkat.forEach(c => finalSkatContainer.appendChild(c.createDOMElement()));
 
+        // Ensure groups are visible/hidden correctly
+        originalSkatContainer.parentElement.classList.remove('hidden');
+        finalSkatContainer.parentElement.classList.remove('hidden');
+
         // Reset elements
         overbidEl.classList.add('hidden');
         overbidEl.textContent = `⚠️ ${this.getTranslation('overbid')}`;
@@ -1180,7 +1184,7 @@ class UI {
         }
     }
 
-    showGameOverPassedIn() {
+    showGameOverPassedIn(initialSkat = []) {
         this.els.gameOverOverlay.classList.remove('hidden');
         document.getElementById('game-result-msg').textContent = this.getTranslation('passed_in');
         const resDiv = document.getElementById('results');
@@ -1188,5 +1192,23 @@ class UI {
         resDiv.innerHTML = `
             <p>${this.getTranslation('nobody_bid')}</p>
         `;
+
+        // Skat Summary elements
+        const originalSkatContainer = document.getElementById('original-skat-cards');
+        const finalSkatContainer = document.getElementById('final-skat-cards');
+        const skatSummary = document.getElementById('skat-summary');
+        
+        // Render Skat Summary (only original)
+        skatSummary.classList.remove('hidden');
+        originalSkatContainer.innerHTML = '';
+        initialSkat.forEach(c => originalSkatContainer.appendChild(c.createDOMElement()));
+        
+        // Hide final skat group for passed in
+        finalSkatContainer.parentElement.classList.add('hidden');
+        originalSkatContainer.parentElement.classList.remove('hidden');
+
+        // Hide other details
+        document.getElementById('overbid-warning').classList.add('hidden');
+        document.getElementById('game-value-details').classList.add('hidden');
     }
 }

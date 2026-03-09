@@ -524,7 +524,7 @@ class Game {
 
     endGamePassedIn() {
         this.phase = PHASES.GAME_OVER;
-        this.ui.showGameOverPassedIn();
+        this.ui.showGameOverPassedIn(this.initialSkat);
         this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
 
         if (this.onGameEnd) {
