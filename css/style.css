@@ -514,6 +514,17 @@ body {
     background: var(--accent-hover);
 }
 
+.btn.danger {
+    background: #c62828;
+    color: #fff;
+}
+
+.btn.danger:hover:not(:disabled) {
+    background: #e53935;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+}
+
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;

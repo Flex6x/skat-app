@@ -76,6 +76,7 @@ class UI {
             settingsView: document.getElementById('settings-view'),
             btnShowSettings: document.getElementById('btn-show-settings'),
             btnBackSettings: document.getElementById('btn-back-settings'),
+            btnDeleteStats: document.getElementById('btn-delete-stats'),
             liveScore: document.getElementById('live-score')
         };
         
@@ -99,6 +100,15 @@ class UI {
         };
         this.els.btnCloseScoreboard.onclick = () => {
             this.els.scoreboardDrawer.classList.add('hidden');
+        };
+
+        // Delete Stats Logic
+        this.els.btnDeleteStats.onclick = () => {
+            if (window.confirm("Möchtest du wirklich alle Statistiken unwiderruflich löschen?")) {
+                localStorage.removeItem("skatStats");
+                this.showMessage("Statistiken gelöscht.");
+                this.renderStats();
+            }
         };
     }
 
