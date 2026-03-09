@@ -1023,3 +1023,117 @@ body {
     background: repeating-linear-gradient(45deg, #bbb, #bbb 10px, #aaa 10px, #aaa 20px);
     border-color: #888;
 }
+
+/* === iPad Responsiveness (768px - 1024px) === */
+@media screen and (max-width: 1024px) {
+    #game-container {
+        max-width: 100%;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .menu-content {
+        padding: 40px 60px;
+        width: 90%;
+    }
+
+    .menu-content h1 {
+        font-size: 3rem;
+    }
+
+    /* Scale cards slightly smaller */
+    .card {
+        width: 70px !important;
+        height: 105px !important;
+    }
+
+    .card-face {
+        width: 70px !important;
+        height: 105px !important;
+    }
+
+    /* Adjust bot card sizes */
+    .bot-cards .card {
+        width: 60px !important;
+        height: 90px !important;
+    }
+
+    /* Scale slots */
+    .card-slot, .played-card-slot, .skat-slot {
+        width: 70px !important;
+        height: 105px !important;
+    }
+
+    /* Larger buttons for touch */
+    .btn {
+        padding: 15px 25px;
+        font-size: 1.1rem;
+        min-height: 50px;
+    }
+
+    .floating-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 30px;
+        font-size: 1.8rem;
+    }
+
+    .player-info {
+        font-size: 1.2rem;
+    }
+
+    .game-info {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+
+    /* Adjust table area for smaller height */
+    #table-area {
+        height: 45%;
+    }
+
+    /* Ensure trick cards are visible */
+    .played-card {
+        transform: scale(0.9);
+    }
+
+    /* Settings UI adjustments */
+    .settings-form {
+        max-width: 100%;
+    }
+
+    .radio-label, .toggle-label {
+        padding: 12px 15px;
+        font-size: 1.1rem;
+    }
+
+    .toggle-switch {
+        width: 54px;
+        height: 30px;
+        border-radius: 15px;
+    }
+
+    .toggle-switch::after {
+        width: 26px;
+        height: 26px;
+    }
+
+    .toggle-label input[type="checkbox"]:checked + .toggle-switch::after {
+        transform: translateX(24px);
+    }
+}
+
+@media screen and (max-height: 800px) and (max-width: 1024px) {
+    /* Landcape iPad / Small tablets */
+    #game-container {
+        gap: 5px;
+    }
+    
+    #bots-area {
+        height: 15%;
+    }
+    
+    #table-area {
+        height: 50%;
+    }
+}

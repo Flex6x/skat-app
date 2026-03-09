@@ -384,6 +384,67 @@ class UI {
                     }
                 }
             };
+
+            // Touch events for drag-and-drop on iPad
+            el.ontouchstart = (e) => {
+                if (e.cancelable) e.preventDefault();
+                el.classList.add('dragging');
+                el._touchStartX = e.touches[0].clientX;
+                el._touchStartY = e.touches[0].clientY;
+            };
+
+            el.ontouchmove = (e) => {
+                if (e.cancelable) e.preventDefault();
+                const touch = e.touches[0];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                
+                // Visual feedback for slots
+                this.els.skatDiscardSlots.forEach(slot => {
+                    if (target === slot || slot.contains(target)) {
+                        slot.classList.add('drag-over');
+                    } else {
+                        slot.classList.remove('drag-over');
+                    }
+                });
+                
+                if (target === handContainer || handContainer.contains(target)) {
+                    handContainer.classList.add('drag-over');
+                } else {
+                    handContainer.classList.remove('drag-over');
+                }
+            };
+
+            el.ontouchend = (e) => {
+                el.classList.remove('dragging');
+                const touch = e.changedTouches[0];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                
+                this.els.skatDiscardSlots.forEach(slot => slot.classList.remove('drag-over'));
+                handContainer.classList.remove('drag-over');
+
+                const cardId = el.dataset.id;
+                const parentSlot = el.parentElement;
+
+                // Move logic
+                const dropSlot = Array.from(this.els.skatDiscardSlots).find(s => s === target || s.contains(target));
+                if (dropSlot && !dropSlot.hasChildNodes() && !parentSlot.classList.contains('skat-slot')) {
+                    // Move to skat slot
+                    dropSlot.appendChild(el);
+                    dropSlot.dataset.cardId = cardId;
+                    if (!discardedIds.includes(cardId)) discardedIds.push(cardId);
+                    if (discardedIds.length === 2) this.els.btnConfirmSkat.disabled = false;
+                } else if ((target === handContainer || handContainer.contains(target)) && parentSlot.classList.contains('skat-slot')) {
+                    // Move to hand
+                    handContainer.appendChild(el);
+                    parentSlot.dataset.cardId = '';
+                    const index = discardedIds.indexOf(cardId);
+                    if (index > -1) discardedIds.splice(index, 1);
+                    this.els.btnConfirmSkat.disabled = true;
+                } else if (Math.abs(touch.clientX - el._touchStartX) < 10 && Math.abs(touch.clientY - el._touchStartY) < 10) {
+                    // Fallback to click-like behavior if it was just a tap
+                    el.click();
+                }
+            };
         };
 
         // Bind all current hand cards
@@ -571,7 +632,7 @@ class UI {
         tableArea.addEventListener('dragleave', this._dragLeaveHandler);
         tableArea.addEventListener('drop', this._dropHandler);
 
-        // Make cards draggable / clickable
+        // Make cards draggable / clickable / touchable
         cardEls.forEach(el => {
             const cardId = el.dataset.id;
             
@@ -588,12 +649,43 @@ class UI {
                 };
                 el.ondragend = () => el.classList.remove('dragging');
                 
+                // Touch Start for Trick
+                el.ontouchstart = (e) => {
+                    if (e.cancelable) e.preventDefault();
+                    el.classList.add('dragging');
+                    el._touchCardId = cardId;
+                };
+
+                el.ontouchmove = (e) => {
+                    if (e.cancelable) e.preventDefault();
+                    const touch = e.touches[0];
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                    if (target && (target.id === 'table-area' || target.closest('#table-area'))) {
+                        tableArea.style.boxShadow = 'inset 0 0 50px rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.5)';
+                    } else {
+                        tableArea.style.boxShadow = '';
+                    }
+                };
+
+                el.ontouchend = (e) => {
+                    el.classList.remove('dragging');
+                    tableArea.style.boxShadow = '';
+                    const touch = e.changedTouches[0];
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                    
+                    if (target && (target.id === 'table-area' || target.closest('#table-area'))) {
+                        removeListeners();
+                        onPlay(cardId);
+                    }
+                };
+                
                 // Allow double click to play instantly
                 el.ondblclick = () => onPlay(cardId);
             } else {
                 el.classList.remove('valid-move');
                 el.classList.add('invalid-move');
                 el.ondragstart = (e) => e.preventDefault();
+                el.ontouchstart = null;
                 el.ondblclick = null;
             }
         });

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +8,20 @@
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <!-- Main Start Menu -->
     <div id="main-menu" class="menu-overlay">
         <div class="menu-content" id="menu-primary">
             <h1>Skat</h1>
-            <p class="subtitle">Minimalist Web Game</p>
+            <p class="subtitle">Minimalist Web - Game</p>
             <div class="menu-buttons">
                 <button id="btn-start-game" class="btn primary large-btn">Neues Spiel</button>
                 <button id="btn-show-stats" class="btn large-btn">Stats</button>
                 <button id="btn-show-settings" class="btn large-btn">Settings</button>
             </div>
         </div>
-        
+
         <div class="menu-content hidden" id="stats-view">
             <h2>Letzte Spiele</h2>
             <div class="stats-table-container">
@@ -105,7 +107,7 @@
             <button id="btn-home" class="floating-btn" title="Zurück zum Hauptmenü">🏠</button>
             <button id="btn-last-trick" class="floating-btn smaller hidden" title="Letzten Stich ansehen">👁️</button>
         </div>
-        
+
         <!-- Top Bots Area -->
         <div id="bots-area">
             <div id="bot2" class="player-zone">
@@ -123,13 +125,13 @@
         <!-- Center Table Area -->
         <div id="table-area">
             <div id="deck-zone"></div>
-            
+
             <div id="trick-zone">
                 <div id="played-card-bot2" class="played-card-slot"></div>
                 <div id="played-card-bot1" class="played-card-slot"></div>
                 <div id="played-card-player" class="played-card-slot"></div>
             </div>
-            
+
             <div id="skat-zone">
                 <div class="card-slot"></div>
                 <div class="card-slot"></div>
@@ -167,35 +169,39 @@
             <div id="trump-overlay" class="overlay hidden">
                 <h2>Trumpf wählen</h2>
                 <div id="trump-options">
-                    <button class="btn trump-btn" data-suit="Eichel">Eichel <img src="media/eichel.png" class="suit-icon" alt="Eichel"></button>
-                    <button class="btn trump-btn" data-suit="Grün">Grün <img src="media/gruen.png" class="suit-icon" alt="Grün"></button>
-                    <button class="btn trump-btn" data-suit="Rot">Rot <img src="media/rot.png" class="suit-icon" alt="Rot"></button>
-                    <button class="btn trump-btn" data-suit="Schellen">Schellen <img src="media/schellen.png" class="suit-icon" alt="Schellen"></button>
+                    <button class="btn trump-btn" data-suit="Eichel">Eichel <img src="media/eichel.png"
+                            class="suit-icon" alt="Eichel"></button>
+                    <button class="btn trump-btn" data-suit="Grün">Grün <img src="media/gruen.png" class="suit-icon"
+                            alt="Grün"></button>
+                    <button class="btn trump-btn" data-suit="Rot">Rot <img src="media/rot.png" class="suit-icon"
+                            alt="Rot"></button>
+                    <button class="btn trump-btn" data-suit="Schellen">Schellen <img src="media/schellen.png"
+                            class="suit-icon" alt="Schellen"></button>
                     <button class="btn trump-btn" data-suit="Grand">Grand</button>
                     <button class="btn trump-btn" data-suit="Null">Null</button>
                 </div>
             </div>
-            
-     <!-- GameOver Overlay -->
-    <div id="game-over-overlay" class="overlay hidden">
-        <h2 id="game-result-msg">Spiel beendet</h2>
-        <div id="overbid-warning" class="overbid-warning hidden">⚠️ Überreizt!</div>
-        <div id="results"></div>
-        <div id="game-value-details" class="game-value-details hidden">
-            <p id="game-value-line" class="game-value-line"></p>
-            <div id="game-badges" class="game-badges"></div>
-        </div>
-        <button id="btn-restart" class="btn primary">Neues Spiel</button>
-    </div>
 
-    <!-- Last Trick Overlay -->
-    <div id="last-trick-overlay" class="overlay hidden">
-        <h2>Letzter Stich</h2>
-        <div id="last-trick-cards" class="trick-viewer">
-            <!-- Cards appended here -->
-        </div>
-        <p class="subtitle" style="margin-top: 20px;">Klicke irgendwo zum Schließen</p>
-    </div>
+            <!-- GameOver Overlay -->
+            <div id="game-over-overlay" class="overlay hidden">
+                <h2 id="game-result-msg">Spiel beendet</h2>
+                <div id="overbid-warning" class="overbid-warning hidden">⚠️ Überreizt!</div>
+                <div id="results"></div>
+                <div id="game-value-details" class="game-value-details hidden">
+                    <p id="game-value-line" class="game-value-line"></p>
+                    <div id="game-badges" class="game-badges"></div>
+                </div>
+                <button id="btn-restart" class="btn primary">Neues Spiel</button>
+            </div>
+
+            <!-- Last Trick Overlay -->
+            <div id="last-trick-overlay" class="overlay hidden">
+                <h2>Letzter Stich</h2>
+                <div id="last-trick-cards" class="trick-viewer">
+                    <!-- Cards appended here -->
+                </div>
+                <p class="subtitle" style="margin-top: 20px;">Klicke irgendwo zum Schließen</p>
+            </div>
         </div>
 
         <!-- Bottom Player Area -->
@@ -226,4 +232,5 @@
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
 </body>
+
 </html>
