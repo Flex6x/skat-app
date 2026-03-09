@@ -172,6 +172,10 @@ class CardAnimations {
 
         for (const step of sequence) {
             if (this.isAborted) break;
+            
+            // Play drag sound for each packet
+            this.ui.playSound('drag');
+
             const tempPacket = this.createTempPacket(step.count);
             let targetEl;
             // ... (rest of loop)
