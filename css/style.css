@@ -661,3 +661,71 @@ body {
     filter: brightness(0.5);
     pointer-events: none;
 }
+
+/* === Game Value Details (Game Over) === */
+.overbid-warning {
+    background: linear-gradient(135deg, #ff5252, #d32f2f);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    animation: pulseWarning 1.5s ease-in-out infinite;
+    box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
+}
+
+@keyframes pulseWarning {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+
+.game-value-details {
+    margin: 15px 0 10px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-value-line {
+    font-size: 0.95rem;
+    color: #ccc;
+    margin: 0 0 10px;
+    letter-spacing: 0.3px;
+}
+
+.game-badges {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.badge-schneider {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+}
+
+.badge-schwarz {
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(156, 39, 176, 0.3);
+}
+
+.badge-matadors {
+    background: linear-gradient(135deg, #42a5f5, #1e88e5);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}

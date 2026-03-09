@@ -122,7 +122,12 @@
      <!-- GameOver Overlay -->
     <div id="game-over-overlay" class="overlay hidden">
         <h2 id="game-result-msg">Spiel beendet</h2>
+        <div id="overbid-warning" class="overbid-warning hidden">⚠️ Überreizt!</div>
         <div id="results"></div>
+        <div id="game-value-details" class="game-value-details hidden">
+            <p id="game-value-line" class="game-value-line"></p>
+            <div id="game-badges" class="game-badges"></div>
+        </div>
         <button id="btn-restart" class="btn primary">Neues Spiel</button>
     </div>
 
@@ -157,6 +162,7 @@
     <script src="js/botBidding.js"></script>
     <script src="js/biddingController.js"></script>
     <script src="js/ai.js"></script>
+    <script src="js/gameValueEngine.js"></script>
     <script src="js/game.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>

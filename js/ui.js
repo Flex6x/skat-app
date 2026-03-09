@@ -557,9 +557,13 @@ class UI {
         this.els.trickPlayer.innerHTML = '';
     }
 
-    showGameOver(won, resultMsg, declarerPoints, oppPoints) {
+    showGameOver(won, resultMsg, declarerPoints, oppPoints, evaluation = null) {
         this.els.gameOverOverlay.classList.remove('hidden');
         const resDiv = document.getElementById('results');
+        const overbidEl = document.getElementById('overbid-warning');
+        const detailsEl = document.getElementById('game-value-details');
+        const valueLine = document.getElementById('game-value-line');
+        const badgesEl = document.getElementById('game-badges');
         
         // Use the title based on won
         const title = won ? 'Spiel gewonnen!' : 'Spiel verloren!';
@@ -572,6 +576,33 @@ class UI {
                 <p>Gegner: ${oppPoints} Augen</p>
             </div>
         `;
+        
+        // Reset elements
+        overbidEl.classList.add('hidden');
+        detailsEl.classList.add('hidden');
+        badgesEl.innerHTML = '';
+        
+        if (evaluation) {
+            // Show game value details
+            detailsEl.classList.remove('hidden');
+            valueLine.textContent = `Spielwert: ${evaluation.details}`;
+            
+            // Overbid warning
+            if (evaluation.overbid) {
+                overbidEl.classList.remove('hidden');
+            }
+            
+            // Badges for schneider / schwarz / hand
+            if (evaluation.schneider) {
+                badgesEl.innerHTML += '<span class="badge badge-schneider">Schneider</span>';
+            }
+            if (evaluation.schwarz) {
+                badgesEl.innerHTML += '<span class="badge badge-schwarz">Schwarz</span>';
+            }
+            if (evaluation.matadors && evaluation.matadors.count > 0) {
+                badgesEl.innerHTML += `<span class="badge badge-matadors">${evaluation.matadors.type} ${evaluation.matadors.count}</span>`;
+            }
+        }
     }
 
     showGameOverPassedIn() {

@@ -42,6 +42,9 @@ class Game {
             { id: 2, type: PLAYER_TYPES.HUMAN, name: 'Du', hand: [], score: 0, tricks: [] }
         ]; // Player 2 is the human for easier indexing locally
         this.skat = [];
+        this.handGame = false;
+        this.bidValue = 0;
+        this.originalDeclarerHand = [];
         
         this.phase = PHASES.DEALING;
         // Compute roles relative to dealer
@@ -149,6 +152,7 @@ class Game {
         } else {
             // Winner found
             this.declarerIndex = declarerId;
+            this.bidValue = finalBid;
             this.ui.setDeclarer(this.players[this.declarerIndex].name, finalBid);
             this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt (${finalBid}).`);
             await this.delay(1500);
@@ -162,6 +166,7 @@ class Game {
             this.ui.showSkatDecisionOverlay(
                 // Take Skat
                 () => {
+                    this.handGame = false;
                     // Start dragging game: The two cards in this.skat are shown in slots
                     this.ui.showSkatDiscardUI(this.players[this.declarerIndex].hand, this.skat, (discardedIds) => {
                         // The user confirmed physically what 2 cards go into skat. 
@@ -180,6 +185,7 @@ class Game {
                 },
                 // Hand play
                 () => {
+                    this.handGame = true;
                     this.startTrumpSelection();
                 }
             );
@@ -189,6 +195,7 @@ class Game {
     }
 
     async simulateBotSkatDecision() {
+        this.handGame = false;
         this.ui.showMessage(`${this.players[this.declarerIndex].name} nimmt den Skat auf.`);
         await this.delay(1500);
         
@@ -236,6 +243,8 @@ class Game {
 
     startGameplay() {
         this.phase = PHASES.PLAYING;
+        // Originale Karten des Alleinspielers sichern (Hand + Skat) für Spitzenberechnung
+        this.originalDeclarerHand = [...this.players[this.declarerIndex].hand, ...this.skat];
         this.turnIndex = this.forehandIndex;
         this.processTurn();
     }
@@ -424,6 +433,7 @@ class Game {
         // Count points
         let declarerPoints = 0;
         let defendersPoints = 0;
+        let defenderTrickCount = 0;
         
         for (let i = 0; i < 3; i++) {
             const pts = this.calculatePoints(this.players[i].tricks);
@@ -431,20 +441,39 @@ class Game {
                 declarerPoints += pts;
             } else {
                 defendersPoints += pts;
+                defenderTrickCount += this.players[i].tricks.length;
             }
         }
         
         // Add skat points to declarer
         declarerPoints += this.calculatePoints(this.skat);
         
-        let won = wonOverride !== null ? wonOverride : (declarerPoints > 60);
+        // Determine if declarer won "normally" (before overbid check)
+        const declarerWonNormally = wonOverride !== null ? wonOverride : (declarerPoints > 60);
+        
+        // --- Spielwertberechnung via GameValueEngine ---
+        const evaluation = GameValueEngine.evaluateEndGame({
+            trumpMode: this.trumpMode,
+            declarerCards: this.originalDeclarerHand || [],
+            skat: this.skat,
+            bidValue: this.bidValue,
+            handGame: this.handGame,
+            declarerPoints,
+            defenderPoints: defendersPoints,
+            defenderTrickCount,
+            declarerWonNormally
+        });
+        
+        const won = evaluation.won;
         
         // Message construction
         let resultMsg;
         if (this.trumpMode === TRUMP_MODES.NULL) {
             resultMsg = won
                 ? `${this.players[this.declarerIndex].name} gewinnt das Null-Spiel!`
-                : `${this.players[this.declarerIndex].name} verliert das Null-Spiel (Stich gewonnen).`;
+                : `${this.players[this.declarerIndex].name} verliert das Null-Spiel!`;
+        } else if (evaluation.overbid) {
+            resultMsg = `${this.players[this.declarerIndex].name} hat überreizt! (Reizwert ${this.bidValue} > Spielwert ${evaluation.gameValue})`;
         } else {
             resultMsg = won 
                 ? `${this.players[this.declarerIndex].name} gewinnt mit ${declarerPoints} Augen!` 
@@ -461,7 +490,7 @@ class Game {
         // - If human is the declarer: human wins when declarer wins (won === true)
         // - If human is a defender: human wins when declarer loses (won === false)
         const humanWon = this.declarerIndex === 2 ? won : !won;
-        this.ui.showGameOver(humanWon, resultMsg, declarerPoints, defendersPoints);
+        this.ui.showGameOver(humanWon, resultMsg, declarerPoints, defendersPoints, evaluation);
         this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
     }
     

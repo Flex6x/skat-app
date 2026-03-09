@@ -11,9 +11,9 @@
 - Settings
 - Listen erstellen: also immer einen Satz von ... Spielen starten
 - Null Ouvert usw implementieren
-- Überreizt einfügen
 - stats verschönern
 - besseres design
 
 ## Bugs:
 
+- Überreizt Bidlschirm soll bei Eingepasst nicht kommen
