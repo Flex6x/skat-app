@@ -32,8 +32,9 @@ class BiddingController {
         this.survivor = this.vorhand;
         this.challenger = this.mittelhand;
         this.activeTurn = this.challenger; // Middlehand speaks first
-        this.phase = 1; // 1: M vs V | 2: H vs Winner(M,V)
-        this.hasBidBeenMade = false; // Tracks if anyone ever said >= 18
+        this.phase = 1; // 1: M vs V | 2: Winner(M,V) vs H | 3: Final check for Forehand if all passed
+        this.hasBidBeenMade = false;
+        this.passedPlayers = new Set();
     }
 
     async start() {
@@ -55,7 +56,9 @@ class BiddingController {
     }
 
     handleHumanTurn() {
-        const isChallenger = this.activeTurn === this.challenger;
+        const isChallenger = this.activeTurn === this.challenger || this.phase === 3;
+        
+        // In phase 3, Forehand is the only one left and must bid at least 18 to play
         const targetBid = isChallenger ? 
             (this.currentBid === 0 ? 18 : this.engine.getNextBid(this.currentBid)) : 
             this.currentBid;
@@ -63,14 +66,14 @@ class BiddingController {
         this.ui.showAdvancedBiddingOverlay(
             targetBid,
             isChallenger, // canBid (Reizen)
-            !isChallenger, // canHold (Ja)
+            !isChallenger && this.phase !== 3, // canHold (Ja)
             () => this.onAction(isChallenger ? 'bid' : 'hold', targetBid),
             () => this.onAction('pass', null)
         );
     }
 
     handleBotTurn(botId) {
-        const isChallenger = botId === this.challenger;
+        const isChallenger = botId === this.challenger || this.phase === 3;
         const data = this.botData[botId];
         
         const targetBid = isChallenger ? 
@@ -82,6 +85,7 @@ class BiddingController {
             return;
         }
 
+        // Bots only bid if they have a good hand
         if (this.botBidding.decideBid(targetBid, data)) {
             this.onAction(isChallenger ? 'bid' : 'hold', targetBid);
         } else {
@@ -90,21 +94,31 @@ class BiddingController {
     }
 
     async onAction(action, value) {
-        this.ui.hideBiddingOverlay();
         const actorId = this.activeTurn;
 
         if (action === 'pass') {
+            this.ui.hideBiddingOverlay();
             this.ui.showSpeechBubble(actorId, 'Passe');
+            this.passedPlayers.add(actorId);
             await this.delay(1000);
             this.handlePass(actorId);
         } else if (action === 'bid') {
+            this.ui.hideBiddingOverlay();
             this.hasBidBeenMade = true;
             this.currentBid = value;
             this.ui.showSpeechBubble(actorId, `Reize ${value}`);
-            this.activeTurn = this.survivor; // Survivor must answer now
-            await this.delay(1000);
-            this.processTurn();
+            
+            if (this.phase === 3) {
+                // Forehand bid 18 after others passed, they win immediately
+                await this.delay(1000);
+                this.finishBidding(this.vorhand);
+            } else {
+                this.activeTurn = this.survivor; // Survivor must answer now
+                await this.delay(1000);
+                this.processTurn();
+            }
         } else if (action === 'hold') {
+            this.ui.hideBiddingOverlay();
             this.ui.showSpeechBubble(actorId, 'Ja');
             this.activeTurn = this.challenger; // Challenger must increase
             await this.delay(1000);
@@ -114,36 +128,46 @@ class BiddingController {
 
     handlePass(actorId) {
         if (this.phase === 1) {
-            // Phase 1 ended
-            if (actorId === this.challenger) {
-                // M passed, V is survivor
+            if (actorId === this.mittelhand) {
+                // Mittelhand passed, Hinterhand challenges Vorhand
                 this.survivor = this.vorhand;
+                this.challenger = this.hinterhand;
+                this.activeTurn = this.challenger;
+                this.phase = 2;
+                this.processTurn();
             } else {
-                // V passed, M is survivor
+                // Vorhand passed, Mittelhand is now the survivor, Hinterhand challenges
                 this.survivor = this.mittelhand;
+                this.challenger = this.hinterhand;
+                this.activeTurn = this.challenger;
+                this.phase = 2;
+                this.processTurn();
             }
-            // Move to Phase 2: H challenges Survivor
-            this.phase = 2;
-            this.challenger = this.hinterhand;
-            this.activeTurn = this.challenger;
-            this.processTurn();
         } else if (this.phase === 2) {
-            // Phase 2 ended
-            if (actorId === this.challenger) {
-                // H passed, survivor wins
-                this.finishBidding(this.survivor);
+            const winnerId = (actorId === this.challenger) ? this.survivor : this.challenger;
+            
+            // Special case: If everyone so far passed (M, H and V was challenger or survivor)
+            // we must check if Forehand wants to play at 18.
+            if (!this.hasBidBeenMade && this.passedPlayers.has(this.mittelhand) && this.passedPlayers.has(this.hinterhand)) {
+                this.phase = 3;
+                this.activeTurn = this.vorhand;
+                this.processTurn();
             } else {
-                // Survivor passed, H wins
-                this.finishBidding(this.hinterhand);
+                this.finishBidding(winnerId);
             }
+        } else if (this.phase === 3) {
+            // Forehand also passed
+            this.finishBidding(null);
         }
     }
 
     finishBidding(winnerId) {
-        if (!this.hasBidBeenMade) {
-            this.onComplete(null, 0); // Schieberamsch / Eingepasst
+        if (winnerId === null) {
+            this.onComplete(null, 0);
         } else {
-            this.onComplete(winnerId, this.currentBid);
+            // If winner wins without a bid (only Forehand can do this if others passed), bid is 18 minimum
+            const finalBid = this.currentBid === 0 ? 18 : this.currentBid;
+            this.onComplete(winnerId, finalBid);
         }
     }
 

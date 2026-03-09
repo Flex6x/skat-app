@@ -62,6 +62,7 @@ class UI {
             scoreboardBody: document.getElementById('scoreboard-body'),
             btnShowScoreboard: document.getElementById('btn-show-scoreboard'),
             btnCloseScoreboard: document.getElementById('btn-close-scoreboard'),
+            totalPlayerNum: document.getElementById('total-player-num'), // We will use footer first cell for this
             totalPlayer0: document.getElementById('total-player0'),
             totalPlayer1: document.getElementById('total-player1'),
             totalPlayer2: document.getElementById('total-player2'),
@@ -123,17 +124,29 @@ class UI {
         this.els.scoreboardBody.innerHTML = '';
         let totals = [0, 0, 0];
 
-        history.forEach(game => {
+        history.forEach((game, index) => {
             const tr = document.createElement('tr');
+            
+            // Game Number column
+            const tdNum = document.createElement('td');
+            tdNum.textContent = index + 1;
+            tdNum.style.fontWeight = 'bold';
+            tdNum.style.color = '#888';
+            tr.appendChild(tdNum);
+
             for (let i = 0; i < 3; i++) {
                 const td = document.createElement('td');
-                if (game.declarerId === i) {
+                if (game.passedIn) {
+                    td.textContent = '0';
+                    td.style.color = '#666';
+                } else if (game.declarerId === i) {
                     const val = game.won ? game.value : -game.value;
                     td.textContent = val;
                     td.className = val >= 0 ? 'score-pos' : 'score-neg';
                     totals[i] += val;
                 } else {
                     td.textContent = '-';
+                    td.style.color = '#444';
                 }
                 tr.appendChild(td);
             }

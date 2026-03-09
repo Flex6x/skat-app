@@ -41,12 +41,17 @@ document.addEventListener('DOMContentLoaded', () => {
         game.reset();
         game.start((result) => {
             // Callback when game ends
-            if (result && !result.passedIn) {
-                gameHistory.push({
-                    declarerId: result.declarerId,
-                    value: result.gameValue,
-                    won: result.won
-                });
+            if (result) {
+                if (result.passedIn) {
+                    gameHistory.push({ passedIn: true });
+                } else {
+                    gameHistory.push({
+                        declarerId: result.declarerId,
+                        value: result.gameValue,
+                        won: result.won,
+                        passedIn: false
+                    });
+                }
                 ui.updateScoreboard(gameHistory);
             }
             completedRounds++;
