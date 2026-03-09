@@ -644,7 +644,23 @@ body {
 
 /* Drag and Drop Visuals */
 .card-face.dragging {
-    opacity: 0.5;
+    opacity: 0.3;
+}
+
+.card-face.dragging-active {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    cursor: grabbing;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.card-face.returning {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1000;
 }
 
 .droppable.drag-over {

@@ -314,6 +314,122 @@ class UI {
         this.els.biddingOverlay.classList.add('hidden');
     }
 
+    _initCardDragging(el, config) {
+        let isDragging = false;
+        let startX, startY;
+        let initialRect;
+        let currentDropTarget = null;
+        let placeholder = null;
+
+        const onStart = (e) => {
+            if (e.button && e.button !== 0) return; // Only left click
+            
+            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+            
+            startX = clientX;
+            startY = clientY;
+            initialRect = el.getBoundingClientRect();
+            
+            const moveHandler = (moveEvent) => {
+                const moveX = moveEvent.type === 'touchmove' ? moveEvent.touches[0].clientX : moveEvent.clientX;
+                const moveY = moveEvent.type === 'touchmove' ? moveEvent.touches[0].clientY : moveEvent.clientY;
+                
+                const deltaX = moveX - startX;
+                const deltaY = moveY - startY;
+
+                if (!isDragging && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+                    isDragging = true;
+                    
+                    // Create placeholder to keep hand layout
+                    placeholder = el.cloneNode(true);
+                    placeholder.style.opacity = '0';
+                    placeholder.style.pointerEvents = 'none';
+                    el.parentNode.insertBefore(placeholder, el);
+                    
+                    el.classList.add('dragging-active');
+                    el.style.width = initialRect.width + 'px';
+                    el.style.height = initialRect.height + 'px';
+                    el.style.left = initialRect.left + 'px';
+                    el.style.top = initialRect.top + 'px';
+                }
+
+                if (isDragging) {
+                    if (moveEvent.cancelable) moveEvent.preventDefault();
+                    
+                    el.style.left = (initialRect.left + deltaX) + 'px';
+                    el.style.top = (initialRect.top + deltaY) + 'px';
+
+                    // Target detection
+                    const target = document.elementFromPoint(moveX, moveY);
+                    const dropTarget = config.getValidTarget(target);
+                    
+                    if (dropTarget !== currentDropTarget) {
+                        if (currentDropTarget) currentDropTarget.classList.remove('drag-over');
+                        currentDropTarget = dropTarget;
+                        if (currentDropTarget) currentDropTarget.classList.add('drag-over');
+                    }
+                }
+            };
+
+            const endHandler = (endEvent) => {
+                window.removeEventListener('mousemove', moveHandler);
+                window.removeEventListener('mouseup', endHandler);
+                window.removeEventListener('touchmove', moveHandler);
+                window.removeEventListener('touchend', endHandler);
+
+                if (isDragging) {
+                    el.classList.remove('dragging-active');
+                    
+                    if (currentDropTarget) {
+                        if (placeholder) {
+                            placeholder.remove();
+                            placeholder = null;
+                        }
+                        currentDropTarget.classList.remove('drag-over');
+                        config.execute(el, currentDropTarget);
+                        // Reset styles
+                        el.style.position = '';
+                        el.style.left = '';
+                        el.style.top = '';
+                        el.style.width = '';
+                        el.style.height = '';
+                    } else {
+                        // Return animation
+                        el.classList.add('returning');
+                        el.style.left = initialRect.left + 'px';
+                        el.style.top = initialRect.top + 'px';
+                        
+                        const currentPlaceholder = placeholder;
+                        placeholder = null;
+                        
+                        setTimeout(() => {
+                            el.classList.remove('returning');
+                            el.style.position = '';
+                            el.style.left = '';
+                            el.style.top = '';
+                            el.style.width = '';
+                            el.style.height = '';
+                            if (currentPlaceholder) currentPlaceholder.remove();
+                        }, 300);
+                    }
+                    isDragging = false;
+                } else if (config.onClick) {
+                    // It was a click, not a drag
+                    config.onClick(el);
+                }
+            };
+
+            window.addEventListener('mousemove', moveHandler, { passive: false });
+            window.addEventListener('mouseup', endHandler);
+            window.addEventListener('touchmove', moveHandler, { passive: false });
+            window.addEventListener('touchend', endHandler);
+        };
+
+        el.addEventListener('mousedown', onStart);
+        el.addEventListener('touchstart', onStart, { passive: false });
+    }
+
     showSkatDecisionOverlay(onTake, onHand) {
         this.els.skatDecisionOverlay.classList.remove('hidden');
         this.els.skatDiscardArea.classList.add('hidden');
@@ -350,101 +466,53 @@ class UI {
         
         // Function to make a single card fully interactive (Drag & Click toggle)
         const bindCardInteractable = (el) => {
-            el.draggable = true;
-            
-            // Re-bind nicely without stacking listeners
-            el.ondragstart = e => {
-                e.dataTransfer.setData('text/plain', el.dataset.id);
-                el.classList.add('dragging');
-            };
-            el.ondragend = () => el.classList.remove('dragging');
-
-            el.onclick = () => {
-                const parentSlot = el.parentElement;
-                if (parentSlot.classList.contains('skat-slot')) {
-                    // Move from skat exactly to hand
-                    handContainer.appendChild(el);
-                    parentSlot.dataset.cardId = '';
-                    
-                    const index = discardedIds.indexOf(el.dataset.id);
-                    if (index > -1) discardedIds.splice(index, 1);
-                    this.els.btnConfirmSkat.disabled = true;
-                } else {
-                    // Move from hand exactly to the first available skat slot
-                    const emptySlot = Array.from(this.els.skatDiscardSlots).find(s => !s.dataset.cardId);
-                    if (emptySlot) {
-                        emptySlot.appendChild(el);
-                        emptySlot.dataset.cardId = el.dataset.id;
-                        discardedIds.push(el.dataset.id);
-                        if (discardedIds.length === 2) {
-                            this.els.btnConfirmSkat.disabled = false;
+            this._initCardDragging(el, {
+                getValidTarget: (target) => {
+                    const dropSlot = Array.from(this.els.skatDiscardSlots).find(s => s === target || s.contains(target));
+                    if (dropSlot && !dropSlot.hasChildNodes() && !el.parentElement.classList.contains('skat-slot')) {
+                        return dropSlot;
+                    }
+                    if ((target === handContainer || handContainer.contains(target)) && el.parentElement.classList.contains('skat-slot')) {
+                        return handContainer;
+                    }
+                    return null;
+                },
+                execute: (cardEl, target) => {
+                    const cardId = cardEl.dataset.id;
+                    if (target.classList.contains('skat-slot')) {
+                        target.appendChild(cardEl);
+                        target.dataset.cardId = cardId;
+                        if (!discardedIds.includes(cardId)) discardedIds.push(cardId);
+                    } else if (target === handContainer) {
+                        const parentSlot = cardEl.parentElement;
+                        handContainer.appendChild(cardEl);
+                        parentSlot.dataset.cardId = '';
+                        const index = discardedIds.indexOf(cardId);
+                        if (index > -1) discardedIds.splice(index, 1);
+                    }
+                    this.els.btnConfirmSkat.disabled = (discardedIds.length !== 2);
+                },
+                onClick: (cardEl) => {
+                    const parentSlot = cardEl.parentElement;
+                    if (parentSlot.classList.contains('skat-slot')) {
+                        handContainer.appendChild(cardEl);
+                        parentSlot.dataset.cardId = '';
+                        const index = discardedIds.indexOf(cardEl.dataset.id);
+                        if (index > -1) discardedIds.splice(index, 1);
+                        this.els.btnConfirmSkat.disabled = true;
+                    } else {
+                        const emptySlot = Array.from(this.els.skatDiscardSlots).find(s => !s.dataset.cardId);
+                        if (emptySlot) {
+                            emptySlot.appendChild(cardEl);
+                            emptySlot.dataset.cardId = cardEl.dataset.id;
+                            discardedIds.push(cardEl.dataset.id);
+                            this.els.btnConfirmSkat.disabled = (discardedIds.length !== 2);
+                        } else {
+                            this.showMessage("Drücke zuerst eine Karte zurück auf die Hand!");
                         }
-                    } else {
-                        this.showMessage("Drücke zuerst eine Karte zurück auf die Hand!");
                     }
                 }
-            };
-
-            // Touch events for drag-and-drop on iPad
-            el.ontouchstart = (e) => {
-                if (e.cancelable) e.preventDefault();
-                el.classList.add('dragging');
-                el._touchStartX = e.touches[0].clientX;
-                el._touchStartY = e.touches[0].clientY;
-            };
-
-            el.ontouchmove = (e) => {
-                if (e.cancelable) e.preventDefault();
-                const touch = e.touches[0];
-                const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                
-                // Visual feedback for slots
-                this.els.skatDiscardSlots.forEach(slot => {
-                    if (target === slot || slot.contains(target)) {
-                        slot.classList.add('drag-over');
-                    } else {
-                        slot.classList.remove('drag-over');
-                    }
-                });
-                
-                if (target === handContainer || handContainer.contains(target)) {
-                    handContainer.classList.add('drag-over');
-                } else {
-                    handContainer.classList.remove('drag-over');
-                }
-            };
-
-            el.ontouchend = (e) => {
-                el.classList.remove('dragging');
-                const touch = e.changedTouches[0];
-                const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                
-                this.els.skatDiscardSlots.forEach(slot => slot.classList.remove('drag-over'));
-                handContainer.classList.remove('drag-over');
-
-                const cardId = el.dataset.id;
-                const parentSlot = el.parentElement;
-
-                // Move logic
-                const dropSlot = Array.from(this.els.skatDiscardSlots).find(s => s === target || s.contains(target));
-                if (dropSlot && !dropSlot.hasChildNodes() && !parentSlot.classList.contains('skat-slot')) {
-                    // Move to skat slot
-                    dropSlot.appendChild(el);
-                    dropSlot.dataset.cardId = cardId;
-                    if (!discardedIds.includes(cardId)) discardedIds.push(cardId);
-                    if (discardedIds.length === 2) this.els.btnConfirmSkat.disabled = false;
-                } else if ((target === handContainer || handContainer.contains(target)) && parentSlot.classList.contains('skat-slot')) {
-                    // Move to hand
-                    handContainer.appendChild(el);
-                    parentSlot.dataset.cardId = '';
-                    const index = discardedIds.indexOf(cardId);
-                    if (index > -1) discardedIds.splice(index, 1);
-                    this.els.btnConfirmSkat.disabled = true;
-                } else if (Math.abs(touch.clientX - el._touchStartX) < 10 && Math.abs(touch.clientY - el._touchStartY) < 10) {
-                    // Fallback to click-like behavior if it was just a tap
-                    el.click();
-                }
-            };
+            });
         };
 
         // Bind all current hand cards
@@ -457,56 +525,6 @@ class UI {
             if (cardInSlot) bindCardInteractable(cardInSlot);
         });
 
-        // Setup drop zones for the skat slots
-        this.els.skatDiscardSlots.forEach(slot => {
-            slot.ondragover = e => { e.preventDefault(); slot.classList.add('drag-over'); };
-            slot.ondragleave = () => slot.classList.remove('drag-over');
-            slot.ondrop = e => {
-                e.preventDefault();
-                slot.classList.remove('drag-over');
-                
-                const cardId = e.dataTransfer.getData('text/plain');
-                if (!cardId) return;
-
-                const cardEl = document.querySelector(`[data-id="${cardId}"]`);
-                if (cardEl && !slot.hasChildNodes()) {
-                    slot.appendChild(cardEl);
-                    slot.dataset.cardId = cardId;
-                    
-                    if (!discardedIds.includes(cardId)) {
-                        discardedIds.push(cardId);
-                    }
-                    
-                    if (discardedIds.length === 2) {
-                        this.els.btnConfirmSkat.disabled = false;
-                    }
-                }
-            };
-        });
-
-        // Allow taking card back to hand via drag and drop
-        handContainer.ondragover = e => e.preventDefault();
-        handContainer.ondrop = e => {
-            e.preventDefault();
-            const cardId = e.dataTransfer.getData('text/plain');
-            if (!cardId) return;
-
-            // Only act if the card came from a skat slot
-            const slot = Array.from(this.els.skatDiscardSlots).find(s => s.dataset.cardId === cardId);
-            if (slot) {
-                const cardEl = slot.querySelector('.card-face');
-                if (cardEl) {
-                    handContainer.appendChild(cardEl);
-                    slot.dataset.cardId = '';
-                    
-                    const index = discardedIds.indexOf(cardId);
-                    if (index > -1) discardedIds.splice(index, 1);
-                    
-                    this.els.btnConfirmSkat.disabled = true;
-                }
-            }
-        };
-
         // Confirmation Callback
         this.els.btnConfirmSkat.disabled = false; // Initially 2 cards are in the skat
         this.els.btnConfirmSkat.onclick = () => {
@@ -518,8 +536,10 @@ class UI {
              
              // Cleanly remove bindings before continuing
              const allCards = [...handContainer.querySelectorAll('.card-face'), ...document.querySelectorAll('.skat-slot .card-face')];
-             allCards.forEach(c => { c.onclick = null; c.ondragstart = null; c.ondragend = null; });
-             handContainer.ondragover = null; handContainer.ondrop = null;
+             allCards.forEach(c => { 
+                 const newC = c.cloneNode(true);
+                 c.parentNode.replaceChild(newC, c);
+             });
              
              this.updateSkatZone(); 
              onConfirm([finalSkatId1, finalSkatId2]);
@@ -598,95 +618,38 @@ class UI {
         const validIds = validCards.map(c => c.id);
         const cardEls = this.els.player2Cards.querySelectorAll('.card-face');
         
-        // Handle Drag & Drop logic for playing to trick on the entire table-area
         const tableArea = document.getElementById('table-area');
         
-        // Clean up previous event listeners by cloning table area is dangerous since it holds overlays,
-        // so we use named functions and attach/detach them instead.
-        
-        const removeListeners = () => {
-            tableArea.removeEventListener('dragover', this._dragOverHandler);
-            tableArea.removeEventListener('dragleave', this._dragLeaveHandler);
-            tableArea.removeEventListener('drop', this._dropHandler);
-        };
-        
-        removeListeners(); // Clean up if they existed
-        
-        this._dragOverHandler = (e) => { e.preventDefault(); tableArea.style.boxShadow = 'inset 0 0 50px rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.5)'; };
-        this._dragLeaveHandler = () => { tableArea.style.boxShadow = ''; };
-        
-        this._dropHandler = (e) => {
-            e.preventDefault();
-            tableArea.style.boxShadow = '';
-            const cardId = e.dataTransfer.getData('text/plain');
-            
-            if (validIds.includes(cardId)) {
-                removeListeners();
-                onPlay(cardId);
-            } else {
-                this.showMessage("Karte darf nicht gespielt werden!");
-            }
-        };
-
-        tableArea.addEventListener('dragover', this._dragOverHandler);
-        tableArea.addEventListener('dragleave', this._dragLeaveHandler);
-        tableArea.addEventListener('drop', this._dropHandler);
-
         // Make cards draggable / clickable / touchable
         cardEls.forEach(el => {
             const cardId = el.dataset.id;
+            const isDraggable = validIds.includes(cardId);
             
-            // Remove old listeners mostly via wiping innerText/HTML in renderPlayerHand, but let's be safe.
-            el.draggable = validIds.includes(cardId);
-            
-            if (el.draggable) {
+            if (isDraggable) {
                 el.classList.add('valid-move');
                 el.classList.remove('invalid-move');
                 
-                el.ondragstart = (e) => {
-                    e.dataTransfer.setData('text/plain', cardId);
-                    el.classList.add('dragging');
-                };
-                el.ondragend = () => el.classList.remove('dragging');
-                
-                // Touch Start for Trick
-                el.ontouchstart = (e) => {
-                    if (e.cancelable) e.preventDefault();
-                    el.classList.add('dragging');
-                    el._touchCardId = cardId;
-                };
-
-                el.ontouchmove = (e) => {
-                    if (e.cancelable) e.preventDefault();
-                    const touch = e.touches[0];
-                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                    if (target && (target.id === 'table-area' || target.closest('#table-area'))) {
-                        tableArea.style.boxShadow = 'inset 0 0 50px rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.5)';
-                    } else {
-                        tableArea.style.boxShadow = '';
-                    }
-                };
-
-                el.ontouchend = (e) => {
-                    el.classList.remove('dragging');
-                    tableArea.style.boxShadow = '';
-                    const touch = e.changedTouches[0];
-                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                    
-                    if (target && (target.id === 'table-area' || target.closest('#table-area'))) {
-                        removeListeners();
+                this._initCardDragging(el, {
+                    getValidTarget: (target) => {
+                        if (target && (target.id === 'table-area' || target.closest('#table-area'))) {
+                            return tableArea;
+                        }
+                        return null;
+                    },
+                    execute: (cardEl, target) => {
+                        onPlay(cardId);
+                    },
+                    onClick: (cardEl) => {
                         onPlay(cardId);
                     }
-                };
+                });
                 
-                // Allow double click to play instantly
+                // Allow double click to play instantly as well
                 el.ondblclick = () => onPlay(cardId);
             } else {
                 el.classList.remove('valid-move');
                 el.classList.add('invalid-move');
-                el.ondragstart = (e) => e.preventDefault();
-                el.ontouchstart = null;
-                el.ondblclick = null;
+                el.style.pointerEvents = 'none'; // Ensure invalid cards don't react at all
             }
         });
     }
