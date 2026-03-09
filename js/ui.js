@@ -259,6 +259,23 @@ class UI {
         liveScoreChk.addEventListener('change', () => {
             settings.set('showLiveScore', liveScoreChk.checked);
         });
+
+        // Sound toggle
+        const soundChk = document.getElementById('chk-sound');
+        if (soundChk) {
+            soundChk.checked = s.soundEnabled;
+            soundChk.addEventListener('change', () => {
+                settings.set('soundEnabled', soundChk.checked);
+            });
+        }
+    }
+
+    playSound(name) {
+        if (!window.appSettings || !window.appSettings.current.soundEnabled) return;
+        
+        const audio = new Audio(`media/${name}.mp3`);
+        audio.volume = 0.5;
+        audio.play().catch(e => console.warn("Audio play blocked", e));
     }
     
     /**
@@ -460,6 +477,8 @@ class UI {
         const onStart = (e) => {
             if (e.button && e.button !== 0) return; // Only left click
             
+            this.playSound('drag');
+
             const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
             const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
             

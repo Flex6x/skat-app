@@ -105,6 +105,10 @@ class Game {
             this.animations = new CardAnimations(this.ui);
         }
 
+        // Play shuffle sound and wait 1.5s as requested
+        this.ui.playSound('shuffle');
+        await this.delay(1500);
+
         this.deck.initialize();
         this.deck.shuffle();
         const dealt = this.deck.deal();

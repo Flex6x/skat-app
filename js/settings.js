@@ -8,7 +8,8 @@ class Settings {
     static DEFAULTS = {
         theme: 'dark',
         animationSpeed: 0.45,
-        showLiveScore: false
+        showLiveScore: false,
+        soundEnabled: true
     };
 
     static SPEED_MAP = {
