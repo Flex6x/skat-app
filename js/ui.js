@@ -163,6 +163,7 @@ class UI {
             statWinStreak: document.getElementById('stat-win-streak'),
             gameContainer: document.getElementById('game-container'),
             
+            btnLogoHome: document.getElementById('btn-logo-home'),
             btnStartGame: document.getElementById('btn-start-game'),
             btnShowStats: document.getElementById('btn-show-stats'),
             btnBackMenu: document.getElementById('btn-back-menu'),
@@ -246,6 +247,57 @@ class UI {
                 this.renderStats();
             }
         };
+
+        // Logo Home Navigation
+        this.els.btnLogoHome.onclick = () => {
+            window.location.hash = 'menu';
+        };
+
+        // Hash Navigation Listener
+        window.onhashchange = () => this.handleHashNavigation();
+    }
+
+    handleHashNavigation() {
+        const hash = window.location.hash.replace('#', '');
+        
+        switch(hash) {
+            case 'stats':
+                this._switchView(this.els.statsView);
+                this.renderStats();
+                break;
+            case 'settings':
+                this._switchView(this.els.settingsView);
+                break;
+            case 'play':
+                // Handled via session start logic in main.js
+                break;
+            default:
+                this._switchView(this.els.menuPrimary);
+                break;
+        }
+    }
+
+    _switchView(viewEl) {
+        // List of all possible menu views
+        const views = [
+            this.els.menuPrimary,
+            this.els.statsView,
+            this.els.settingsView,
+            this.els.roundSelectionView
+        ];
+        
+        views.forEach(v => {
+            if (v === viewEl) v.classList.remove('hidden');
+            else v.classList.add('hidden');
+        });
+
+        // Always ensure main menu overlay is visible when switching these internal views
+        this.els.mainMenu.classList.remove('hidden');
+        this.els.gameContainer.classList.add('hidden');
+    }
+
+    showHeroView() {
+        this._switchView(this.els.menuPrimary);
     }
 
     getTranslation(key) {

@@ -13,13 +13,13 @@
     <!-- Main Start Menu -->
     <div id="main-menu" class="menu-overlay">
         <header class="menu-header">
-            <div class="header-left">
+            <div class="header-left" id="btn-logo-home" style="cursor: pointer;">
                 <div class="app-logo">S</div>
                 <span class="app-name">Skat</span>
             </div>
             <nav class="header-right">
-                <button id="btn-show-stats" class="nav-link">Stats</button>
-                <button id="btn-show-settings" class="nav-link">Settings</button>
+                <button id="btn-show-stats" class="nav-link" data-i18n="statistics">Statistics</button>
+                <button id="btn-show-settings" class="nav-link" data-i18n="settings">Settings</button>
             </nav>
         </header>
 
@@ -88,93 +88,105 @@
         </div>
 
         <div class="menu-content hidden" id="settings-view">
-            <h2 data-i18n="settings">Settings</h2>
-            <div class="settings-form">
-                <!-- Nickname -->
-                <div class="settings-group">
+            <header class="view-header">
+                <h1 data-i18n="settings">Settings</h1>
+            </header>
+
+            <div class="settings-grid">
+                <!-- Profile Section -->
+                <div class="settings-card">
                     <h3 data-i18n="nickname">Nickname</h3>
-                    <input type="text" id="input-nickname" class="nickname-input" maxlength="12" placeholder="Dein Name">
-                </div>
-
-                <!-- Language -->
-                <div class="settings-group">
-                    <h3 data-i18n="language">Sprache</h3>
-                    <div class="language-switch">
-                        <span class="lang-label">DE</span>
-                        <label class="toggle-label mini">
-                            <input type="checkbox" id="chk-language">
-                            <span class="toggle-switch"></span>
-                        </label>
-                        <span class="lang-label">EN</span>
+                    <div class="settings-control">
+                        <input type="text" id="input-nickname" class="nickname-input" maxlength="12" placeholder="Dein Name">
                     </div>
                 </div>
 
-                <!-- Theme -->
-                <div class="settings-group">
+                <!-- Language Section -->
+                <div class="settings-card">
+                    <h3 data-i18n="language">Language</h3>
+                    <div class="settings-control">
+                        <div class="language-switch">
+                            <span class="lang-label">DE</span>
+                            <label class="toggle-label mini">
+                                <input type="checkbox" id="chk-language">
+                                <span class="toggle-switch"></span>
+                            </label>
+                            <span class="lang-label">EN</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appearance Section -->
+                <div class="settings-card">
                     <h3 data-i18n="theme">Theme</h3>
-                    <div class="radio-group">
-                        <label class="radio-label">
-                            <input type="radio" name="theme" value="dark" checked>
-                            <span class="radio-custom"></span>
-                            Dark
+                    <div class="settings-control">
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="theme" value="dark" checked>
+                                <span class="radio-custom"></span>
+                                Dark
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="theme" value="light">
+                                <span class="radio-custom"></span>
+                                Light
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gameplay Section -->
+                <div class="settings-card">
+                    <h3 data-i18n="card_animation">Animation</h3>
+                    <div class="settings-control">
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="animSpeed" value="0.3">
+                                <span class="radio-custom"></span>
+                                <span data-i18n="fast">Schnell</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="animSpeed" value="0.45" checked>
+                                <span class="radio-custom"></span>
+                                <span data-i18n="normal">Normal</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="animSpeed" value="0.65">
+                                <span class="radio-custom"></span>
+                                <span data-i18n="slow">Langsam</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferences Section -->
+                <div class="settings-card">
+                    <h3 data-i18n="preferences">Preferences</h3>
+                    <div class="settings-control stacked">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="chk-live-score">
+                            <span class="toggle-switch"></span>
+                            <span data-i18n="show_live_points">Punkte live anzeigen</span>
                         </label>
-                        <label class="radio-label">
-                            <input type="radio" name="theme" value="light">
-                            <span class="radio-custom"></span>
-                            Light
+                        <label class="toggle-label">
+                            <input type="checkbox" id="chk-sound">
+                            <span class="toggle-switch"></span>
+                            <span data-i18n="activate_sounds">Sounds aktivieren</span>
                         </label>
                     </div>
                 </div>
 
-                <!-- Animation Speed -->
-                <div class="settings-group">
-                    <h3 data-i18n="card_animation">Kartenanimation</h3>
-                    <div class="radio-group">
-                        <label class="radio-label">
-                            <input type="radio" name="animSpeed" value="0.3">
-                            <span class="radio-custom"></span>
-                            <span data-i18n="fast">Schnell</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="animSpeed" value="0.45" checked>
-                            <span class="radio-custom"></span>
-                            <span data-i18n="normal">Normal</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="animSpeed" value="0.65">
-                            <span class="radio-custom"></span>
-                            <span data-i18n="slow">Langsam</span>
-                        </label>
+                <!-- Data Section -->
+                <div class="settings-card danger-card">
+                    <h3 data-i18n="data">Data</h3>
+                    <div class="settings-control">
+                        <button id="btn-delete-stats" class="btn danger" style="width: 100%;" data-i18n="delete_stats">Statistiken löschen</button>
                     </div>
-                </div>
-
-                <!-- Live Score -->
-                <div class="settings-group">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="chk-live-score">
-                        <span class="toggle-switch"></span>
-                        <span data-i18n="show_live_points">Punkte während des Spiels anzeigen</span>
-                    </label>
-                </div>
-
-                <!-- Sound -->
-                <div class="settings-group">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="chk-sound">
-                        <span class="toggle-switch"></span>
-                        <span data-i18n="activate_sounds">Sounds aktivieren</span>
-                    </label>
-                </div>
-
-                <!-- Danger Zone -->
-                <div class="settings-group"
-                    style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-                    <h3 data-i18n="data">Daten</h3>
-                    <button id="btn-delete-stats" class="btn danger" style="width: 100%;" data-i18n="delete_stats">Statistiken löschen</button>
                 </div>
             </div>
-            <div class="menu-buttons">
-                <button id="btn-back-settings" class="btn primary large-btn" data-i18n="back">Zurück</button>
+
+            <div class="menu-buttons footer-actions">
+                <button id="btn-back-settings" class="btn primary large-btn" data-i18n="back_to_menu">Zurück zum Menü</button>
             </div>
         </div>
     </div>
