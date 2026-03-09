@@ -19,3 +19,4 @@
 ## Bugs:
 
 - game ist stuck am ende des letzten spiels der list (evtl nur nach einer bot runde)
+- Settings und Stats gleichzeit offen -> Bug

@@ -556,23 +556,26 @@ class UI {
     showLastTrick(cardsArray) {
         this.els.lastTrickOverlay.classList.remove('hidden');
         this.els.lastTrickCards.innerHTML = '';
-        
+
         cardsArray.forEach(trickItem => {
-            // trickItem could just be the physical Card object, we create DOM
-            // Usually the game engine gives us {playerId, card}
-            const c = trickItem.card || trickItem; 
+            // trickItem: {playerId, card}
+            const c = trickItem.card;
             const el = c.createDOMElement();
-            // Prevent dragging from the viewer
             el.draggable = false;
+
+            // Assign position class based on player
+            const posClass = trickItem.playerId === 0 ? 'pos-bot2' :
+                             trickItem.playerId === 1 ? 'pos-bot1' : 'pos-player';
+            el.classList.add(posClass);
+
             this.els.lastTrickCards.appendChild(el);
         });
-        
+
         // Close on click anywhere
         this.els.lastTrickOverlay.onclick = () => {
              this.els.lastTrickOverlay.classList.add('hidden');
         };
     }
-    
     renderStats() {
         const stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
         this.els.statsTableBody.innerHTML = '';
