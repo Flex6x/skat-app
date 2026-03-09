@@ -46,15 +46,34 @@
         </div>
 
         <div class="menu-content hidden" id="stats-view">
-            <h2>Letzte Spiele</h2>
-            <div class="stats-table-container">
+            <header class="view-header">
+                <h1>Statistics</h1>
+            </header>
+            
+            <div class="stats-dashboard">
+                <div class="stat-card">
+                    <span class="stat-label">Total Lists</span>
+                    <span id="stat-total-games" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Win Ratio</span>
+                    <span id="stat-win-ratio" class="stat-value">0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Best Streak</span>
+                    <span id="stat-win-streak" class="stat-value">0</span>
+                </div>
+            </div>
+
+            <div class="stats-table-full-container">
                 <table id="stats-table">
                     <thead>
                         <tr>
-                            <th>Zeit</th>
+                            <th>Datum</th>
                             <th>Gewinner</th>
-                            <th>Punkte</th>
-                            <th>Spieltyp</th>
+                            <th>Pkt. Aicore</th>
+                            <th>Pkt. Aiden</th>
+                            <th>Pkt. Du</th>
                         </tr>
                     </thead>
                     <tbody id="stats-table-body">
@@ -62,8 +81,9 @@
                     </tbody>
                 </table>
             </div>
-            <div class="menu-buttons">
-                <button id="btn-back-menu" class="btn primary large-btn">Zurück</button>
+            
+            <div class="menu-buttons footer-actions">
+                <button id="btn-back-menu" class="btn primary large-btn">Zurück zum Menü</button>
             </div>
         </div>
 

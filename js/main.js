@@ -57,7 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
             completedRounds++;
             
             if (completedRounds >= sessionRounds) {
-                // Session finished
+                // Session finished -> SAVE TO STATS
+                saveListToStats(gameHistory);
+
                 ui.els.btnRestart.textContent = 'Session beenden';
                 ui.els.btnRestart.onclick = () => {
                     ui.els.gameOverOverlay.classList.add('hidden');
@@ -72,6 +74,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
         });
+    };
+
+    const saveListToStats = (history) => {
+        let totals = [0, 0, 0];
+        history.forEach(game => {
+            if (!game.passedIn) {
+                const val = game.won ? game.value : -game.value;
+                totals[game.declarerId] += val;
+            }
+        });
+
+        // Determine winner
+        let winnerName = 'Aicore';
+        if (totals[1] > totals[0] && totals[1] > totals[2]) winnerName = 'Aiden';
+        if (totals[2] > totals[0] && totals[2] > totals[1]) winnerName = 'Du';
+        if (totals[0] === totals[1] && totals[0] === totals[2]) winnerName = 'Unentschieden';
+
+        const listResult = {
+            date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            winner: winnerName,
+            scores: totals, // [bot2, bot1, player]
+            rounds: history.length
+        };
+
+        let stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
+        stats.push(listResult);
+        localStorage.setItem("skatListStats", JSON.stringify(stats));
     };
     
     // Setup Home Button (In-Game Menu Returning)

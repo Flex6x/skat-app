@@ -33,6 +33,9 @@ class UI {
             menuPrimary: document.getElementById('menu-primary'),
             statsView: document.getElementById('stats-view'),
             statsTableBody: document.getElementById('stats-table-body'),
+            statTotalGames: document.getElementById('stat-total-games'),
+            statWinRatio: document.getElementById('stat-win-ratio'),
+            statWinStreak: document.getElementById('stat-win-streak'),
             gameContainer: document.getElementById('game-container'),
             
             btnStartGame: document.getElementById('btn-start-game'),
@@ -306,22 +309,51 @@ class UI {
     }
     
     renderStats() {
-        const stats = JSON.parse(localStorage.getItem("skatStats")) || [];
+        const stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
         this.els.statsTableBody.innerHTML = '';
         
         if (stats.length === 0) {
-            this.els.statsTableBody.innerHTML = '<tr><td colspan="4">Noch keine Spiele absolviert.</td></tr>';
+            this.els.statsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #666;">Noch keine Listen absolviert.</td></tr>';
+            this.els.statTotalGames.textContent = '0';
+            this.els.statWinRatio.textContent = '0%';
+            this.els.statWinStreak.textContent = '0';
             return;
         }
+
+        let totalLists = stats.length;
+        let wins = 0;
+        let currentStreak = 0;
+        let bestStreak = 0;
+
+        // Process Dashboard
+        stats.forEach(list => {
+            const playerPoints = list.scores[2];
+            const isWinner = list.winner === 'Du';
+            
+            if (isWinner) {
+                wins++;
+                currentStreak++;
+                if (currentStreak > bestStreak) bestStreak = currentStreak;
+            } else {
+                currentStreak = 0;
+            }
+        });
+
+        this.els.statTotalGames.textContent = totalLists;
+        this.els.statWinRatio.textContent = Math.round((wins / totalLists) * 100) + '%';
+        this.els.statWinStreak.textContent = bestStreak;
         
-        // Show newest first
-        [...stats].reverse().forEach(game => {
+        // Render Table (Newest first)
+        [...stats].reverse().forEach(list => {
             const tr = document.createElement('tr');
+            const isWinner = list.winner === 'Du';
+            
             tr.innerHTML = `
-                <td>${game.date}</td>
-                <td>${game.winner}</td>
-                <td>${game.score}</td>
-                <td>${game.gameType}</td>
+                <td>${list.date}</td>
+                <td style="font-weight: bold; color: ${isWinner ? '#4caf50' : '#fff'}">${list.winner}</td>
+                <td>${list.scores[0]}</td>
+                <td>${list.scores[1]}</td>
+                <td>${list.scores[2]}</td>
             `;
             this.els.statsTableBody.appendChild(tr);
         });

@@ -513,20 +513,7 @@ class Game {
     }
     
     saveGameResult(winner, score, gameType) {
-        let stats = JSON.parse(localStorage.getItem("skatStats")) || [];
-        stats.push({
-            date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            winner: winner,
-            score: score,
-            gameType: gameType
-        });
-        
-        // Keep only last 10 games
-        if (stats.length > 10) {
-            stats = stats.slice(-10);
-        }
-        
-        localStorage.setItem("skatStats", JSON.stringify(stats));
+        // Individual game stats tracking removed in favor of session/list tracking in main.js
     }
 
     endGamePassedIn() {
