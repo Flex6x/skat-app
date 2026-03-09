@@ -18,6 +18,7 @@
                 <span class="app-name">Skat</span>
             </div>
             <nav class="header-right">
+                <button id="btn-show-tutorial" class="nav-link" data-i18n="tutorial">Tutorial</button>
                 <button id="btn-show-stats" class="nav-link" data-i18n="statistics">Statistics</button>
                 <button id="btn-show-settings" class="nav-link" data-i18n="settings">Settings</button>
             </nav>
@@ -372,6 +373,24 @@
         </div>
     </div>
 
+    <!-- Tutorial Overlay -->
+    <div id="tutorial-overlay" class="tutorial-overlay hidden">
+        <div class="tutorial-spotlight" id="tutorial-spotlight"></div>
+        <div class="tutorial-card" id="tutorial-card">
+            <div class="tutorial-header">
+                <span id="tutorial-step-indicator">Step 1 of 6</span>
+                <button id="btn-skip-tutorial" class="btn-skip" data-i18n="skip_tutorial">Skip</button>
+            </div>
+            <div class="tutorial-body">
+                <p id="tutorial-text"></p>
+            </div>
+            <div class="tutorial-footer">
+                <button id="btn-prev-tutorial" class="btn secondary" data-i18n="back">Back</button>
+                <button id="btn-next-tutorial" class="btn primary" data-i18n="next">Next</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/settings.js"></script>
     <script src="js/cards.js"></script>
@@ -382,6 +401,7 @@
     <script src="js/ai.js"></script>
     <script src="js/gameValueEngine.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/tutorial.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
 </body>

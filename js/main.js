@@ -10,19 +10,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const ui = new UI();
     ui.bindSettingsForm(window.appSettings);
     
+    // Initialize Tutorial
+    const tutorial = new Tutorial(ui);
+    document.getElementById('btn-show-tutorial').onclick = () => tutorial.start();
+
     // Initialize AI Controllers
     const aiControllers = [
         new AIController(0, 'Bot 2'),
         new AIController(1, 'Bot 1')
     ];
     
-    // Session State
-    let sessionRounds = 0;
-    let completedRounds = 0;
-    let gameHistory = []; // { declarerId, value, won }
-
-    // Initialize Game Engine (pass settings)
+    // ... rest of init
     const game = new Game(ui, aiControllers, window.appSettings);
+
+    // Auto-start tutorial for first time users
+    const tutorialCompleted = localStorage.getItem('skat_tutorial_completed');
+    if (!tutorialCompleted) {
+        // Short delay to let everything settle
+        setTimeout(() => tutorial.start(), 1000);
+    }
     
     const startNewSession = () => {
         ui.showRoundSelection((rounds) => {

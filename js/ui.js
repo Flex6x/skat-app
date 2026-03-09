@@ -66,7 +66,18 @@ const TRANSLATIONS = {
         original_skat: "Original Skat",
         discarded_cards: "Gedrückt",
         announce_schneider: "Schneider ansagen",
-        announce_schwarz: "Schwarz ansagen"
+        announce_schwarz: "Schwarz ansagen",
+        tutorial: "Tutorial",
+        skip_tutorial: "Überspringen",
+        next: "Weiter",
+        finish: "Fertig",
+        step: "Schritt",
+        tut_step1: "Hier siehst du deine Karten. Du nutzt sie, um Stiche zu machen und zu entscheiden, ob du reizen möchtest.",
+        tut_step2: "Dies ist das Reiz-Fenster. Wer am höchsten reizt, wird Alleinspieler und darf den Skat aufnehmen.",
+        tut_step3: "Als Alleinspieler wählst du hier den Spieltyp (Farbe, Grand oder Null).",
+        tut_step4: "In der Mitte des Tisches werden die Karten ausgespielt. Wer die höchste Karte legt, gewinnt den Stich.",
+        tut_step5: "Hier oben findest du alle wichtigen Infos zum aktuellen Spiel, inklusive der Punkte.",
+        tut_step6: "Über das Logo kommst du immer zurück. Hier findest du auch die Liste und Statistiken."
     },
     en: {
         select_rounds: "Select Rounds",
@@ -131,7 +142,18 @@ const TRANSLATIONS = {
         original_skat: "Original Skat",
         discarded_cards: "Discarded",
         announce_schneider: "Announce Schneider",
-        announce_schwarz: "Announce Schwarz"
+        announce_schwarz: "Announce Schwarz",
+        tutorial: "Tutorial",
+        skip_tutorial: "Skip",
+        next: "Next",
+        finish: "Finish",
+        step: "Step",
+        tut_step1: "Here you see your cards. You use them to play tricks and decide whether you want to bid.",
+        tut_step2: "This is the bidding window. The highest bidder becomes the declarer and can take the Skat.",
+        tut_step3: "As declarer, you choose the game type here (Suit, Grand, or Null).",
+        tut_step4: "Cards are played in the center of the table. The highest card wins the trick.",
+        tut_step5: "Up here you'll find all important game info, including current points.",
+        tut_step6: "Use the logo to return home. You can also find the game list and statistics here."
     }
 };
 
