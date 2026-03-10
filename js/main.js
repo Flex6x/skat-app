@@ -50,6 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result) {
                 if (result.passedIn) {
                     gameHistory.push({ passedIn: true });
+                } else if (result.isRamsch) {
+                    gameHistory.push({
+                        isRamsch: true,
+                        loserIndices: result.loserIndices
+                    });
                 } else {
                     gameHistory.push({
                         declarerId: result.declarerId,
@@ -85,7 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveListToStats = (history) => {
         let totals = [0, 0, 0];
         history.forEach(game => {
-            if (!game.passedIn) {
+            if (game.passedIn) return;
+            
+            if (game.isRamsch) {
+                game.loserIndices.forEach(idx => totals[idx] -= 25);
+            } else {
                 const val = game.won ? game.value : -game.value;
                 totals[game.declarerId] += val;
             }
@@ -93,16 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Determine winner
         const playerName = window.appSettings.current.nickname || 'Du';
-        let winnerName = 'Aicore';
-        if (totals[1] > totals[0] && totals[1] > totals[2]) winnerName = 'Aiden';
-        if (totals[2] > totals[0] && totals[2] > totals[1]) winnerName = playerName;
-        if (totals[0] === totals[1] && totals[0] === totals[2]) winnerName = 'Unentschieden';
-
+        
         const listResult = {
             date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            winner: winnerName,
             scores: totals, // [bot2, bot1, player]
-            rounds: history.length
+            rounds: history.length,
+            ruleSet: window.appSettings.current.ruleSet
         };
 
         let stats = JSON.parse(localStorage.getItem("skatListStats")) || [];

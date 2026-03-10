@@ -8,6 +8,7 @@ const PHASES = {
     SKAT_DECISION: 'skat_decision',
     TRUMP_SELECTION: 'trump_selection',
     PLAYING: 'playing',
+    RAMSCH: 'ramsch',
     GAME_OVER: 'game_over'
 };
 
@@ -155,12 +156,18 @@ class Game {
 
     async onBiddingComplete(declarerId, finalBid) {
         if (declarerId === null) {
-            // Passed in
-            this.declarerIndex = -1;
-            this.ui.setDeclarer('-');
-            this.ui.showMessage('Eingepasst! Niemand möchte spielen.');
-            await this.delay(1500);
-            this.endGamePassedIn();
+            // No winner found
+            if (this.settings.current.ruleSet === 'pub') {
+                this.ui.showMessage('Ramsch!');
+                await this.delay(1500);
+                this.startRamsch();
+            } else {
+                this.declarerIndex = -1;
+                this.ui.setDeclarer('-');
+                this.ui.showMessage('Eingepasst! Niemand möchte spielen.');
+                await this.delay(1500);
+                this.endGamePassedIn();
+            }
         } else {
             // Winner found
             this.declarerIndex = declarerId;
@@ -172,6 +179,21 @@ class Game {
             this.startSkatDecision(finalBid);
         }
     }
+
+    startRamsch() {
+        this.phase = PHASES.RAMSCH;
+        this.trumpMode = TRUMP_MODES.GRAND; // Ramsch is often played like Grand (only Jacks are trump)
+        this.ui.setTrump('Ramsch');
+        this.ui.setDeclarer('Ramsch');
+
+        // Sorting hands for Grand
+        this.players.forEach(p => this.sortHand(p.hand));
+        this.ui.renderAllHands(this.players);
+
+        this.turnIndex = this.forehandIndex;
+        this.processTurn();
+    }
+
 
     startSkatDecision(finalBid) {
         if (this.players[this.declarerIndex].type === PLAYER_TYPES.HUMAN) {
@@ -303,7 +325,7 @@ class Game {
     }
 
     async processTurn() {
-        if (this.phase !== PHASES.PLAYING || this.aborted) return;
+        if ((this.phase !== PHASES.PLAYING && this.phase !== PHASES.RAMSCH) || this.aborted) return;
 
         this.ui.updateTurn(this.turnIndex);
 
@@ -387,11 +409,59 @@ class Game {
         }
 
         if (this.trickCount === 10) {
-            this.endGame(this.trumpMode === TRUMP_MODES.NULL ? true : null);
+            if (this.phase === PHASES.RAMSCH) {
+                this.resolveRamsch();
+            } else {
+                this.endGame(this.trumpMode === TRUMP_MODES.NULL ? true : null);
+            }
         } else {
             // Winner leads the next trick
             this.turnIndex = winnerId;
             this.processTurn();
+        }
+    }
+
+    resolveRamsch() {
+        this.phase = PHASES.GAME_OVER;
+        
+        let playerPoints = [0, 0, 0];
+        for (let i = 0; i < 3; i++) {
+            playerPoints[i] = this.calculatePoints(this.players[i].tricks);
+        }
+        
+        // Find the loser (most points)
+        const maxPoints = Math.max(...playerPoints);
+        const loserIndices = [];
+        playerPoints.forEach((pts, idx) => {
+            if (pts === maxPoints) loserIndices.push(idx);
+        });
+
+        // If everyone has 40 points, it's a draw, but usually someone loses.
+        // We just pick the loser(s) and give -25.
+        
+        let resultMsg = `Ramsch beendet. `;
+        loserIndices.forEach(idx => {
+            resultMsg += `${this.players[idx].name} verliert mit ${playerPoints[idx]} Augen (-25). `;
+        });
+
+        this.ui.showGameOver(
+            !loserIndices.includes(2), // Human won if they are not the loser
+            resultMsg,
+            playerPoints[2], // Score of player 2
+            Math.max(playerPoints[0], playerPoints[1]), 
+            null,
+            this.initialSkat,
+            [],
+            playerPoints // Passing full array for individual display
+        );
+
+        this.dealerIndex = (this.dealerIndex + 1) % 3;
+
+        if (this.onGameEnd) {
+            this.onGameEnd({
+                isRamsch: true,
+                loserIndices: loserIndices
+            });
         }
     }
 

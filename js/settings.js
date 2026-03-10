@@ -11,7 +11,8 @@ class Settings {
         showLiveScore: false,
         soundEnabled: true,
         nickname: 'Du',
-        language: 'de'
+        language: 'de',
+        ruleSet: 'tournament' // 'tournament' or 'pub'
     };
 
     static SPEED_MAP = {

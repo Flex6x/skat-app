@@ -14,6 +14,10 @@ const TRANSLATIONS = {
         date: "Datum",
         winner: "Gewinner",
         rounds: "Runden",
+        rule_set: "Regeln",
+        tournament: "Turnier",
+        pub: "Kneipe",
+        ramsch: "Ramsch",
         pts_aicore: "Aicore",
         pts_aiden: "Aiden",
         back_to_menu: "Hauptmenü",
@@ -90,6 +94,11 @@ const TRANSLATIONS = {
         best_streak: "Best Streak",
         date: "Date",
         winner: "Winner",
+        rounds: "Rounds",
+        rule_set: "Rules",
+        tournament: "Tournament",
+        pub: "Pub",
+        ramsch: "Ramsch",
         pts_aicore: "Aicore",
         pts_aiden: "Aiden",
         back_to_menu: "Main Menu",
@@ -433,6 +442,11 @@ class UI {
                 if (game.passedIn) {
                     td.textContent = '0';
                     td.style.color = '#666';
+                } else if (game.isRamsch) {
+                    const isLoser = game.loserIndices.includes(i);
+                    td.textContent = isLoser ? '-25' : '0';
+                    td.className = isLoser ? 'score-neg' : '';
+                    if (isLoser) totals[i] -= 25;
                 } else if (game.declarerId === i) {
                     const val = game.won ? game.value : -game.value;
                     td.textContent = val;
@@ -556,6 +570,17 @@ class UI {
                 r.checked = (parseFloat(r.value) === s.animationSpeed);
                 r.addEventListener('change', () => {
                     settings.set('animationSpeed', parseFloat(r.value));
+                });
+            });
+        }
+
+        // Rule Set radios
+        const ruleRadios = document.querySelectorAll('input[name="ruleSet"]');
+        if (ruleRadios.length > 0) {
+            ruleRadios.forEach(r => {
+                r.checked = (r.value === s.ruleSet);
+                r.addEventListener('change', () => {
+                    settings.set('ruleSet', r.value);
                 });
             });
         }
@@ -700,6 +725,7 @@ class UI {
                 <td>${list.date}</td>
                 <td style="font-weight: bold; color: ${isUserWinner ? '#4caf50' : '#fff'}">${winnerDisplay}</td>
                 <td>${list.rounds || '-'}</td>
+                <td>${this.getTranslation(list.ruleSet || 'tournament')}</td>
                 <td>${scores[0]}</td>
                 <td>${scores[1]}</td>
                 <td>${scores[2]}</td>
@@ -1189,7 +1215,7 @@ class UI {
         this.els.trickPlayer.innerHTML = '';
     }
 
-    showGameOver(won, resultMsg, declarerPoints, oppPoints, evaluation = null, initialSkat = [], finalSkat = []) {
+    showGameOver(won, resultMsg, declarerPoints, oppPoints, evaluation = null, initialSkat = [], finalSkat = [], individualScores = null) {
         this.els.gameOverOverlay.classList.remove('hidden');
         const resDiv = document.getElementById('results');
         const overbidEl = document.getElementById('overbid-warning');
@@ -1205,32 +1231,52 @@ class UI {
         const titleKey = won ? 'game_won' : 'game_lost';
         document.getElementById('game-result-msg').textContent = this.getTranslation(titleKey);
         
-        const declLabel = this.getTranslation('declarer');
-        const oppLabel = this.getTranslation('opponents');
-        const eyesLabel = this.getTranslation('eyes');
+        if (individualScores) {
+            // RAMSCH Layout: Show all 3 players
+            const names = ['Aicore', 'Aiden', (window.appSettings && window.appSettings.current.nickname) || 'Du'];
+            const eyesLabel = this.getTranslation('eyes');
+            
+            let scoresHtml = '<div class="result-details individual-scores">';
+            individualScores.forEach((pts, idx) => {
+                scoresHtml += `<p>${names[idx]}: ${pts} ${eyesLabel}</p>`;
+            });
+            scoresHtml += '</div>';
 
-        resDiv.innerHTML = `
-            <p class="result-summary">${resultMsg}</p>
-            <div class="result-details">
-                <p>${declLabel}: ${declarerPoints} ${eyesLabel}</p>
-                <p>${oppLabel}: ${oppPoints} ${eyesLabel}</p>
-            </div>
-        `;
+            resDiv.innerHTML = `
+                <p class="result-summary">${resultMsg}</p>
+                ${scoresHtml}
+            `;
+            
+            // Hide "Discarded" cards group for Ramsch
+            finalSkatContainer.parentElement.classList.add('hidden');
+        } else {
+            // NORMAL Layout
+            const declLabel = this.getTranslation('declarer');
+            const oppLabel = this.getTranslation('opponents');
+            const eyesLabel = this.getTranslation('eyes');
+
+            resDiv.innerHTML = `
+                <p class="result-summary">${resultMsg}</p>
+                <div class="result-details">
+                    <p>${declLabel}: ${declarerPoints} ${eyesLabel}</p>
+                    <p>${oppLabel}: ${oppPoints} ${eyesLabel}</p>
+                </div>
+            `;
+            finalSkatContainer.parentElement.classList.remove('hidden');
+        }
         
-        // Render Skat Summary
+        // Render Skat Summary (Original always shown)
         originalSkatContainer.innerHTML = '';
         initialSkat.forEach(c => originalSkatContainer.appendChild(c.createDOMElement()));
-        
-        finalSkatContainer.innerHTML = '';
-        finalSkat.forEach(c => finalSkatContainer.appendChild(c.createDOMElement()));
-
-        // Ensure groups are visible/hidden correctly
         originalSkatContainer.parentElement.classList.remove('hidden');
-        finalSkatContainer.parentElement.classList.remove('hidden');
+
+        if (!individualScores) {
+            finalSkatContainer.innerHTML = '';
+            finalSkat.forEach(c => finalSkatContainer.appendChild(c.createDOMElement()));
+        }
 
         // Reset elements
         overbidEl.classList.add('hidden');
-        overbidEl.textContent = `⚠️ ${this.getTranslation('overbid')}`;
         detailsEl.classList.add('hidden');
         badgesEl.innerHTML = '';
         
