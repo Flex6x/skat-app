@@ -17,13 +17,13 @@ class Tutorial {
             {
                 element: '#bidding-overlay',
                 textKey: 'tut_step2',
-                position: 'center',
+                position: 'side',
                 onShow: () => this.ui.els.biddingOverlay.classList.remove('hidden')
             },
             {
                 element: '#trump-overlay',
                 textKey: 'tut_step3',
-                position: 'center',
+                position: 'side',
                 onShow: () => {
                     this.ui.els.biddingOverlay.classList.add('hidden');
                     this.ui.els.trumpOverlay.classList.remove('hidden');
@@ -32,7 +32,7 @@ class Tutorial {
             {
                 element: '#trick-zone',
                 textKey: 'tut_step4',
-                position: 'bottom',
+                position: 'top',
                 onShow: () => this.ui.els.trumpOverlay.classList.add('hidden')
             },
             {
