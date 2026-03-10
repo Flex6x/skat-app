@@ -31,6 +31,7 @@ const TRANSLATIONS = {
         slow: "Langsam",
         show_live_points: "Punkte live anzeigen",
         activate_sounds: "Sounds aktivieren",
+        drag_drop: "Drag & Drop aktivieren",
         data: "Daten",
         delete_stats: "Statistiken löschen",
         back: "Zurück",
@@ -112,6 +113,7 @@ const TRANSLATIONS = {
         slow: "Slow",
         show_live_points: "Show live points",
         activate_sounds: "Enable sounds",
+        drag_drop: "Enable Drag & Drop",
         data: "Data",
         delete_stats: "Delete Statistics",
         back: "Back",
@@ -602,6 +604,15 @@ class UI {
                 settings.set('soundEnabled', soundChk.checked);
             });
         }
+
+        // Drag & Drop toggle
+        const dragDropChk = document.getElementById('chk-drag-drop');
+        if (dragDropChk) {
+            dragDropChk.checked = s.dragDropEnabled;
+            dragDropChk.addEventListener('change', () => {
+                settings.set('dragDropEnabled', dragDropChk.checked);
+            });
+        }
     }
 
     playSound(name) {
@@ -844,6 +855,9 @@ class UI {
         const onStart = (e) => {
             if (e.button && e.button !== 0) return; // Only left click
             
+            // Only allow dragging if enabled in settings
+            const dragEnabled = (window.appSettings && window.appSettings.current.dragDropEnabled);
+            
             this.playSound('drag');
 
             const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
@@ -854,6 +868,8 @@ class UI {
             initialRect = el.getBoundingClientRect();
             
             const moveHandler = (moveEvent) => {
+                if (!dragEnabled) return; // Ignore movement if drag is disabled
+                
                 const moveX = moveEvent.type === 'touchmove' ? moveEvent.touches[0].clientX : moveEvent.clientX;
                 const moveY = moveEvent.type === 'touchmove' ? moveEvent.touches[0].clientY : moveEvent.clientY;
                 

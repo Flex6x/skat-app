@@ -12,7 +12,8 @@ class Settings {
         soundEnabled: true,
         nickname: 'Du',
         language: 'de',
-        ruleSet: 'tournament' // 'tournament' or 'pub'
+        ruleSet: 'tournament', // 'tournament' or 'pub'
+        dragDropEnabled: true
     };
 
     static SPEED_MAP = {
