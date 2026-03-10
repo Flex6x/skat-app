@@ -204,15 +204,30 @@ class GameValueEngine {
         // Überreizen → automatisch verloren, auch wenn >60 Augen
         const won = overbid ? false : declarerWonNormally;
 
-        // Details-String für die Anzeige
-        const parts = [`${matadors.type} ${matadors.count}`];
-        parts.push('Spiel');
-        if (handGame) parts.push('Hand');
-        if (schneider) parts.push('Schneider');
-        if (schwarz) parts.push('Schwarz');
+        // Details-String für die Anzeige (Internationalized via UI.getTranslation)
+        const getT = (key) => {
+            if (typeof UI !== 'undefined' && UI.TRANSLATIONS) {
+                const lang = (window.appSettings && window.appSettings.current.language) || 'de';
+                return UI.TRANSLATIONS[lang][key] || key;
+            }
+            return key;
+        };
+
+        const matadorType = getT(matadors.type); // "mit" or "ohne" / "with" or "without"
+        const gameLabel = getT('game'); // "Spiel" or "Game"
+        const handLabel = getT('hand_game'); // "Hand"
+        const schneiderLabel = 'Schneider';
+        const schwarzLabel = 'Schwarz';
+
+        const parts = [`${matadorType} ${matadors.count}`];
+        parts.push(gameLabel);
+        if (handGame) parts.push(handLabel);
+        if (schneider) parts.push(schneiderLabel);
+        if (schwarz) parts.push(schwarzLabel);
 
         const baseValue = this.BASE_VALUES[trumpMode];
-        const details = `${parts.join(', ')} = ${multiplier} × ${baseValue} = ${gameValue}`;
+        // Format: "mit 2, Spiel 3, 3 * 10 = 30"
+        const details = `${parts.join(', ')} ${multiplier}, ${multiplier} * ${baseValue} = ${gameValue}`;
 
         return {
             gameValue,
