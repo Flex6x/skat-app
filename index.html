@@ -18,392 +18,42 @@
                 <span class="app-name">Skat</span>
             </div>
             <nav class="header-right">
-                <button id="btn-show-tutorial" class="nav-link" data-i18n="tutorial">Tutorial</button>
-                <button id="btn-show-stats" class="nav-link" data-i18n="statistics">Statistics</button>
-                <button id="btn-show-settings" class="nav-link" data-i18n="settings">Settings</button>
+                <button id="btn-show-tutorial" class="nav-link" data-i18n="tutorial" onclick="window.location.href='tutorial.html'">Tutorial</button>
+                <button id="btn-show-stats" class="nav-link" data-i18n="statistics" onclick="window.location.href='stats.html'">Statistics</button>
+                <button id="btn-show-settings" class="nav-link" data-i18n="settings" onclick="window.location.href='settings.html'">Settings</button>
             </nav>
         </header>
 
         <div class="menu-content hero-section" id="menu-primary">
             <h1 class="glow-text">Skat</h1>
             <div class="menu-buttons">
-                <button id="btn-start-game" class="btn primary play-now-btn">Play Now</button>
-            </div>
-        </div>
-
-        <div class="menu-content hidden" id="round-selection-view">
-            <h2 data-i18n="select_rounds">Rundenanzahl wählen</h2>
-            <p class="subtitle" data-i18n="how_many_games">Wie viele Spiele sollen absolviert werden?</p>
-            <div class="round-options">
-                <button class="btn round-btn" data-rounds="3">3</button>
-                <button class="btn round-btn" data-rounds="6">6</button>
-                <button class="btn round-btn" data-rounds="9">9</button>
-                <button class="btn round-btn" data-rounds="12">12</button>
-                <button class="btn round-btn" data-rounds="15">15</button>
-            </div>
-            <div class="menu-buttons" style="margin-top: 30px;">
-                <button id="btn-cancel-rounds" class="btn large-btn" data-i18n="cancel">Abbrechen</button>
-            </div>
-        </div>
-
-        <div class="menu-content hidden" id="stats-view">
-            <header class="view-header">
-                <h1 data-i18n="statistics">Statistics</h1>
-            </header>
-
-            <div class="stats-dashboard">
-                <div class="stat-card">
-                    <span class="stat-label" data-i18n="total_lists">Total Lists</span>
-                    <span id="stat-total-games" class="stat-value">0</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-label" data-i18n="win_ratio">Win Ratio</span>
-                    <span id="stat-win-ratio" class="stat-value">0%</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-label" data-i18n="best_streak">Best Streak</span>
-                    <span id="stat-win-streak" class="stat-value">0</span>
-                </div>
-            </div>
-
-            <div class="stats-table-full-container">
-                <table id="stats-table">
-                    <thead>
-                        <tr>
-                            <th data-i18n="date">Datum</th>
-                            <th data-i18n="winner">Gewinner</th>
-                            <th data-i18n="pts_aicore">Aicore</th>
-                            <th data-i18n="pts_aiden">Aiden</th>
-                            <th id="stats-player-name-head">Du</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stats-table-body">
-                        <!-- Filled by JS -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="menu-buttons footer-actions">
-                <button id="btn-back-menu" class="btn primary large-btn" data-i18n="back_to_menu">Zurück zum Menü</button>
-            </div>
-        </div>
-
-        <div class="menu-content hidden" id="settings-view">
-            <header class="view-header">
-                <h1 data-i18n="settings">Settings</h1>
-            </header>
-
-            <div class="settings-grid">
-                <!-- Profile Section -->
-                <div class="settings-card">
-                    <h3 data-i18n="nickname">Nickname</h3>
-                    <div class="settings-control">
-                        <input type="text" id="input-nickname" class="nickname-input" maxlength="12" placeholder="Dein Name">
-                    </div>
-                </div>
-
-                <!-- Language Section -->
-                <div class="settings-card">
-                    <h3 data-i18n="language">Language</h3>
-                    <div class="settings-control">
-                        <div class="language-switch">
-                            <span class="lang-label">DE</span>
-                            <label class="toggle-label mini">
-                                <input type="checkbox" id="chk-language">
-                                <span class="toggle-switch"></span>
-                            </label>
-                            <span class="lang-label">EN</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Appearance Section -->
-                <div class="settings-card">
-                    <h3 data-i18n="theme">Theme</h3>
-                    <div class="settings-control">
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="theme" value="dark" checked>
-                                <span class="radio-custom"></span>
-                                Dark
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="theme" value="light">
-                                <span class="radio-custom"></span>
-                                Light
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Gameplay Section -->
-                <div class="settings-card">
-                    <h3 data-i18n="card_animation">Animation</h3>
-                    <div class="settings-control">
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="animSpeed" value="0.3">
-                                <span class="radio-custom"></span>
-                                <span data-i18n="fast">Schnell</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="animSpeed" value="0.45" checked>
-                                <span class="radio-custom"></span>
-                                <span data-i18n="normal">Normal</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="animSpeed" value="0.65">
-                                <span class="radio-custom"></span>
-                                <span data-i18n="slow">Langsam</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Preferences Section -->
-                <div class="settings-card">
-                    <h3 data-i18n="preferences">Preferences</h3>
-                    <div class="settings-control stacked">
-                        <label class="toggle-label">
-                            <input type="checkbox" id="chk-live-score">
-                            <span class="toggle-switch"></span>
-                            <span data-i18n="show_live_points">Punkte live anzeigen</span>
-                        </label>
-                        <label class="toggle-label">
-                            <input type="checkbox" id="chk-sound">
-                            <span class="toggle-switch"></span>
-                            <span data-i18n="activate_sounds">Sounds aktivieren</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Data Section -->
-                <div class="settings-card danger-card">
-                    <h3 data-i18n="data">Data</h3>
-                    <div class="settings-control">
-                        <button id="btn-delete-stats" class="btn danger" style="width: 100%;" data-i18n="delete_stats">Statistiken löschen</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="menu-buttons footer-actions">
-                <button id="btn-back-settings" class="btn primary large-btn" data-i18n="back_to_menu">Zurück zum Menü</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="game-container" class="hidden">
-        <!-- In-Game Info Box Top Center -->
-        <div class="game-info-container">
-            <div class="game-info-top">
-                <div id="current-declarer">Alleinspieler: -</div>
-                <div id="current-bid">Reizwert: -</div>
-                <div id="current-trump">Trumpf: -</div>
-                <div id="current-turn">Zug: -</div>
-                <div id="live-score" class="live-score hidden">Punkte: -</div>
-            </div>
-
-            <!-- Controls below info -->
-            <div class="game-controls-bottom">
-                <button id="btn-home" class="floating-btn" title="Zurück zum Hauptmenü">🏠</button>
-                <button id="btn-show-scoreboard" class="floating-btn" title="Spielliste anzeigen">📋</button>
-                <button id="btn-last-trick" class="floating-btn smaller hidden" title="Letzten Stich ansehen">👁️</button>
-            </div>
-        </div>
-
-        <!-- Scoreboard Drawer/Overlay -->
-        <div id="scoreboard-drawer" class="drawer hidden">
-            <div class="drawer-header">
-                <h2>Spielliste</h2>
-                <button id="btn-close-scoreboard" class="btn-close">×</button>
-            </div>
-            <div class="drawer-content">
-                <table id="scoreboard-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 40px;">#</th>
-                            <th id="player0-name">Aicore</th>
-                            <th id="player1-name">Aiden</th>
-                            <th id="player2-name">Du</th>
-                        </tr>
-                    </thead>
-                    <tbody id="scoreboard-body">
-                        <!-- Rows added by JS -->
-                    </tbody>
-                    <tfoot>
-                        <tr class="total-row">
-                            <td id="total-player-num">Total</td>
-                            <td id="total-player0">0</td>
-                            <td id="total-player1">0</td>
-                            <td id="total-player2">0</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
-
-        <!-- Top Bots Area -->
-        <div id="bots-area">
-            <div id="bot2" class="player-zone">
-                <div class="player-info"><span class="ai-text">Ai</span>core</div>
-                <div class="cards-container bot-cards"></div>
-                <div class="speech-bubble hidden"></div>
-            </div>
-            <div id="bot1" class="player-zone">
-                <div class="player-info"><span class="ai-text">Ai</span>den</div>
-                <div class="cards-container bot-cards"></div>
-                <div class="speech-bubble hidden"></div>
-            </div>
-        </div>
-
-        <!-- Center Table Area -->
-        <div id="table-area">
-            <div id="deck-zone"></div>
-
-            <div id="trick-zone">
-                <div id="played-card-bot2" class="played-card-slot"></div>
-                <div id="played-card-bot1" class="played-card-slot"></div>
-                <div id="played-card-player" class="played-card-slot"></div>
-            </div>
-
-            <div id="skat-zone">
-                <div class="card-slot"></div>
-                <div class="card-slot"></div>
-            </div>
-
-            <!-- Overlays for Bidding & Trump Selection -->
-            <div id="bidding-overlay" class="overlay hidden">
-                <h2>Reizen</h2>
-                <div id="bidding-controls">
-                    <p id="bidding-status">Warte auf Reiz-Phase...</p>
-                    <div class="button-group">
-                        <button id="btn-pass" class="btn">Passen</button>
-                        <button id="btn-bid" class="btn primary">Halten / Reizen</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="skat-decision-overlay" class="overlay hidden">
-                <h2>Skat aufnehmen?</h2>
-                <div class="button-group">
-                    <button id="btn-skat-hand" class="btn">Hand spielen</button>
-                    <button id="btn-skat-take" class="btn primary">Aufnehmen</button>
-                </div>
-
-                <!-- Announcements (only for Hand) -->
-                <div id="hand-announcements" class="announcements-container hidden">
-                    <label class="toggle-label mini">
-                        <input type="checkbox" id="chk-announce-schneider">
-                        <span class="toggle-switch"></span>
-                        <span data-i18n="announce_schneider">Schneider ansagen</span>
-                    </label>
-                    <label class="toggle-label mini">
-                        <input type="checkbox" id="chk-announce-schwarz">
-                        <span class="toggle-switch"></span>
-                        <span data-i18n="announce_schwarz">Schwarz ansagen</span>
-                    </label>
-                </div>
-                <!-- Skat discard area -->
-                <div id="skat-discard-area" class="hidden">
-                    <p>Lege 2 Karten in den Skat (Drag & Drop oder Klick)</p>
-                    <div id="skat-discard-slots">
-                        <div class="skat-slot droppable" data-index="0"></div>
-                        <div class="skat-slot droppable" data-index="1"></div>
-                    </div>
-                    <button id="btn-confirm-skat" class="btn primary" disabled>Bestätigen</button>
-                </div>
-            </div>
-
-            <div id="trump-overlay" class="overlay hidden">
-                <h2>Trumpf wählen</h2>
-                <div id="trump-options">
-                    <button class="btn trump-btn" data-suit="Eichel">Eichel <img src="media/eichel.png"
-                            class="suit-icon" alt="Eichel"></button>
-                    <button class="btn trump-btn" data-suit="Grün">Grün <img src="media/gruen.png" class="suit-icon"
-                            alt="Grün"></button>
-                    <button class="btn trump-btn" data-suit="Rot">Rot <img src="media/rot.png" class="suit-icon"
-                            alt="Rot"></button>
-                    <button class="btn trump-btn" data-suit="Schellen">Schellen <img src="media/schellen.png"
-                            class="suit-icon" alt="Schellen"></button>
-                    <button class="btn trump-btn" data-suit="Grand">Grand</button>
-                    <button class="btn trump-btn" data-suit="Null">Null</button>
-                </div>
-            </div>
-
-            <!-- GameOver Overlay -->
-            <div id="game-over-overlay" class="overlay hidden">
-                <h2 id="game-result-msg">Spiel beendet</h2>
-                <div id="overbid-warning" class="overbid-warning hidden">⚠️ Überreizt!</div>
-                <div id="results"></div>
-                
-                <!-- Skat Summary -->
-                <div id="skat-summary" class="skat-summary">
-                    <div class="skat-summary-group">
-                        <span class="skat-summary-label" data-i18n="original_skat">Original Skat</span>
-                        <div id="original-skat-cards" class="skat-summary-cards"></div>
-                    </div>
-                    <div class="skat-summary-group">
-                        <span class="skat-summary-label" data-i18n="discarded_cards">Gedrückt</span>
-                        <div id="final-skat-cards" class="skat-summary-cards"></div>
-                    </div>
-                </div>
-
-                <div id="game-value-details" class="game-value-details hidden">
-                    <p id="game-value-line" class="game-value-line"></p>
-                    <div id="game-badges" class="game-badges"></div>
-                </div>
-                <button id="btn-restart" class="btn primary">Neues Spiel</button>
-            </div>
-
-            <!-- Last Trick Overlay -->
-            <div id="last-trick-overlay" class="overlay hidden">
-                <h2>Letzter Stich</h2>
-                <div id="last-trick-cards" class="trick-viewer">
-                    <!-- Cards appended here -->
-                </div>
-                <p class="subtitle" style="margin-top: 20px;">Klicke irgendwo zum Schließen</p>
-            </div>
-        </div>
-
-        <!-- Bottom Player Area -->
-        <div id="player-area" class="player-zone">
-            <div class="player-info">Du</div>
-            <div id="player-hand" class="cards-container player-cards"></div>
-            <div class="speech-bubble hidden"></div>
-        </div>
-    </div>
-
-    <!-- Tutorial Overlay -->
-    <div id="tutorial-overlay" class="tutorial-overlay hidden">
-        <div class="tutorial-spotlight" id="tutorial-spotlight"></div>
-        <div class="tutorial-card" id="tutorial-card">
-            <div class="tutorial-header">
-                <span id="tutorial-step-indicator">Step 1 of 6</span>
-                <button id="btn-skip-tutorial" class="btn-skip" data-i18n="skip_tutorial">Skip</button>
-            </div>
-            <div class="tutorial-body">
-                <p id="tutorial-text"></p>
-            </div>
-            <div class="tutorial-footer">
-                <button id="btn-prev-tutorial" class="btn secondary" data-i18n="back">Back</button>
-                <button id="btn-next-tutorial" class="btn primary" data-i18n="next">Next</button>
+                <button id="btn-start-game" class="btn primary play-now-btn" onclick="window.location.href='play.html'">Play Now</button>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="js/settings.js"></script>
-    <script src="js/cards.js"></script>
-    <script src="js/cardAnimations.js"></script>
-    <script src="js/biddingEngine.js"></script>
-    <script src="js/botBidding.js"></script>
-    <script src="js/biddingController.js"></script>
-    <script src="js/ai.js"></script>
-    <script src="js/gameValueEngine.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/tutorial.js"></script>
     <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.appSettings = new Settings();
+            const ui = new UI();
+            ui.updateLanguageUI();
+            
+            // Auto-start tutorial for first time users
+            const tutorialCompleted = localStorage.getItem('skat_tutorial_completed');
+            if (!tutorialCompleted) {
+                setTimeout(() => {
+                    if (confirm("Willkommen! Möchtest du das Tutorial ansehen?")) {
+                        window.location.href = 'tutorial.html';
+                    } else {
+                        localStorage.setItem('skat_tutorial_completed', 'true');
+                    }
+                }, 1000);
+            }
+        });
+    </script>
 </body>
 
 </html>

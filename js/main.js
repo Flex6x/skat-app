@@ -8,28 +8,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize UI
     const ui = new UI();
+
+    // Only proceed if we are on a page with a game container
+    if (!ui.els.gameContainer) {
+        ui.updateLanguageUI();
+        return;
+    }
+
     ui.bindSettingsForm(window.appSettings);
     
-    // Initialize Tutorial
-    const tutorial = new Tutorial(ui);
-    document.getElementById('btn-show-tutorial').onclick = () => tutorial.start();
-
     // Initialize AI Controllers
     const aiControllers = [
         new AIController(0, 'Bot 2'),
         new AIController(1, 'Bot 1')
     ];
     
-    // ... rest of init
     const game = new Game(ui, aiControllers, window.appSettings);
-
-    // Auto-start tutorial for first time users
-    const tutorialCompleted = localStorage.getItem('skat_tutorial_completed');
-    if (!tutorialCompleted) {
-        // Short delay to let everything settle
-        setTimeout(() => tutorial.start(), 1000);
-    }
     
+    let sessionRounds = 0;
+    let completedRounds = 0;
+    let gameHistory = [];
+
     const startNewSession = () => {
         ui.showRoundSelection((rounds) => {
             sessionRounds = rounds;
@@ -39,7 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.hideMainMenu();
             startNewGame();
         }, () => {
-            // Cancelled
+            // Cancelled -> Go back to index
+            window.location.href = 'index.html';
         });
     };
 
@@ -66,10 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Session finished -> SAVE TO STATS
                 saveListToStats(gameHistory);
 
-                ui.els.btnRestart.textContent = 'Session beenden';
+                ui.els.btnRestart.textContent = ui.getTranslation('back_to_menu');
                 ui.els.btnRestart.onclick = () => {
                     ui.els.gameOverOverlay.classList.add('hidden');
-                    ui.showMainMenu(startNewSession);
+                    window.location.href = 'index.html';
                 };
             } else {
                 ui.els.btnRestart.textContent = `Nächstes Spiel (${completedRounds + 1}/${sessionRounds})`;
@@ -114,11 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.bindHomeButton(() => {
         const msg = ui.getTranslation('home_confirm');
         if (window.confirm(msg)) {
-            // Force reload to completely wipe any buggy state/listeners
-            window.location.href = window.location.pathname; 
+            window.location.href = 'index.html';
         }
     });
 
-    // Start by showing the Main Menu
-    ui.showMainMenu(startNewSession);
+    // Start by showing the Round Selection (since we are on play.html)
+    ui.updateLanguageUI();
+    startNewSession();
 });
+

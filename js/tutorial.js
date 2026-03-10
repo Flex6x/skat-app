@@ -69,20 +69,22 @@ class Tutorial {
     start() {
         this.isActive = true;
         this.currentStep = 0;
-        this.overlay.classList.remove('hidden');
-        this.ui.els.gameContainer.classList.remove('hidden');
-        this.ui.els.mainMenu.classList.add('hidden');
+        if (this.overlay) this.overlay.classList.remove('hidden');
+        if (this.ui.els.gameContainer) this.ui.els.gameContainer.classList.remove('hidden');
+        if (this.ui.els.mainMenu) this.ui.els.mainMenu.classList.add('hidden');
         this.showStep();
     }
 
     stop() {
         this.isActive = false;
-        this.overlay.classList.add('hidden');
-        this.ui.els.gameContainer.classList.add('hidden');
-        this.ui.els.mainMenu.classList.remove('hidden');
-        this.ui.els.biddingOverlay.classList.add('hidden');
-        this.ui.els.trumpOverlay.classList.add('hidden');
+        if (this.overlay) this.overlay.classList.add('hidden');
+        if (this.ui.els.gameContainer) this.ui.els.gameContainer.classList.add('hidden');
+        if (this.ui.els.mainMenu) this.ui.els.mainMenu.classList.remove('hidden');
+        if (this.ui.els.biddingOverlay) this.ui.els.biddingOverlay.classList.add('hidden');
+        if (this.ui.els.trumpOverlay) this.ui.els.trumpOverlay.classList.add('hidden');
         localStorage.setItem('skat_tutorial_completed', 'true');
+        
+        if (this.finish) this.finish();
     }
 
     next() {

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skat - Play</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation / Header -->
+    <header class="menu-header" style="position: absolute; width: 100%; z-index: 100;">
+        <div class="header-left" id="btn-logo-home" style="cursor: pointer;" onclick="window.location.href='index.html'">
+            <div class="app-logo">S</div>
+            <span class="app-name">Skat</span>
+        </div>
+    </header>
+
+    <!-- Round Selection Overlay (shown before game starts) -->
+    <div id="main-menu" class="menu-overlay hidden">
+        <div class="menu-content" id="round-selection-view">
+            <h2 data-i18n="select_rounds">Rundenanzahl wählen</h2>
+            <p class="subtitle" data-i18n="how_many_games">Wie viele Spiele sollen absolviert werden?</p>
+            <div class="round-options">
+                <button class="btn round-btn" data-rounds="3">3</button>
+                <button class="btn round-btn" data-rounds="6">6</button>
+                <button class="btn round-btn" data-rounds="9">9</button>
+                <button class="btn round-btn" data-rounds="12">12</button>
+                <button class="btn round-btn" data-rounds="15">15</button>
+            </div>
+            <div class="menu-buttons" style="margin-top: 30px;">
+                <button id="btn-cancel-rounds" class="btn large-btn" data-i18n="cancel" onclick="window.location.href='index.html'">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden">
+        <!-- In-Game Info Box Top Center -->
+        <div class="game-info-container">
+            <div class="game-info-top">
+                <div id="current-declarer">Alleinspieler: -</div>
+                <div id="current-bid">Reizwert: -</div>
+                <div id="current-trump">Trumpf: -</div>
+                <div id="current-turn">Zug: -</div>
+                <div id="live-score" class="live-score hidden">Punkte: -</div>
+            </div>
+
+            <!-- Controls below info -->
+            <div class="game-controls-bottom">
+                <button id="btn-home" class="floating-btn" title="Zurück zum Hauptmenü">🏠</button>
+                <button id="btn-show-scoreboard" class="floating-btn" title="Spielliste anzeigen">📋</button>
+                <button id="btn-last-trick" class="floating-btn smaller hidden" title="Letzten Stich ansehen">👁️</button>
+            </div>
+        </div>
+
+        <!-- Scoreboard Drawer/Overlay -->
+        <div id="scoreboard-drawer" class="drawer hidden">
+            <div class="drawer-header">
+                <h2 data-i18n="game_list">Spielliste</h2>
+                <button id="btn-close-scoreboard" class="btn-close">×</button>
+            </div>
+            <div class="drawer-content">
+                <table id="scoreboard-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;">#</th>
+                            <th id="player0-name">Aicore</th>
+                            <th id="player1-name">Aiden</th>
+                            <th id="player2-name-list">Du</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreboard-body">
+                        <!-- Rows added by JS -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td id="total-player-num">Total</td>
+                            <td id="total-player0">0</td>
+                            <td id="total-player1">0</td>
+                            <td id="total-player2">0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Top Bots Area -->
+        <div id="bots-area">
+            <div id="bot2" class="player-zone">
+                <div class="player-info"><span class="ai-text">Ai</span>core</div>
+                <div class="cards-container bot-cards"></div>
+                <div class="speech-bubble hidden"></div>
+            </div>
+            <div id="bot1" class="player-zone">
+                <div class="player-info"><span class="ai-text">Ai</span>den</div>
+                <div class="cards-container bot-cards"></div>
+                <div class="speech-bubble hidden"></div>
+            </div>
+        </div>
+
+        <!-- Center Table Area -->
+        <div id="table-area">
+            <div id="deck-zone"></div>
+
+            <div id="trick-zone">
+                <div id="played-card-bot2" class="played-card-slot"></div>
+                <div id="played-card-bot1" class="played-card-slot"></div>
+                <div id="played-card-player" class="played-card-slot"></div>
+            </div>
+
+            <div id="skat-zone">
+                <div class="card-slot"></div>
+                <div class="card-slot"></div>
+            </div>
+
+            <!-- Overlays for Bidding & Trump Selection -->
+            <div id="bidding-overlay" class="overlay hidden">
+                <h2 data-i18n="wait_bidding">Reizen</h2>
+                <div id="bidding-controls">
+                    <p id="bidding-status">Warte auf Reiz-Phase...</p>
+                    <div class="button-group">
+                        <button id="btn-pass" class="btn">Passen</button>
+                        <button id="btn-bid" class="btn primary">Halten / Reizen</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="skat-decision-overlay" class="overlay hidden">
+                <h2 data-i18n="take_skat">Skat aufnehmen?</h2>
+                <div class="button-group">
+                    <button id="btn-skat-hand" class="btn" data-i18n="hand_game">Hand spielen</button>
+                    <button id="btn-skat-take" class="btn primary" data-i18n="take">Aufnehmen</button>
+                </div>
+
+                <!-- Announcements (only for Hand) -->
+                <div id="hand-announcements" class="announcements-container hidden">
+                    <label class="toggle-label mini">
+                        <input type="checkbox" id="chk-announce-schneider">
+                        <span class="toggle-switch"></span>
+                        <span data-i18n="announce_schneider">Schneider ansagen</span>
+                    </label>
+                    <label class="toggle-label mini">
+                        <input type="checkbox" id="chk-announce-schwarz">
+                        <span class="toggle-switch"></span>
+                        <span data-i18n="announce_schwarz">Schwarz ansagen</span>
+                    </label>
+                </div>
+                <!-- Skat discard area -->
+                <div id="skat-discard-area" class="hidden">
+                    <p data-i18n="discard_info">Lege 2 Karten in den Skat (Drag & Drop oder Klick)</p>
+                    <div id="skat-discard-slots">
+                        <div class="skat-slot droppable" data-index="0"></div>
+                        <div class="skat-slot droppable" data-index="1"></div>
+                    </div>
+                    <button id="btn-confirm-skat" class="btn primary" disabled data-i18n="confirm">Bestätigen</button>
+                </div>
+            </div>
+
+            <div id="trump-overlay" class="overlay hidden">
+                <h2 data-i18n="choose_trump">Trumpf wählen</h2>
+                <div id="trump-options">
+                    <button class="btn trump-btn" data-suit="Eichel">Eichel <img src="media/eichel.png"
+                            class="suit-icon" alt="Eichel"></button>
+                    <button class="btn trump-btn" data-suit="Grün">Grün <img src="media/gruen.png" class="suit-icon"
+                            alt="Grün"></button>
+                    <button class="btn trump-btn" data-suit="Rot">Rot <img src="media/rot.png" class="suit-icon"
+                            alt="Rot"></button>
+                    <button class="btn trump-btn" data-suit="Schellen">Schellen <img src="media/schellen.png"
+                            class="suit-icon" alt="Schellen"></button>
+                    <button class="btn trump-btn" data-suit="Grand">Grand</button>
+                    <button class="btn trump-btn" data-suit="Null">Null</button>
+                </div>
+            </div>
+
+            <!-- GameOver Overlay -->
+            <div id="game-over-overlay" class="overlay hidden">
+                <h2 id="game-result-msg">Spiel beendet</h2>
+                <div id="overbid-warning" class="overbid-warning hidden" data-i18n="overbid">⚠️ Überreizt!</div>
+                <div id="results"></div>
+                
+                <!-- Skat Summary -->
+                <div id="skat-summary" class="skat-summary">
+                    <div class="skat-summary-group">
+                        <span class="skat-summary-label" data-i18n="original_skat">Original Skat</span>
+                        <div id="original-skat-cards" class="skat-summary-cards"></div>
+                    </div>
+                    <div class="skat-summary-group">
+                        <span class="skat-summary-label" data-i18n="discarded_cards">Gedrückt</span>
+                        <div id="final-skat-cards" class="skat-summary-cards"></div>
+                    </div>
+                </div>
+
+                <div id="game-value-details" class="game-value-details hidden">
+                    <p id="game-value-line" class="game-value-line"></p>
+                    <div id="game-badges" class="game-badges"></div>
+                </div>
+                <button id="btn-restart" class="btn primary">Neues Spiel</button>
+            </div>
+
+            <!-- Last Trick Overlay -->
+            <div id="last-trick-overlay" class="overlay hidden">
+                <h2 data-i18n="last_trick">Letzter Stich</h2>
+                <div id="last-trick-cards" class="trick-viewer">
+                    <!-- Cards appended here -->
+                </div>
+                <p class="subtitle" style="margin-top: 20px;" data-i18n="close_info">Klicke irgendwo zum Schließen</p>
+            </div>
+        </div>
+
+        <!-- Bottom Player Area -->
+        <div id="player-area" class="player-zone">
+            <div class="player-info">Du</div>
+            <div id="player-hand" class="cards-container player-cards"></div>
+            <div class="speech-bubble hidden"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/settings.js"></script>
+    <script src="js/cards.js"></script>
+    <script src="js/cardAnimations.js"></script>
+    <script src="js/biddingEngine.js"></script>
+    <script src="js/botBidding.js"></script>
+    <script src="js/biddingController.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/gameValueEngine.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

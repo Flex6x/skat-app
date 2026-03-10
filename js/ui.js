@@ -221,7 +221,7 @@ class UI {
             scoreboardBody: document.getElementById('scoreboard-body'),
             btnShowScoreboard: document.getElementById('btn-show-scoreboard'),
             btnCloseScoreboard: document.getElementById('btn-close-scoreboard'),
-            totalPlayerNum: document.getElementById('total-player-num'), // We will use footer first cell for this
+            totalPlayerNum: document.getElementById('total-player-num'), 
             totalPlayer0: document.getElementById('total-player0'),
             totalPlayer1: document.getElementById('total-player1'),
             totalPlayer2: document.getElementById('total-player2'),
@@ -251,40 +251,49 @@ class UI {
     
     bindGlobalEvents() {
         // Setup drop zones for trick
-        this.els.trickPlayer.addEventListener('dragover', e => { e.preventDefault(); this.els.trickPlayer.classList.add('drag-over'); });
-        this.els.trickPlayer.addEventListener('dragleave', () => this.els.trickPlayer.classList.remove('drag-over'));
+        if (this.els.trickPlayer) {
+            this.els.trickPlayer.addEventListener('dragover', e => { e.preventDefault(); this.els.trickPlayer.classList.add('drag-over'); });
+            this.els.trickPlayer.addEventListener('dragleave', () => this.els.trickPlayer.classList.remove('drag-over'));
+        }
         
         // Setup drop zones for skat discard
-        this.els.skatDiscardSlots.forEach(slot => {
-            slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('drag-over'); });
-            slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
-        });
+        if (this.els.skatDiscardSlots) {
+            this.els.skatDiscardSlots.forEach(slot => {
+                slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('drag-over'); });
+                slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+            });
+        }
 
         // Scoreboard toggle
-        this.els.btnShowScoreboard.onclick = () => {
-            this.els.scoreboardDrawer.classList.toggle('hidden');
-        };
-        this.els.btnCloseScoreboard.onclick = () => {
-            this.els.scoreboardDrawer.classList.add('hidden');
-        };
+        if (this.els.btnShowScoreboard) {
+            this.els.btnShowScoreboard.onclick = () => {
+                this.els.scoreboardDrawer.classList.toggle('hidden');
+            };
+        }
+        if (this.els.btnCloseScoreboard) {
+            this.els.btnCloseScoreboard.onclick = () => {
+                this.els.scoreboardDrawer.classList.add('hidden');
+            };
+        }
 
         // Delete Stats Logic
-        this.els.btnDeleteStats.onclick = () => {
-            const msg = this.getTranslation('delete_confirm');
-            if (window.confirm(msg)) {
-                localStorage.removeItem("skatListStats");
-                this.showMessage(this.getTranslation('stats_deleted'));
-                this.renderStats();
-            }
-        };
+        if (this.els.btnDeleteStats) {
+            this.els.btnDeleteStats.onclick = () => {
+                const msg = this.getTranslation('delete_confirm');
+                if (window.confirm(msg)) {
+                    localStorage.removeItem("skatListStats");
+                    this.showMessage(this.getTranslation('stats_deleted'));
+                    this.renderStats();
+                }
+            };
+        }
 
         // Logo Home Navigation
-        this.els.btnLogoHome.onclick = () => {
-            window.location.hash = 'menu';
-        };
-
-        // Hash Navigation Listener
-        window.onhashchange = () => this.handleHashNavigation();
+        if (this.els.btnLogoHome && !this.els.btnLogoHome.onclick) {
+            this.els.btnLogoHome.onclick = () => {
+                window.location.href = 'index.html';
+            };
+        }
     }
 
     resetAllOverlays() {
@@ -302,39 +311,25 @@ class UI {
         });
         
         // Also hide speech bubbles
-        this.els.bot1Speech.classList.add('hidden');
-        this.els.bot2Speech.classList.add('hidden');
-        this.els.playerSpeech.classList.add('hidden');
+        if (this.els.bot1Speech) this.els.bot1Speech.classList.add('hidden');
+        if (this.els.bot2Speech) this.els.bot2Speech.classList.add('hidden');
+        if (this.els.playerSpeech) this.els.playerSpeech.classList.add('hidden');
     }
 
     handleHashNavigation() {
-        const hash = window.location.hash.replace('#', '');
-        
-        switch(hash) {
-            case 'stats':
-                this._switchView(this.els.statsView);
-                this.renderStats();
-                break;
-            case 'settings':
-                this._switchView(this.els.settingsView);
-                break;
-            case 'play':
-                // Handled via session start logic in main.js
-                break;
-            default:
-                this._switchView(this.els.menuPrimary);
-                break;
-        }
+        // Obsolete in MPA
     }
 
     _switchView(viewEl) {
+        if (!viewEl) return;
+        
         // List of all possible menu views
         const views = [
             this.els.menuPrimary,
             this.els.statsView,
             this.els.settingsView,
             this.els.roundSelectionView
-        ];
+        ].filter(v => !!v);
         
         views.forEach(v => {
             if (v === viewEl) v.classList.remove('hidden');
@@ -342,9 +337,10 @@ class UI {
         });
 
         // Always ensure main menu overlay is visible when switching these internal views
-        this.els.mainMenu.classList.remove('hidden');
-        this.els.gameContainer.classList.add('hidden');
+        if (this.els.mainMenu) this.els.mainMenu.classList.remove('hidden');
+        if (this.els.gameContainer) this.els.gameContainer.classList.add('hidden');
     }
+
 
     showHeroView() {
         this._switchView(this.els.menuPrimary);
@@ -393,21 +389,27 @@ class UI {
     }
 
     showRoundSelection(onSelect, onCancel) {
-        this.els.menuPrimary.classList.add('hidden');
-        this.els.roundSelectionView.classList.remove('hidden');
+        if (this.els.mainMenu) this.els.mainMenu.classList.remove('hidden');
+        if (this.els.gameContainer) this.els.gameContainer.classList.add('hidden');
+        if (this.els.menuPrimary) this.els.menuPrimary.classList.add('hidden');
+        if (this.els.roundSelectionView) this.els.roundSelectionView.classList.remove('hidden');
         
-        this.els.roundBtns.forEach(btn => {
-            btn.onclick = () => {
-                this.els.roundSelectionView.classList.add('hidden');
-                onSelect(parseInt(btn.dataset.rounds));
+        if (this.els.roundBtns) {
+            this.els.roundBtns.forEach(btn => {
+                btn.onclick = () => {
+                    if (this.els.roundSelectionView) this.els.roundSelectionView.classList.add('hidden');
+                    onSelect(parseInt(btn.dataset.rounds));
+                };
+            });
+        }
+        
+        if (this.els.btnCancelRounds) {
+            this.els.btnCancelRounds.onclick = () => {
+                if (this.els.roundSelectionView) this.els.roundSelectionView.classList.add('hidden');
+                if (this.els.menuPrimary) this.els.menuPrimary.classList.remove('hidden');
+                onCancel();
             };
-        });
-        
-        this.els.btnCancelRounds.onclick = () => {
-            this.els.roundSelectionView.classList.add('hidden');
-            this.els.menuPrimary.classList.remove('hidden');
-            onCancel();
-        };
+        }
     }
 
     updateScoreboard(history) {
@@ -518,43 +520,53 @@ class UI {
         const s = settings.current;
         
         // Nickname
-        this.els.inputNickname.value = s.nickname;
-        this.els.inputNickname.oninput = () => {
-            settings.set('nickname', this.els.inputNickname.value || 'Du');
-            this.updateNicknames();
-        };
+        if (this.els.inputNickname) {
+            this.els.inputNickname.value = s.nickname;
+            this.els.inputNickname.oninput = () => {
+                settings.set('nickname', this.els.inputNickname.value || 'Du');
+                this.updateNicknames();
+            };
+        }
 
         // Language toggle
-        this.els.chkLanguage.checked = (s.language === 'en');
-        this.els.chkLanguage.onchange = () => {
-            settings.set('language', this.els.chkLanguage.checked ? 'en' : 'de');
-            this.updateLanguageUI();
-        };
+        if (this.els.chkLanguage) {
+            this.els.chkLanguage.checked = (s.language === 'en');
+            this.els.chkLanguage.onchange = () => {
+                settings.set('language', this.els.chkLanguage.checked ? 'en' : 'de');
+                this.updateLanguageUI();
+            };
+        }
 
         // Theme radios
         const themeRadios = document.querySelectorAll('input[name="theme"]');
-        themeRadios.forEach(r => {
-            r.checked = (r.value === s.theme);
-            r.addEventListener('change', () => {
-                settings.set('theme', r.value);
+        if (themeRadios.length > 0) {
+            themeRadios.forEach(r => {
+                r.checked = (r.value === s.theme);
+                r.addEventListener('change', () => {
+                    settings.set('theme', r.value);
+                });
             });
-        });
+        }
         
         // Animation speed radios
         const speedRadios = document.querySelectorAll('input[name="animSpeed"]');
-        speedRadios.forEach(r => {
-            r.checked = (parseFloat(r.value) === s.animationSpeed);
-            r.addEventListener('change', () => {
-                settings.set('animationSpeed', parseFloat(r.value));
+        if (speedRadios.length > 0) {
+            speedRadios.forEach(r => {
+                r.checked = (parseFloat(r.value) === s.animationSpeed);
+                r.addEventListener('change', () => {
+                    settings.set('animationSpeed', parseFloat(r.value));
+                });
             });
-        });
+        }
         
         // Live score toggle
         const liveScoreChk = document.getElementById('chk-live-score');
-        liveScoreChk.checked = s.showLiveScore;
-        liveScoreChk.addEventListener('change', () => {
-            settings.set('showLiveScore', liveScoreChk.checked);
-        });
+        if (liveScoreChk) {
+            liveScoreChk.checked = s.showLiveScore;
+            liveScoreChk.addEventListener('change', () => {
+                settings.set('showLiveScore', liveScoreChk.checked);
+            });
+        }
 
         // Sound toggle
         const soundChk = document.getElementById('chk-sound');

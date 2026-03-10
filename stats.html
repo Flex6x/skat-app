@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skat - Statistics</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="menu-header">
+        <div class="header-left" id="btn-logo-home" style="cursor: pointer;" onclick="window.location.href='index.html'">
+            <div class="app-logo">S</div>
+            <span class="app-name">Skat</span>
+        </div>
+    </header>
+
+    <div id="main-menu" class="menu-overlay">
+        <div class="menu-content" id="stats-view">
+            <header class="view-header">
+                <h1 data-i18n="statistics">Statistics</h1>
+            </header>
+
+            <div class="stats-dashboard">
+                <div class="stat-card">
+                    <span class="stat-label" data-i18n="total_lists">Total Lists</span>
+                    <span id="stat-total-games" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label" data-i18n="win_ratio">Win Ratio</span>
+                    <span id="stat-win-ratio" class="stat-value">0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label" data-i18n="best_streak">Best Streak</span>
+                    <span id="stat-win-streak" class="stat-value">0</span>
+                </div>
+            </div>
+
+            <div class="stats-table-full-container">
+                <table id="stats-table">
+                    <thead>
+                        <tr>
+                            <th data-i18n="date">Datum</th>
+                            <th data-i18n="winner">Gewinner</th>
+                            <th data-i18n="pts_aicore">Aicore</th>
+                            <th data-i18n="pts_aiden">Aiden</th>
+                            <th id="stats-player-name-head">Du</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-table-body">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="menu-buttons footer-actions">
+                <button id="btn-back-menu" class="btn primary large-btn" data-i18n="back_to_menu" onclick="window.location.href='index.html'">Zurück zum Menü</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/settings.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.appSettings = new Settings();
+            const ui = new UI();
+            ui.updateLanguageUI();
+            ui.renderStats();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skat - Tutorial</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation / Header -->
+    <header class="menu-header" style="position: absolute; width: 100%; z-index: 100;">
+        <div class="header-left" id="btn-logo-home" style="cursor: pointer;" onclick="window.location.href='index.html'">
+            <div class="app-logo">S</div>
+            <span class="app-name">Skat</span>
+        </div>
+    </header>
+
+    <div id="game-container">
+        <!-- Minimal game elements for tutorial to point to -->
+        <div class="game-info-container">
+            <div class="game-info-top">
+                <div>Alleinspieler: -</div>
+                <div>Reizwert: -</div>
+                <div>Trumpf: -</div>
+                <div>Zug: -</div>
+            </div>
+        </div>
+
+        <div id="bots-area">
+            <div id="bot2" class="player-zone"><div class="player-info">Aicore</div></div>
+            <div id="bot1" class="player-zone"><div class="player-info">Aiden</div></div>
+        </div>
+
+        <div id="table-area">
+             <div id="trick-zone"></div>
+             <div id="bidding-overlay" class="overlay hidden" style="position: relative; top: 0; left: 0; transform: none; margin: 20px auto;">
+                <h2 data-i18n="wait_bidding">Reizen</h2>
+            </div>
+            <div id="trump-overlay" class="overlay hidden" style="position: relative; top: 0; left: 0; transform: none; margin: 20px auto;">
+                <h2 data-i18n="choose_trump">Trumpf wählen</h2>
+            </div>
+        </div>
+
+        <div id="player-area" class="player-zone">
+            <div class="player-info">Du</div>
+            <div id="player-hand" class="cards-container player-cards">
+                <!-- Some dummy cards for tutorial -->
+                <div class="card card-back"></div>
+                <div class="card card-back"></div>
+                <div class="card card-back"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div id="tutorial-overlay" class="tutorial-overlay">
+        <div class="tutorial-spotlight" id="tutorial-spotlight"></div>
+        <div class="tutorial-card" id="tutorial-card">
+            <div class="tutorial-header">
+                <span id="tutorial-step-indicator">Step 1 of 6</span>
+                <button id="btn-skip-tutorial" class="btn-skip" data-i18n="skip_tutorial" onclick="window.location.href='index.html'">Skip</button>
+            </div>
+            <div class="tutorial-body">
+                <p id="tutorial-text"></p>
+            </div>
+            <div class="tutorial-footer">
+                <button id="btn-prev-tutorial" class="btn secondary" data-i18n="back">Back</button>
+                <button id="btn-next-tutorial" class="btn primary" data-i18n="next">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/settings.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/tutorial.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.appSettings = new Settings();
+            const ui = new UI();
+            ui.updateLanguageUI();
+            const tutorial = new Tutorial(ui);
+            
+            // Override tutorial finish behavior
+            const originalFinish = tutorial.finish;
+            tutorial.finish = () => {
+                localStorage.setItem('skat_tutorial_completed', 'true');
+                window.location.href = 'index.html';
+            };
+            
+            tutorial.start();
+        });
+    </script>
+</body>
+
+</html>
