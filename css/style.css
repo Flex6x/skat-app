@@ -569,12 +569,13 @@ body {
 }
 
 #stats-table th {
-    background: rgba(255, 255, 255, 0.1);
+    background: #1a1a1a; /* Fully opaque background */
     padding: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     position: sticky;
     top: 0;
+    z-index: 10;
 }
 
 #stats-table td {

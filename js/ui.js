@@ -13,6 +13,7 @@ const TRANSLATIONS = {
         best_streak: "Beste Serie",
         date: "Datum",
         winner: "Gewinner",
+        rounds: "Runden",
         pts_aicore: "Aicore",
         pts_aiden: "Aiden",
         back_to_menu: "Hauptmenü",
@@ -676,18 +677,32 @@ class UI {
         // Render Table (Newest first)
         [...stats].reverse().forEach(list => {
             const tr = document.createElement('tr');
-            let winnerDisplay = list.winner;
-            if (winnerDisplay === 'Du') winnerDisplay = playerName;
-            if (winnerDisplay === 'Unentschieden') winnerDisplay = this.getTranslation('draw');
+            const scores = list.scores;
+            const names = ['Aicore', 'Aiden', playerName];
+            
+            // Find max score
+            const maxScore = Math.max(...scores);
+            const winnersIndices = [];
+            scores.forEach((s, i) => {
+                if (s === maxScore) winnersIndices.push(i);
+            });
 
-            const isWinner = list.winner === playerName || list.winner === 'Du';
+            let winnerDisplay = '';
+            let isUserWinner = winnersIndices.includes(2);
+
+            if (winnersIndices.length === 3) {
+                winnerDisplay = this.getTranslation('draw');
+            } else {
+                winnerDisplay = winnersIndices.map(i => names[i]).join(' & ');
+            }
             
             tr.innerHTML = `
                 <td>${list.date}</td>
-                <td style="font-weight: bold; color: ${isWinner ? '#4caf50' : '#fff'}">${winnerDisplay}</td>
-                <td>${list.scores[0]}</td>
-                <td>${list.scores[1]}</td>
-                <td>${list.scores[2]}</td>
+                <td style="font-weight: bold; color: ${isUserWinner ? '#4caf50' : '#fff'}">${winnerDisplay}</td>
+                <td>${list.rounds || '-'}</td>
+                <td>${scores[0]}</td>
+                <td>${scores[1]}</td>
+                <td>${scores[2]}</td>
             `;
             this.els.statsTableBody.appendChild(tr);
         });
