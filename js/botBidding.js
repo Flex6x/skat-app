@@ -57,23 +57,23 @@ class BotBidding {
             else if (card.rank === 'A' || card.rank === '10') highCards++;
         });
 
-        // Tighter Probability model
+        // Even tighter Probability model
         let prob = 0;
         if (jacks <= 1) {
             prob = 0;
         } else if (jacks === 2) {
             // Very cautious with only 2 jacks
-            if (highCards >= 3) prob = 0.15;
-            if (highCards >= 5) prob = 0.40;
+            if (highCards >= 3) prob = 0.10;
+            if (highCards >= 5) prob = 0.30;
         } else if (jacks === 3) {
             // 3 Jacks is better, but still needs backup
-            prob = 0.30;
-            if (highCards >= 2) prob += 0.30;
+            prob = 0.20;
+            if (highCards >= 2) prob += 0.25;
             if (highCards >= 4) prob += 0.20;
         } else if (jacks === 4) {
-            // 4 Jacks is usually a go, but not 100% without points
-            prob = 0.80;
-            if (highCards >= 2) prob = 0.95;
+            // 4 Jacks is usually a go, but still slightly lowered base
+            prob = 0.70;
+            if (highCards >= 2) prob = 0.90;
         }
 
         const willBid = Math.random() < prob;

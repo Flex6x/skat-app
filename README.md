@@ -13,6 +13,6 @@
 - karten sollen am ende eines spiels zum bsp eines abbgrebochenen nulls zum stappel schwirren.
 - settings.html scrollbar machen
 - wenn ein bot, sieht, dass der stich für sich/sein team schon verloren ist und nichts mehr daran ändern kann, soll er probieren möglichst augen reinzuwerfen.
-- grand chance für bots zu hoch noch (basiert zu sehr auf unter konstellation)
+
 
 ## Bugs:
