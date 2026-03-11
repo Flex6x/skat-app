@@ -24,6 +24,26 @@ class BotBidding {
      * @returns {Object} Analyse-Ergebnis mit { willBid, trumpSuit, maxBid, strengthScore }
      */
     evaluateHand(hand) {
+        // Evaluate regular game (Suit/Grand)
+        const regularData = this.evaluateSuitHand(hand);
+        
+        // Evaluate Null game
+        const nullData = this.evaluateNullHand(hand);
+        
+        // Decide which one is better
+        // Prioritize suit game if it has a high score/maxBid
+        if (regularData.willBid && regularData.maxBid >= 23 && regularData.strengthScore >= 7) {
+            return regularData;
+        }
+        
+        if (nullData.willBid) {
+            return nullData;
+        }
+
+        return regularData;
+    }
+
+    evaluateSuitHand(hand) {
         let numberOfJacks = 0;
         let suitCounts = {
             'Eichel': 0,
@@ -55,10 +75,7 @@ class BotBidding {
             }
         }
 
-        // 3. Zähle zusätzliche Asse (Asse, die NICHT in der stärksten Farbe und KEIN Unter sind)
-        // Die Anforderung "egal welche Farbe" kann als alle Asse interpretiert werden, 
-        // oder Asse außerhalb der Trumpffarbe. Wir zählen hier Asse außerhalb der potenziellen Trumpffarbe,
-        // da das Trumpf-Ass schon Teil der `maxCardsInSuit` ist, um doppeltes Zählen zu vermeiden.
+        // 3. Zähle zusätzliche Asse
         hand.forEach(card => {
             if (card.rank === 'A' && card.suit !== bestSuit && card.rank !== 'U') {
                 extraAces++;
@@ -76,18 +93,13 @@ class BotBidding {
         else if (strengthScore === 7) bidProbability = 0.90;
         else if (strengthScore >= 8) bidProbability = 1.00;
 
-        // Entscheide per Zufall, ob der Bot überhaupt mitreizt
-        // Verwende Math.random(), das einen Wert zwischen 0 (inkl.) und 1 (exkl.) liefert.
         let willBid = false;
         if (strengthScore >= 5) {
             willBid = Math.random() < bidProbability;
         }
 
         let maxBid = 0;
-
         if (willBid) {
-            // Vereinfachte Berechnung des maximalen Reizwerts: 
-            // Grundwert der Farbe * (Anzahl Unter + 1)
             const baseValue = this.suitBaseValues[bestSuit];
             const multiplier = numberOfJacks + 1;
             maxBid = baseValue * multiplier;
@@ -97,7 +109,60 @@ class BotBidding {
             willBid: willBid,
             trumpSuit: bestSuit,
             maxBid: maxBid,
-            strengthScore: strengthScore
+            strengthScore: strengthScore,
+            type: 'suit'
+        };
+    }
+
+    evaluateNullHand(hand) {
+        const luschenRanks = ['7', '8', '9'];
+        const highRanks = ['A', '10', 'K'];
+        
+        let luschenCount = 0;
+        let dangerousHighCards = 0;
+        
+        const suitGroups = {
+            'Eichel': [],
+            'Grün': [],
+            'Rot': [],
+            'Schellen': []
+        };
+        
+        hand.forEach(card => {
+            if (luschenRanks.includes(card.rank)) {
+                luschenCount++;
+            }
+            suitGroups[card.suit].push(card);
+        });
+        
+        // Check for dangerous cards (high cards in short suits)
+        for (const suit in suitGroups) {
+            const group = suitGroups[suit];
+            if (group.length > 0 && group.length <= 2) {
+                const hasHigh = group.some(c => highRanks.includes(c.rank));
+                if (hasHigh) dangerousHighCards++;
+            }
+        }
+        
+        // Probability based on luschenCount and dangerous cards
+        let prob = 0;
+        if (luschenCount <= 4) prob = 0;
+        else if (luschenCount === 5) prob = 0.15;
+        else if (luschenCount === 6) prob = 0.40;
+        else if (luschenCount === 7) prob = 0.70;
+        else if (luschenCount >= 8) prob = 0.90;
+        
+        // Decrease probability for each dangerous card
+        prob = Math.max(0, prob - (dangerousHighCards * 0.25));
+        
+        const willBid = Math.random() < prob;
+        
+        return {
+            willBid: willBid,
+            trumpSuit: 'Null',
+            maxBid: 23,
+            strengthScore: luschenCount,
+            type: 'null'
         };
     }
 

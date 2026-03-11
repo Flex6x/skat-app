@@ -246,9 +246,22 @@ class Game {
         
         this.sortHand(botHand);
         
-        const d1 = botHand.pop();
-        const d2 = botHand.pop();
+        // Discard logic
+        let d1, d2;
+        if (this.trumpMode === TRUMP_MODES.NULL) {
+            // In Null games, discard the two HIGHEST cards to avoid winning tricks
+            botHand.sort((a, b) => NULL_RANK_POWER[b.rank] - NULL_RANK_POWER[a.rank]);
+            d1 = botHand.shift();
+            d2 = botHand.shift();
+        } else {
+            // In Suit/Grand games, discard two non-trump cards (usually lowest or according to some logic)
+            // For now, keep the simple pop() which usually removes cards from the end of sorted hand
+            d1 = botHand.pop();
+            d2 = botHand.pop();
+        }
+        
         this.skat.push(d1, d2);
+        this.sortHand(botHand); // Resort after discarding
         
         this.ui.updateSkatZone(false);
         this.ui.renderBotHand(this.declarerIndex, botHand.length);
@@ -346,7 +359,7 @@ class Game {
             // Bot's turn
             await this.delay(800 + Math.random() * 500); // 0.8s - 1.3s delay
             const aiController = this.aiControllers[currentPlayer.id];
-            const selectedCard = aiController.chooseCard(validMoves, this.currentTrick, this.trumpMode);
+            const selectedCard = aiController.chooseCard(validMoves, this.currentTrick, this.trumpMode, this.declarerIndex);
             await this.playCard(this.turnIndex, selectedCard.id);
         }
     }

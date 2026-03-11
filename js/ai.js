@@ -9,8 +9,20 @@ class AIController {
     }
 
     // Returns a Card object to play
-    chooseCard(validMoves, currentTrick, trumpMode) {
+    chooseCard(validMoves, currentTrick, trumpMode, declarerIndex) {
         if (validMoves.length === 1) return validMoves[0];
+
+        // Null game strategy
+        if (trumpMode === 'Null') {
+            const isDeclarer = (this.id === declarerIndex);
+            if (isDeclarer) {
+                // As declarer: stay as low as possible
+                return this.getLowestCard(validMoves, 'Null');
+            } else {
+                // As defender: force declarer to take trick
+                return this.chooseNullDefenseCard(validMoves, currentTrick);
+            }
+        }
 
         // Basic Heuristic:
         // 1. If leading, play non-trump high card or small trump.
@@ -30,6 +42,37 @@ class AIController {
         } else {
             // Can't win (or don't want to waste high card), play absolute lowest
             return this.getLowestCard(validMoves, trumpMode);
+        }
+    }
+
+    chooseNullDefenseCard(validMoves, currentTrick) {
+        // If leading, play a low card to see if declarer has to win it
+        if (currentTrick.cards.length === 0) {
+            return this.getLowestCard(validMoves, 'Null');
+        }
+
+        // If following
+        const rp = NULL_RANK_POWER;
+        const leadSuit = currentTrick.leadSuit;
+        
+        // Can we follow suit?
+        const canFollow = validMoves.some(c => c.suit === leadSuit);
+        
+        if (canFollow) {
+            // Try to play BELOW the highest card in trick if possible, or play lowest
+            const highestInTrick = this.getHighestCardLevel(currentTrick, 'Null');
+            const lowerCards = validMoves.filter(c => c.suit === leadSuit && rp[c.rank] < rp[highestInTrick.rank]);
+            
+            if (lowerCards.length > 0) {
+                // Play highest of the lower cards (staying under but as high as possible)
+                return this.getHighestCard(lowerCards, 'Null');
+            } else {
+                // Must play higher than current highest or no lower cards
+                return this.getLowestCard(validMoves, 'Null');
+            }
+        } else {
+            // Can't follow suit: throw away high cards to increase chance declarer wins lead suit
+            return this.getHighestCard(validMoves, 'Null');
         }
     }
 
