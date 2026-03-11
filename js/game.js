@@ -359,7 +359,8 @@ class Game {
             // Bot's turn
             await this.delay(800 + Math.random() * 500); // 0.8s - 1.3s delay
             const aiController = this.aiControllers[currentPlayer.id];
-            const selectedCard = aiController.chooseCard(validMoves, this.currentTrick, this.trumpMode, this.declarerIndex);
+            const isRamsch = (this.phase === PHASES.RAMSCH);
+            const selectedCard = aiController.chooseCard(validMoves, this.currentTrick, this.trumpMode, this.declarerIndex, isRamsch);
             await this.playCard(this.turnIndex, selectedCard.id);
         }
     }

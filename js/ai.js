@@ -9,7 +9,7 @@ class AIController {
     }
 
     // Returns a Card object to play
-    chooseCard(validMoves, currentTrick, trumpMode, declarerIndex) {
+    chooseCard(validMoves, currentTrick, trumpMode, declarerIndex, isRamsch = false) {
         if (validMoves.length === 1) return validMoves[0];
 
         // Null game strategy
@@ -22,6 +22,11 @@ class AIController {
                 // As defender: force declarer to take trick
                 return this.chooseNullDefenseCard(validMoves, currentTrick);
             }
+        }
+
+        // Ramsch strategy (similar to Null but with points consideration)
+        if (isRamsch) {
+            return this.chooseRamschCard(validMoves, currentTrick, trumpMode);
         }
 
         // Basic Heuristic:
@@ -43,6 +48,53 @@ class AIController {
             // Can't win (or don't want to waste high card), play absolute lowest
             return this.getLowestCard(validMoves, trumpMode);
         }
+    }
+
+    chooseRamschCard(validMoves, currentTrick, trumpMode) {
+        // If leading, play a low card (lowest rank)
+        if (currentTrick.cards.length === 0) {
+            return this.getLowestCard(validMoves, trumpMode);
+        }
+
+        // If following
+        const leadSuit = currentTrick.leadSuit;
+        const canFollow = validMoves.some(c => this.getEffectiveSuit(c, trumpMode) === leadSuit);
+        
+        if (canFollow) {
+            // Must follow suit. Try to play BELOW the current highest to avoid winning.
+            const highestInTrick = this.getHighestCardLevel(currentTrick, trumpMode);
+            const lowerCards = validMoves.filter(c => 
+                this.getEffectiveSuit(c, trumpMode) === leadSuit && 
+                !this.beatsCard(c, highestInTrick, leadSuit, trumpMode)
+            );
+            
+            if (lowerCards.length > 0) {
+                // Play highest of the lower cards (staying under but as high as possible)
+                // This gets rid of cards without winning the trick
+                return this.getHighestCard(lowerCards, trumpMode);
+            } else {
+                // Must win the trick or no lower cards: win with absolute LOWEST card possible
+                return this.getLowestCard(validMoves, trumpMode);
+            }
+        } else {
+            // Cannot follow suit: Abwerfen!
+            // Prefer discarding high-POINT cards (Ace, 10, King) to get rid of them safely
+            return this.getHighestPointCard(validMoves);
+        }
+    }
+
+    getHighestPointCard(cards) {
+        return cards.reduce((highest, current) => {
+            const pCurrent = CARD_VALUES[current.rank] || 0;
+            const pHighest = CARD_VALUES[highest.rank] || 0;
+            if (pCurrent > pHighest) return current;
+            // If points same, use rank power as secondary
+            if (pCurrent === pHighest) {
+                const rp = RANK_POWER;
+                return rp[current.rank] > rp[highest.rank] ? current : highest;
+            }
+            return highest;
+        }, cards[0]);
     }
 
     chooseNullDefenseCard(validMoves, currentTrick) {
