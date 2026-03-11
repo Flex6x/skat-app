@@ -13,7 +13,8 @@ class Settings {
         nickname: 'Du',
         language: 'de',
         ruleSet: 'tournament', // 'tournament' or 'pub'
-        dragDropEnabled: true
+        dragDropEnabled: true,
+        batterySaver: false
     };
 
     static SPEED_MAP = {

@@ -134,8 +134,9 @@ class CardAnimations {
 
     async animateDealSequence(forehandIndex, uiPlayers) {
         this.isAborted = false; // Reset on start
+        const isBatterySaver = (typeof appSettings !== 'undefined') && appSettings.current.batterySaver;
+        
         const deckEl = document.getElementById('deck-zone');
-        // ... (rest of initial setup)
         const skatSlots = this.ui.els.skatZone.querySelectorAll('.card-slot');
 
         this.ui.els.skatZone.classList.remove('hidden');
@@ -173,12 +174,7 @@ class CardAnimations {
         for (const step of sequence) {
             if (this.isAborted) break;
             
-            // Play drag sound for each packet
-            this.ui.playSound('drag');
-
-            const tempPacket = this.createTempPacket(step.count);
             let targetEl;
-            // ... (rest of loop)
             if (step.target === 'skat') {
                 targetEl = skatSlots[skatReceived];
             } else {
@@ -188,7 +184,12 @@ class CardAnimations {
             }
 
             if (targetEl) {
-                await this.animateCardMove(tempPacket, deckEl, targetEl, this.dealDuration);
+                if (!isBatterySaver) {
+                    this.ui.playSound('drag');
+                    const tempPacket = this.createTempPacket(step.count);
+                    await this.animateCardMove(tempPacket, deckEl, targetEl, this.dealDuration);
+                }
+
                 if (this.isAborted) break;
 
                 for (let i = 0; i < step.count; i++) {
@@ -216,7 +217,10 @@ class CardAnimations {
                         }
                     }
                 }
-                await this.delay(this.delayBetweenDeals);
+                
+                if (!isBatterySaver) {
+                    await this.delay(this.delayBetweenDeals);
+                }
             }
         }
 
@@ -227,8 +231,15 @@ class CardAnimations {
      * Animates gathering a trick to the winner's area
      */
     async animateCollectTrick(winnerId) {
+        const isBatterySaver = (typeof appSettings !== 'undefined') && appSettings.current.batterySaver;
+
+        if (isBatterySaver) {
+            this.ui.clearTrickZone();
+            return;
+        }
+
         const trickZones = [
-            this.ui.els.trickBot2.firstElementChild, // slot 0 might be under another bot? 
+            this.ui.els.trickBot2.firstElementChild, 
             this.ui.els.trickBot1.firstElementChild,
             this.ui.els.trickPlayer.firstElementChild
         ];

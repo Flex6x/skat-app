@@ -379,7 +379,8 @@ class Game {
 
     async resolveTrick() {
         if (this.aborted) return;
-        await this.delay(1000); // Shorter wait before animating
+        const isBatterySaver = (typeof appSettings !== 'undefined') && appSettings.current.batterySaver;
+        await this.delay(isBatterySaver ? 400 : 1000); // Shorter wait before animating
         if (this.aborted) return;
         
         if (!this.animations) this.animations = new CardAnimations(this.ui);

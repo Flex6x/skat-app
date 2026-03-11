@@ -36,6 +36,7 @@ const TRANSLATIONS = {
         show_live_points: "Punkte live anzeigen",
         activate_sounds: "Sounds aktivieren",
         drag_drop: "Drag & Drop aktivieren",
+        battery_saver: "Akkusparmodus",
         data: "Daten",
         delete_stats: "Statistiken löschen",
         back: "Zurück",
@@ -122,6 +123,7 @@ const TRANSLATIONS = {
         show_live_points: "Show live points",
         activate_sounds: "Enable sounds",
         drag_drop: "Enable Drag & Drop",
+        battery_saver: "Battery Saver",
         data: "Data",
         delete_stats: "Delete Statistics",
         back: "Back",
@@ -619,6 +621,15 @@ class UI {
             dragDropChk.checked = s.dragDropEnabled;
             dragDropChk.addEventListener('change', () => {
                 settings.set('dragDropEnabled', dragDropChk.checked);
+            });
+        }
+
+        // Battery Saver toggle
+        const batterySaverChk = document.getElementById('chk-battery-saver');
+        if (batterySaverChk) {
+            batterySaverChk.checked = s.batterySaver;
+            batterySaverChk.addEventListener('change', () => {
+                settings.set('batterySaver', batterySaverChk.checked);
             });
         }
     }
