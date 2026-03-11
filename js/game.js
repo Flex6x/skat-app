@@ -231,7 +231,6 @@ class Game {
                         // Resort and Re-render hand legally
                         this.sortHand(this.players[this.declarerIndex].hand);
                         this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
-                        this.ui.updateSkatPile(true); // Show pile on table
                         this.startTrumpSelection();
                     });
                 },
@@ -294,7 +293,6 @@ class Game {
         this.sortHand(botHand); // Resort after discarding
         
         this.ui.updateSkatZone(false);
-        this.ui.updateSkatPile(true); // Show pile back on table near declarer
         this.ui.renderBotHand(this.declarerIndex, botHand.length);
         this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt ${this.trumpMode}.`);
         await this.delay(1500);
@@ -344,6 +342,11 @@ class Game {
         this.phase = PHASES.PLAYING;
         // Originale Karten des Alleinspielers sichern (Hand + Skat) für Spitzenberechnung
         this.originalDeclarerHand = [...this.players[this.declarerIndex].hand, ...this.skat];
+        
+        // Visuals: Hide skat pile and initialize trick piles (declarer gets 2 cards)
+        this.ui.updateSkatPile(false);
+        this.ui.updateTrickPiles(this.players, this.declarerIndex, false);
+        
         this.turnIndex = this.forehandIndex;
         this.processTurn();
     }

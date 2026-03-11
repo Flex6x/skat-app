@@ -13,6 +13,8 @@
 - karten sollen am ende eines spiels zum bsp eines abbgrebochenen nulls zum stappel schwirren.
 - settings.html scrollbar machen.
 - wenn ein bot, sieht, dass der stich für sich/sein team schon verloren ist und nichts mehr daran ändern kann, soll er probieren möglichst augen reinzuwerfen.
+- klare trennung von Headline zum weiteren teil der seite: es überschneidet sonst
+- trumpf nach jeder Runde INSTANT zurücksetzen (in Infobox steht bis ende der reizphase der alte trumpf)
 
 
 ## Bugs:

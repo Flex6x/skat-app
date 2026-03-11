@@ -1269,9 +1269,9 @@ class UI {
                 this.renderPileCards(`pile-p${i}`, players[i].tricks.length / 3);
             }
         } else {
-            // Declarer pile
+            // Declarer pile: 2 skat cards + trickCount
             const declarer = players[declarerIndex];
-            this.renderPileCards('pile-declarer', declarer.tricks.length / 3);
+            this.renderPileCards('pile-declarer', declarer.tricks.length / 3, 2);
 
             // Defenders pile (shared)
             let defenderTricks = 0;
@@ -1288,31 +1288,59 @@ class UI {
         
         if (visible) {
             pSkat.innerHTML = '';
+            // We only use this for the initial skat on table before bidding/discarding
+            // Chaotic look here too
             for (let i = 0; i < 2; i++) {
                 const back = document.createElement('div');
                 back.classList.add('card', 'card-back');
+                
+                const rot = (Math.random() * 10) - 5;
+                const ox = (Math.random() * 4) - 2;
+                const oy = (Math.random() * 4) - 2;
+                back.style.transform = `translate(${ox}px, ${oy}px) rotate(${rot}deg)`;
+                
                 pSkat.appendChild(back);
             }
+            pSkat.classList.remove('hidden');
             pSkat.classList.add('has-cards');
         } else {
-            pSkat.innerHTML = '';
+            pSkat.classList.add('hidden');
             pSkat.classList.remove('has-cards');
         }
     }
 
-    renderPileCards(pileId, trickCount) {
+    renderPileCards(pileId, trickCount, extraCards = 0) {
         const el = document.getElementById(pileId);
         if (!el) return;
-        el.innerHTML = '';
-        if (trickCount > 0) {
+        
+        const totalCards = trickCount + extraCards;
+        const targetVisualCount = Math.min(totalCards, 6);
+        const currentVisualCount = el.querySelectorAll('.card-back').length;
+        
+        if (targetVisualCount > 0) {
             el.classList.add('has-cards');
-            const visualCount = Math.min(trickCount, 5);
-            for (let i = 0; i < visualCount; i++) {
+            
+            // Only add cards if we haven't reached the target visual count yet
+            for (let i = currentVisualCount; i < targetVisualCount; i++) {
                 const back = document.createElement('div');
                 back.classList.add('card', 'card-back');
+                
+                // Chaotic Natural Vibe:
+                let rotation = (Math.random() * 30) - 15;
+                const offsetX = (Math.random() * 6) - 3;
+                const offsetY = (Math.random() * 6) - 3;
+                
+                if (Math.random() > 0.75) {
+                    rotation += (Math.random() > 0.5 ? 90 : -90);
+                }
+                
+                back.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg)`;
+                back.style.zIndex = i;
+                
                 el.appendChild(back);
             }
         } else {
+            el.innerHTML = '';
             el.classList.remove('has-cards');
         }
     }
