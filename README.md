@@ -18,6 +18,8 @@
 - bei reiz ansicht am schluss: aktuell steht Spiel immer ohne index da.
 - bei ramsch sollen die bots versuchen nicht so vuel pkt und erlangen.
 - karten sollen am ende eines spiels zum bsp eines abbgrebochenen nulls zum stappel schwirren.
+- kopfzeile in tutorial entfernen.
+- settings.html scrollbar machen
 
 ## Bugs:
 

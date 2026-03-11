@@ -17,13 +17,13 @@ class Tutorial {
             {
                 element: '#bidding-overlay',
                 textKey: 'tut_step2',
-                position: 'side',
+                position: 'right',
                 onShow: () => this.ui.els.biddingOverlay.classList.remove('hidden')
             },
             {
                 element: '#trump-overlay',
                 textKey: 'tut_step3',
-                position: 'side',
+                position: 'left',
                 onShow: () => {
                     this.ui.els.biddingOverlay.classList.add('hidden');
                     this.ui.els.trumpOverlay.classList.remove('hidden');
@@ -153,6 +153,12 @@ class Tutorial {
         } else if (preferredPos === 'bottom') {
             left = targetRect.left + (targetRect.width / 2) - (cardWidth / 2);
             top = targetRect.bottom + padding;
+        } else if (preferredPos === 'left') {
+            left = targetRect.left - cardWidth - padding;
+            top = targetRect.top + (targetRect.height / 2) - 150;
+        } else if (preferredPos === 'right') {
+            left = targetRect.right + padding;
+            top = targetRect.top + (targetRect.height / 2) - 150;
         } else {
             // Center
             left = window.innerWidth / 2 - cardWidth / 2;
