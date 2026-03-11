@@ -57,16 +57,24 @@ class BotBidding {
             else if (card.rank === 'A' || card.rank === '10') highCards++;
         });
 
-        // Probability model
+        // Tighter Probability model
         let prob = 0;
-        if (jacks <= 1) prob = 0;
-        else if (jacks === 2) {
-            prob = 0.10;
+        if (jacks <= 1) {
+            prob = 0;
+        } else if (jacks === 2) {
+            // Very cautious with only 2 jacks
+            if (highCards >= 3) prob = 0.15;
+            if (highCards >= 5) prob = 0.40;
+        } else if (jacks === 3) {
+            // 3 Jacks is better, but still needs backup
+            prob = 0.30;
             if (highCards >= 2) prob += 0.30;
             if (highCards >= 4) prob += 0.20;
+        } else if (jacks === 4) {
+            // 4 Jacks is usually a go, but not 100% without points
+            prob = 0.80;
+            if (highCards >= 2) prob = 0.95;
         }
-        else if (jacks === 3) prob = 0.75;
-        else if (jacks === 4) prob = 0.95;
 
         const willBid = Math.random() < prob;
         const matadors = this.countMatadors(hand, 'Grand');
@@ -78,7 +86,7 @@ class BotBidding {
             trumpSuit: 'Grand',
             maxBid: maxBidNormal,
             maxBidHand: maxBidHand,
-            strengthScore: jacks + (highCards * 0.5),
+            strengthScore: jacks + (highCards * 0.6), // Slightly higher weight for high cards in Grand
             type: 'grand'
         };
     }
