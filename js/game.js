@@ -201,6 +201,7 @@ class Game {
                 // Take Skat
                 () => {
                     this.handGame = false;
+                    this.ui.updateSkatZone(false);
                     // Start dragging game: The two cards in this.skat are shown in slots
                     this.ui.showSkatDiscardUI(this.players[this.declarerIndex].hand, this.skat, (discardedIds) => {
                         // The user confirmed physically what 2 cards go into skat. 
@@ -248,6 +249,7 @@ class Game {
         const d2 = botHand.pop();
         this.skat.push(d1, d2);
         
+        this.ui.updateSkatZone(false);
         this.ui.renderBotHand(this.declarerIndex, botHand.length);
         this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt ${this.trumpMode}.`);
         await this.delay(1500);

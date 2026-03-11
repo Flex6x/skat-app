@@ -815,7 +815,12 @@ class UI {
         });
     }
 
-    updateSkatZone(skatCards) {
+    updateSkatZone(visible = true) {
+        if (!visible) {
+            this.els.skatZone.classList.add('hidden');
+            return;
+        }
+        this.els.skatZone.classList.remove('hidden');
         const slots = this.els.skatZone.querySelectorAll('.card-slot');
         slots.forEach(s => {
             s.innerHTML = '';
@@ -1098,7 +1103,6 @@ class UI {
                  c.parentNode.replaceChild(newC, c);
              });
              
-             this.updateSkatZone(); 
              onConfirm([finalSkatId1, finalSkatId2]);
         };
     }
