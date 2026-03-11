@@ -51,11 +51,9 @@ class Tutorial {
         this.spotlight = document.getElementById('tutorial-spotlight');
         this.card = document.getElementById('tutorial-card');
         this.text = document.getElementById('tutorial-text');
-        this.indicator = document.getElementById('tutorial-step-indicator');
         
         this.btnNext = document.getElementById('btn-next-tutorial');
         this.btnPrev = document.getElementById('btn-prev-tutorial');
-        this.btnSkip = document.getElementById('btn-skip-tutorial');
 
         this.initEvents();
     }
@@ -63,7 +61,6 @@ class Tutorial {
     initEvents() {
         this.btnNext.onclick = () => this.next();
         this.btnPrev.onclick = () => this.prev();
-        this.btnSkip.onclick = () => this.stop();
     }
 
     start() {
@@ -111,7 +108,6 @@ class Tutorial {
 
         // Update Text
         this.text.textContent = this.ui.getTranslation(step.textKey);
-        this.indicator.textContent = `${this.ui.getTranslation('step')} ${this.currentStep + 1} / ${this.steps.length}`;
         
         // Spotlight
         if (el) {

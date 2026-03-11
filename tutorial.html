@@ -10,19 +10,6 @@
 </head>
 
 <body>
-    <!-- Navigation / Header -->
-    <header class="menu-header" style="position: absolute; width: 100%; z-index: 100;">
-        <div class="header-left" id="btn-logo-home" style="cursor: pointer;" onclick="window.location.href='index.html'">
-            <div class="app-logo">S</div>
-            <span class="app-name">Skat</span>
-        </div>
-        <nav class="header-right">
-            <button id="btn-show-tutorial" class="nav-link" data-i18n="tutorial" onclick="window.location.href='tutorial.html'">Tutorial</button>
-            <button id="btn-show-stats" class="nav-link" data-i18n="statistics" onclick="window.location.href='stats.html'">Statistics</button>
-            <button id="btn-show-settings" class="nav-link" data-i18n="settings" onclick="window.location.href='settings.html'">Settings</button>
-        </nav>
-    </header>
-
     <div id="game-container">
         <!-- Minimal game elements for tutorial to point to -->
         <div class="game-info-container">
@@ -64,10 +51,6 @@
     <div id="tutorial-overlay" class="tutorial-overlay">
         <div class="tutorial-spotlight" id="tutorial-spotlight"></div>
         <div class="tutorial-card" id="tutorial-card">
-            <div class="tutorial-header">
-                <span id="tutorial-step-indicator">Step 1 of 6</span>
-                <button id="btn-skip-tutorial" class="btn-skip" data-i18n="skip_tutorial" onclick="window.location.href='index.html'">Skip</button>
-            </div>
             <div class="tutorial-body">
                 <p id="tutorial-text"></p>
             </div>
