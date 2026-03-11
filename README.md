@@ -16,8 +16,8 @@
 - Null revolution: Bei Null eher niedrige karten spieln. Wenn bots sehr niedrige karten haben: Null ansagen könenn.
 - bots sollen versuchen, nicht zu überreizen.
 - bei reiz ansicht am schluss: aktuell steht Spiel immer ohne index da.
-- wenn skat aufgenommen wird, dann soll er kurz vom tisch verschwinden.
-- bei ramsch sollen die bots versuchen nicht so vuel pkt uhz erlangen.
+- bei ramsch sollen die bots versuchen nicht so vuel pkt und erlangen.
+- karten sollen am ende eines spiels zum bsp eines abbgrebochenen nulls zum stappel schwirren.
 
 ## Bugs:
 

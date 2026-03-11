@@ -65,6 +65,7 @@ class Game {
         this.trickCount = 0;
         this.aborted = false;
         this.lastTrick = null;
+        this.inputLocked = false;
         
         this.ui.resetLiveScore();
         // Setup Last trick binding
@@ -335,19 +336,22 @@ class Game {
         const validMoves = this.getValidMoves(this.turnIndex);
 
         if (currentPlayer.type === PLAYER_TYPES.HUMAN) {
-            this.ui.enablePlayerMoves(validMoves, (cardId) => {
-                this.playCard(this.turnIndex, cardId);
+            this.inputLocked = false;
+            this.ui.enablePlayerMoves(validMoves, async (cardId) => {
+                if (this.inputLocked || this.turnIndex !== 2) return;
+                this.inputLocked = true;
+                await this.playCard(this.turnIndex, cardId);
             });
         } else {
             // Bot's turn
             await this.delay(800 + Math.random() * 500); // 0.8s - 1.3s delay
             const aiController = this.aiControllers[currentPlayer.id];
             const selectedCard = aiController.chooseCard(validMoves, this.currentTrick, this.trumpMode);
-            this.playCard(this.turnIndex, selectedCard.id);
+            await this.playCard(this.turnIndex, selectedCard.id);
         }
     }
 
-    playCard(playerId, cardId) {
+    async playCard(playerId, cardId) {
         const card = this.removeCardFromHand(playerId, cardId);
         
         if (this.currentTrick.cards.length === 0) {
@@ -365,11 +369,11 @@ class Game {
 
         // Check if trick is full
         if (this.currentTrick.cards.length === 3) {
-            this.resolveTrick();
+            await this.resolveTrick();
         } else {
             // Next player
             this.turnIndex = (this.turnIndex + 1) % 3;
-            this.processTurn();
+            await this.processTurn();
         }
     }
 
@@ -419,7 +423,7 @@ class Game {
         } else {
             // Winner leads the next trick
             this.turnIndex = winnerId;
-            this.processTurn();
+            await this.processTurn();
         }
     }
 
