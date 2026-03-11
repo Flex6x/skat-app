@@ -173,6 +173,17 @@ class Game {
             // Winner found
             this.declarerIndex = declarerId;
             this.bidValue = finalBid;
+
+            // Check if bot needs to play 'Hand' to justify the bid
+            if (this.players[declarerId].type === PLAYER_TYPES.BOT) {
+                const botData = this.biddingController.botData[declarerId];
+                if (botData && finalBid > botData.maxBid) {
+                    this.handGame = true;
+                } else {
+                    this.handGame = false;
+                }
+            }
+
             this.ui.setDeclarer(this.players[this.declarerIndex].name, finalBid);
             this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt (${finalBid}).`);
             await this.delay(1500);
@@ -231,7 +242,21 @@ class Game {
     }
 
     async simulateBotSkatDecision() {
-        this.handGame = false;
+        if (this.handGame) {
+            this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt Hand.`);
+            await this.delay(1500);
+            
+            const botHand = this.players[this.declarerIndex].hand;
+            const data = this.botBidding.evaluateHand(botHand);
+            this.trumpMode = data.trumpSuit; 
+            this.ui.setTrump(this.trumpMode);
+            
+            this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt ${this.trumpMode} (Hand).`);
+            await this.delay(1500);
+            this.startGameplay();
+            return;
+        }
+
         this.ui.showMessage(`${this.players[this.declarerIndex].name} nimmt den Skat auf.`);
         await this.delay(1500);
         

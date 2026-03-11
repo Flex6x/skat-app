@@ -69,18 +69,15 @@ class BotBidding {
         else if (jacks === 4) prob = 0.95;
 
         const willBid = Math.random() < prob;
-        let maxBid = 0;
-
-        if (willBid) {
-            // Grand base value is 24
-            const matadors = this.countMatadors(hand, 'Grand');
-            maxBid = 24 * (matadors + 1);
-        }
+        const matadors = this.countMatadors(hand, 'Grand');
+        const maxBidNormal = 24 * (matadors + 1);
+        const maxBidHand = 24 * (matadors + 2);
 
         return {
             willBid: willBid,
             trumpSuit: 'Grand',
-            maxBid: maxBid,
+            maxBid: maxBidNormal,
+            maxBidHand: maxBidHand,
             strengthScore: jacks + (highCards * 0.5),
             type: 'grand'
         };
@@ -164,17 +161,21 @@ class BotBidding {
             willBid = Math.random() < bidProbability;
         }
 
-        let maxBid = 0;
-        if (willBid) {
-            const baseValue = this.suitBaseValues[bestSuit];
-            const multiplier = numberOfJacks + 1;
-            maxBid = baseValue * multiplier;
-        }
+        let maxBidNormal = 0;
+        let maxBidHand = 0;
+        const baseValue = this.suitBaseValues[bestSuit];
+        const matadors = this.countMatadors(hand, bestSuit);
+        
+        // Multiplier = Matadors + 1 (Spiel)
+        maxBidNormal = baseValue * (matadors + 1);
+        // Hand Multiplier = Matadors + 1 (Spiel) + 1 (Hand)
+        maxBidHand = baseValue * (matadors + 2);
 
         return {
             willBid: willBid,
             trumpSuit: bestSuit,
-            maxBid: maxBid,
+            maxBid: maxBidNormal,
+            maxBidHand: maxBidHand,
             strengthScore: strengthScore,
             type: 'suit'
         };
@@ -227,6 +228,7 @@ class BotBidding {
             willBid: willBid,
             trumpSuit: 'Null',
             maxBid: 23,
+            maxBidHand: 35,
             strengthScore: luschenCount,
             type: 'null'
         };
@@ -234,17 +236,16 @@ class BotBidding {
 
     /**
      * Entscheidet, ob der Bot bei einem aktuellen Reizwert weiter mitgeht oder passt.
-     * 
-     * @param {number} currentBid Aktueller Reizwert, der gehalten werden muss oder überboten werden soll.
-     * @param {Object} botData Das Ergebnis von evaluateHand (enthält willBid, maxBid).
-     * @returns {boolean} True, wenn der Bot hält/reizt. False, wenn er passt.
      */
     decideBid(currentBid, botData) {
-        if (!botData.willBid) {
-            return false;
-        }
+        if (!botData.willBid) return false;
 
-        if (currentBid <= botData.maxBid) {
+        // Normal check
+        if (currentBid <= botData.maxBid) return true;
+
+        // Hand upgrade check: If hand is very strong (strengthScore >= 7.5),
+        // we might upgrade to Hand game if the bid requires it.
+        if (botData.strengthScore >= 7.5 && currentBid <= botData.maxBidHand) {
             return true;
         }
 

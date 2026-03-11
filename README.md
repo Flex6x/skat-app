@@ -15,11 +15,11 @@
 - bei ramsch sollen die bots versuchen nicht so vuel pkt und erlangen.
 - karten sollen am ende eines spiels zum bsp eines abbgrebochenen nulls zum stappel schwirren.
 - settings.html scrollbar machen
+- grand warscheinlichkeiten bisschen runter setzen
 
 ## Bugs:
 
 - übersetzungsbugs. (z.b Spielwert: ohne 1, game 2, 2 * 12 = 24)
 
-grand
 nicht überreizen
 schneider schwarz
