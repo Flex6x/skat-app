@@ -35,13 +35,6 @@ class GameValueEngine {
 
     /**
      * Berechnet die Spitzen (Matadore) des Alleinspielers.
-     * 
-     * Zählt wie viele Unter der Alleinspieler in ununterbrochener Folge
-     * besitzt ("mit X") oder nicht besitzt ("ohne X"), beginnend beim
-     * Eichel-Unter.
-     * 
-     * @param {Card[]} declarerCards - Alle Karten des Alleinspielers (Hand + Skat)
-     * @returns {{ count: number, type: string }} Anzahl und Typ ("mit"/"ohne")
      */
     static calculateMatadors(declarerCards) {
         const declarerUnterSuits = declarerCards
@@ -53,23 +46,15 @@ class GameValueEngine {
         let count = 0;
 
         if (hasEichelUnter) {
-            // "Mit X" — zähle durchgehende Unter von oben
             for (const suit of this.UNTER_ORDER) {
-                if (declarerUnterSuits.includes(suit)) {
-                    count++;
-                } else {
-                    break;
-                }
+                if (declarerUnterSuits.includes(suit)) count++;
+                else break;
             }
             return { count, type: 'mit' };
         } else {
-            // "Ohne X" — zähle fehlende Unter von oben bis zum ersten vorhandenen
             for (const suit of this.UNTER_ORDER) {
-                if (!declarerUnterSuits.includes(suit)) {
-                    count++;
-                } else {
-                    break;
-                }
+                if (!declarerUnterSuits.includes(suit)) count++;
+                else break;
             }
             return { count, type: 'ohne' };
         }
@@ -77,79 +62,41 @@ class GameValueEngine {
 
     /**
      * Berechnet den Multiplikator.
-     * 
-     * multiplier = matadors + 1 (Spiel) + handGame + schneider + schwarz
-     * 
-     * @param {{ matadors: number, handGame: boolean, schneider: boolean, schwarz: boolean }} params
-     * @returns {number} Der Gesamtmultiplikator
+     * Bonusstufen bei Hand: Hand(1), Schneider(1), Schneider angesagt(1), Schwarz(1), Schwarz angesagt(1)
      */
-    static calculateMultiplier({ matadors, handGame, schneider, schwarz }) {
+    static calculateMultiplier({ matadors, handGame, schneider, schwarz, announcedSchneider, announcedSchwarz }) {
         let multiplier = matadors + 1; // Spitze(n) + Spiel
 
-        if (handGame) multiplier += 1;
-        if (schneider) multiplier += 1;
-        if (schwarz) multiplier += 1;
+        if (handGame) {
+            multiplier += 1; // +1 Hand
+            if (schneider) multiplier += 1; // +1 Schneider erreicht
+            if (announcedSchneider) multiplier += 1; // +1 Schneider angesagt
+            if (schwarz) multiplier += 1; // +1 Schwarz erreicht
+            if (announcedSchwarz) multiplier += 1; // +1 Schwarz angesagt
+        } else {
+            if (schneider) multiplier += 1;
+            if (schwarz) multiplier += 1;
+        }
 
         return multiplier;
     }
 
-    /**
-     * Berechnet den Spielwert für Farbspiele und Grand.
-     * 
-     * @param {string} trumpMode - Spielart ("Eichel", "Grün", "Rot", "Schellen", "Grand")
-     * @param {number} multiplier - Der berechnete Multiplikator
-     * @returns {number} Der Spielwert
-     */
     static calculateGameValue(trumpMode, multiplier) {
         const baseValue = this.BASE_VALUES[trumpMode];
         if (!baseValue) return 0;
         return baseValue * multiplier;
     }
 
-    /**
-     * Gibt den festen Spielwert für ein Null-Spiel zurück.
-     * 
-     * @param {boolean} handGame - Ob Hand gespielt wurde
-     * @returns {number} Der Null-Spielwert
-     */
     static getNullGameValue(handGame) {
         return handGame ? this.NULL_VALUES.hand : this.NULL_VALUES.normal;
     }
 
-    /**
-     * Prüft, ob überreizt wurde.
-     * 
-     * @param {number} bidValue - Der Reizwert
-     * @param {number} gameValue - Der tatsächliche Spielwert
-     * @returns {boolean} True wenn überreizt
-     */
     static checkOverbid(bidValue, gameValue) {
         return gameValue < bidValue;
     }
 
     /**
      * Hauptfunktion: Wertet das Spielende komplett aus.
-     * 
-     * @param {{
-     *   trumpMode: string,
-     *   declarerCards: Card[],
-     *   skat: Card[],
-     *   bidValue: number,
-     *   handGame: boolean,
-     *   declarerPoints: number,
-     *   defenderPoints: number,
-     *   defenderTrickCount: number
-     * }} params
-     * @returns {{
-     *   gameValue: number,
-     *   matadors: { count: number, type: string },
-     *   multiplier: number,
-     *   schneider: boolean,
-     *   schwarz: boolean,
-     *   overbid: boolean,
-     *   won: boolean,
-     *   details: string
-     * }}
      */
     static evaluateEndGame({
         trumpMode,
@@ -157,20 +104,27 @@ class GameValueEngine {
         skat,
         bidValue,
         handGame,
+        announcedSchneider = false,
+        announcedSchwarz = false,
         declarerPoints,
         defenderPoints,
         defenderTrickCount,
         declarerWonNormally
     }) {
 
-        // --- Null-Spiel Sonderbehandlung ---
+        const getT = (key) => {
+            if (typeof UI !== 'undefined' && UI.TRANSLATIONS) {
+                const lang = (window.appSettings && window.appSettings.current.language) || 'de';
+                return UI.TRANSLATIONS[lang][key] || key;
+            }
+            return key;
+        };
+
         if (trumpMode === 'Null') {
             const gameValue = this.getNullGameValue(handGame);
             const overbid = this.checkOverbid(bidValue, gameValue);
-            // Bei Null: won wird extern (wonOverride) bestimmt. Überreizen übersteuert immer.
             const won = overbid ? false : declarerWonNormally;
-
-            const details = handGame ? 'Null Hand' : 'Null';
+            const details = handGame ? `Null ${getT('hand_game')}` : 'Null';
 
             return {
                 gameValue,
@@ -184,7 +138,6 @@ class GameValueEngine {
             };
         }
 
-        // --- Farbspiel / Grand ---
         const allDeclarerCards = [...declarerCards, ...skat];
         const matadors = this.calculateMatadors(allDeclarerCards);
 
@@ -195,38 +148,29 @@ class GameValueEngine {
             matadors: matadors.count,
             handGame,
             schneider,
-            schwarz
+            schwarz,
+            announcedSchneider,
+            announcedSchwarz
         });
 
         const gameValue = this.calculateGameValue(trumpMode, multiplier);
         const overbid = this.checkOverbid(bidValue, gameValue);
 
-        // Überreizen → automatisch verloren, auch wenn >60 Augen
-        const won = overbid ? false : declarerWonNormally;
+        let won = overbid ? false : declarerWonNormally;
+        if (announcedSchneider && !schneider) won = false;
+        if (announcedSchwarz && !schwarz) won = false;
 
-        // Details-String für die Anzeige (Internationalized via UI.getTranslation)
-        const getT = (key) => {
-            if (typeof UI !== 'undefined' && UI.TRANSLATIONS) {
-                const lang = (window.appSettings && window.appSettings.current.language) || 'de';
-                return UI.TRANSLATIONS[lang][key] || key;
-            }
-            return key;
-        };
-
-        const matadorType = getT(matadors.type); // "mit" or "ohne" / "with" or "without"
-        const gameLabel = getT('game'); // "Spiel" or "Game"
-        const handLabel = getT('hand_game'); // "Hand"
-        const schneiderLabel = 'Schneider';
-        const schwarzLabel = 'Schwarz';
-
-        const parts = [`${matadorType} ${matadors.count}`];
-        parts.push(gameLabel);
-        if (handGame) parts.push(handLabel);
-        if (schneider) parts.push(schneiderLabel);
-        if (schwarz) parts.push(schwarzLabel);
+        const matadorType = getT(matadors.type); 
+        const gameLabel = getT('game'); 
+        
+        const parts = [`${matadorType} ${matadors.count}`, gameLabel];
+        if (handGame) parts.push(getT('hand_game'));
+        if (schneider) parts.push('Schneider');
+        if (announcedSchneider) parts.push(`${getT('announced')} Schneider`);
+        if (schwarz) parts.push('Schwarz');
+        if (announcedSchwarz) parts.push(`${getT('announced')} Schwarz`);
 
         const baseValue = this.BASE_VALUES[trumpMode];
-        // Format: "mit 2, Spiel 3, 3 * 10 = 30"
         const details = `${parts.join(', ')} ${multiplier}, ${multiplier} * ${baseValue} = ${gameValue}`;
 
         return {

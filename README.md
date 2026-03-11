@@ -9,17 +9,10 @@
 
 - RESPONSIV
 - bei Handspiel: man kann Schneider oder Schwarz ansagen. - funktioniert noch nicht.
-- Bots sollen grand ansagen können.
-- bots sollen versuchen, nicht zu überreizen.
 - bei reiz ansicht am schluss: aktuell steht Spiel immer ohne index da.
-- bei ramsch sollen die bots versuchen nicht so vuel pkt und erlangen.
 - karten sollen am ende eines spiels zum bsp eines abbgrebochenen nulls zum stappel schwirren.
 - settings.html scrollbar machen
-- grand warscheinlichkeiten bisschen runter setzen
+- wenn ein bot, sieht, dass der stich für sich/sein team schon verloren ist und nichts mehr daran ändern kann, soll er probieren möglichst augen reinzuwerfen.
+- grand chance für bots zu hoch noch (basiert zu sehr auf unter konstellation)
 
 ## Bugs:
-
-- übersetzungsbugs. (z.b Spielwert: ohne 1, game 2, 2 * 12 = 24)
-
-nicht überreizen
-schneider schwarz

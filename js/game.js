@@ -7,6 +7,7 @@ const PHASES = {
     BIDDING: 'bidding',
     SKAT_DECISION: 'skat_decision',
     TRUMP_SELECTION: 'trump_selection',
+    ANNOUNCEMENT: 'announcement',
     PLAYING: 'playing',
     RAMSCH: 'ramsch',
     GAME_OVER: 'game_over'
@@ -48,6 +49,8 @@ class Game {
         this.handGame = false;
         this.bidValue = 0;
         this.originalDeclarerHand = [];
+        this.announcedSchneider = false;
+        this.announcedSchwarz = false;
         
         this.phase = PHASES.DEALING;
         // Compute roles relative to dealer
@@ -311,9 +314,27 @@ class Game {
                 // Resort hand based on new trump mode
                 this.sortHand(this.players[this.declarerIndex].hand);
                 this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
-                this.startGameplay();
+                
+                if (this.handGame && this.trumpMode !== TRUMP_MODES.NULL) {
+                    this.startAnnouncement();
+                } else {
+                    this.startGameplay();
+                }
             });
         }
+    }
+
+    startAnnouncement() {
+        this.phase = PHASES.ANNOUNCEMENT;
+        this.ui.showAnnouncementOverlay((schneider, schwarz) => {
+            this.announcedSchneider = schneider;
+            this.announcedSchwarz = schwarz;
+            
+            // Update UI display with suffixes
+            this.ui.setTrump(this.trumpMode, this.handGame, this.announcedSchneider, this.announcedSchwarz);
+            
+            this.startGameplay();
+        });
     }
 
     startGameplay() {
@@ -589,6 +610,8 @@ class Game {
             skat: this.skat,
             bidValue: this.bidValue,
             handGame: this.handGame,
+            announcedSchneider: this.announcedSchneider,
+            announcedSchwarz: this.announcedSchwarz,
             declarerPoints,
             defenderPoints: defendersPoints,
             defenderTrickCount,

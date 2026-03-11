@@ -21,7 +21,10 @@ const TRANSLATIONS = {
         mit: "mit",
         ohne: "ohne",
         game: "Spiel",
-        hand_game: "Hand",
+        hand: "Hand",
+        hand_game: "Hand spielen",
+        schneider: "Schneider",
+        schwarz: "Schwarz",
         pts_aicore: "Aicore",
         pts_aiden: "Aiden",
         back_to_menu: "Hauptmenü",
@@ -68,6 +71,7 @@ const TRANSLATIONS = {
         take: "Aufnehmen",
         discard_info: "Lege 2 Karten in den Skat (Drag & Drop oder Klick)",
         confirm: "Bestätigen",
+        announce: "Ansagen",
         choose_trump: "Trumpf wählen",
         last_trick: "Letzter Stich",
         close_info: "Klicke irgendwo zum Schließen",
@@ -83,6 +87,7 @@ const TRANSLATIONS = {
         next: "Weiter",
         finish: "Fertig",
         step: "Schritt",
+        announced: "angesagt",
         tut_step1: "Hier siehst du deine Karten. Du nutzt sie, um Stiche zu machen und zu entscheiden, ob du reizen möchtest.",
         tut_step2: "Dies ist das Reiz-Fenster. Wer am höchsten reizt, wird Alleinspieler und darf den Skat aufnehmen.",
         tut_step3: "Als Alleinspieler wählst du hier den Spieltyp (Farbe, Grand oder Null).",
@@ -155,6 +160,7 @@ const TRANSLATIONS = {
         take: "Take",
         discard_info: "Put 2 cards in Skat (Drag & Drop or Click)",
         confirm: "Confirm",
+        announce: "Announce",
         choose_trump: "Choose Trump",
         last_trick: "Last Trick",
         close_info: "Click anywhere to close",
@@ -170,6 +176,7 @@ const TRANSLATIONS = {
         next: "Next",
         finish: "Finish",
         step: "Step",
+        announced: "announced",
         tut_step1: "Here you see your cards. You use them to play tricks and decide whether you want to bid.",
         tut_step2: "This is the bidding window. The highest bidder becomes the declarer and can take the Skat.",
         tut_step3: "As declarer, you choose the game type here (Suit, Grand, or Null).",
@@ -1012,6 +1019,46 @@ class UI {
         };
     }
 
+    showAnnouncementOverlay(onSelect) {
+        this.els.skatDecisionOverlay.classList.remove('hidden');
+        const h2 = this.els.skatDecisionOverlay.querySelector('h2');
+        h2.textContent = this.getTranslation('announce_schneider') + "?";
+
+        // Hide original buttons and discard area
+        this.els.btnSkatTake.classList.add('hidden');
+        this.els.btnSkatHand.classList.add('hidden');
+        this.els.skatDiscardArea.classList.add('hidden');
+
+        const container = document.getElementById('hand-announcements');
+        container.classList.remove('hidden');
+
+        const chkSchneider = document.getElementById('chk-announce-schneider');
+        const chkSchwarz = document.getElementById('chk-announce-schwarz');
+        const btnAnnounce = document.getElementById('btn-confirm-announcement');
+
+        chkSchneider.checked = false;
+        chkSchwarz.checked = false;
+
+        // Auto-check Schneider if Schwarz is checked
+        chkSchwarz.onchange = () => {
+            if (chkSchwarz.checked) chkSchneider.checked = true;
+        };
+        chkSchneider.onchange = () => {
+            if (!chkSchneider.checked) chkSchwarz.checked = false;
+        };
+
+        btnAnnounce.onclick = () => {
+            this.els.skatDecisionOverlay.classList.add('hidden');
+            container.classList.add('hidden');
+            
+            // Reset visibility for next time
+            this.els.btnSkatTake.classList.remove('hidden');
+            this.els.btnSkatHand.classList.remove('hidden');
+            
+            onSelect(chkSchneider.checked, chkSchwarz.checked);
+        };
+    }
+
     showSkatDiscardUI(hand, skatCards, onConfirm) {
         this.els.btnSkatTake.style.display = 'none';
         this.els.btnSkatHand.style.display = 'none';
@@ -1138,12 +1185,21 @@ class UI {
         this.els.trumpBtns = document.querySelectorAll('.trump-btn');
     }
 
-    setTrump(trump) {
+    setTrump(trump, hand = false, schneider = false, schwarz = false) {
         let symbol = trump;
         if (SUIT_SYMBOLS[trump]) {
             symbol = `${trump} ${SUIT_SYMBOLS[trump]}`;
         }
-        this.els.currentTrump.innerHTML = `${this.getTranslation('trump')}: ${symbol}`;
+        
+        let suffix = "";
+        if (hand) {
+            const parts = [this.getTranslation('hand')];
+            if (schwarz) parts.push(this.getTranslation('schwarz'));
+            else if (schneider) parts.push(this.getTranslation('schneider'));
+            suffix = ` (${parts.join(', ')})`;
+        }
+
+        this.els.currentTrump.innerHTML = `${this.getTranslation('trump')}: ${symbol}${suffix}`;
     }
 
     updateTurn(turnIndex) {
