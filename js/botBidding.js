@@ -24,23 +24,89 @@ class BotBidding {
      * @returns {Object} Analyse-Ergebnis mit { willBid, trumpSuit, maxBid, strengthScore }
      */
     evaluateHand(hand) {
-        // Evaluate regular game (Suit/Grand)
+        // Evaluate all three options
         const regularData = this.evaluateSuitHand(hand);
-        
-        // Evaluate Null game
         const nullData = this.evaluateNullHand(hand);
+        const grandData = this.evaluateGrandHand(hand);
         
-        // Decide which one is better
-        // Prioritize suit game if it has a high score/maxBid
-        if (regularData.willBid && regularData.maxBid >= 23 && regularData.strengthScore >= 7) {
-            return regularData;
-        }
-        
-        if (nullData.willBid) {
-            return nullData;
+        let best = regularData;
+
+        // Compare Grand vs Suit
+        if (grandData.willBid) {
+            if (!best.willBid || grandData.maxBid > best.maxBid || (grandData.strengthScore >= 8 && best.strengthScore < 8)) {
+                best = grandData;
+            }
         }
 
-        return regularData;
+        // Compare with Null (Null is fixed at 23, so only pick if other options are weak or not bidding)
+        if (nullData.willBid) {
+            if (!best.willBid || (best.maxBid <= 23 && best.strengthScore < 7)) {
+                best = nullData;
+            }
+        }
+
+        return best;
+    }
+
+    evaluateGrandHand(hand) {
+        let jacks = 0;
+        let highCards = 0; // Aces and 10s
+        
+        hand.forEach(card => {
+            if (card.rank === 'U') jacks++;
+            else if (card.rank === 'A' || card.rank === '10') highCards++;
+        });
+
+        // Probability model
+        let prob = 0;
+        if (jacks <= 1) prob = 0;
+        else if (jacks === 2) {
+            prob = 0.10;
+            if (highCards >= 2) prob += 0.30;
+            if (highCards >= 4) prob += 0.20;
+        }
+        else if (jacks === 3) prob = 0.75;
+        else if (jacks === 4) prob = 0.95;
+
+        const willBid = Math.random() < prob;
+        let maxBid = 0;
+
+        if (willBid) {
+            // Grand base value is 24
+            const matadors = this.countMatadors(hand, 'Grand');
+            maxBid = 24 * (matadors + 1);
+        }
+
+        return {
+            willBid: willBid,
+            trumpSuit: 'Grand',
+            maxBid: maxBid,
+            strengthScore: jacks + (highCards * 0.5),
+            type: 'grand'
+        };
+    }
+
+    countMatadors(hand, trumpMode) {
+        // Simplified matador count for bidding
+        const jacks = hand.filter(c => c.rank === 'U');
+        const hasJack = (suit) => jacks.some(j => j.suit === suit);
+        
+        const order = ['Eichel', 'Grün', 'Rot', 'Schellen'];
+        let count = 0;
+        const withJacks = hasJack(order[0]);
+
+        if (withJacks) {
+            for (let i = 0; i < order.length; i++) {
+                if (hasJack(order[i])) count++;
+                else break;
+            }
+        } else {
+            for (let i = 0; i < order.length; i++) {
+                if (!hasJack(order[i])) count++;
+                else break;
+            }
+        }
+        return count;
     }
 
     evaluateSuitHand(hand) {

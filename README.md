@@ -20,7 +20,6 @@
 
 - übersetzungsbugs. (z.b Spielwert: ohne 1, game 2, 2 * 12 = 24)
 
-ramsch
 grand
 nicht überreizen
 schneider schwarz
