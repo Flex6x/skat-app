@@ -43,8 +43,8 @@ class CardAnimations {
     createTempCard() {
         const cardBack = document.createElement('div');
         cardBack.classList.add('card', 'card-back');
-        cardBack.style.width = '80px';
-        cardBack.style.height = '120px';
+        cardBack.style.width = '65px';
+        cardBack.style.height = '95px';
         // Match the CSS from style.css for bot-cards
         cardBack.style.background = 'repeating-linear-gradient(45deg, #444, #444 10px, #333 10px, #333 20px)';
         cardBack.style.border = '2px solid #fff';
@@ -59,8 +59,8 @@ class CardAnimations {
     createTempPacket(count) {
         const container = document.createElement('div');
         container.style.position = 'relative';
-        container.style.width = '80px';
-        container.style.height = '120px';
+        container.style.width = '65px';
+        container.style.height = '95px';
 
         for (let i = 0; i < count; i++) {
             const cardBack = this.createTempCard();
@@ -94,10 +94,9 @@ class CardAnimations {
 
             document.body.appendChild(cardElement);
             
-            // ... (rest of setup)
             cardElement.style.position = 'fixed';
-            cardElement.style.left = `${startPos.x - 40}px`;
-            cardElement.style.top = `${startPos.y - 60}px`;
+            cardElement.style.left = `${startPos.x - 32.5}px`;
+            cardElement.style.top = `${startPos.y - 47.5}px`;
             cardElement.style.zIndex = '1000';
             cardElement.style.margin = '0';
 
@@ -137,14 +136,17 @@ class CardAnimations {
         const isBatterySaver = (typeof appSettings !== 'undefined') && appSettings.current.batterySaver;
         
         const deckEl = document.getElementById('deck-zone');
-        const skatSlots = this.ui.els.skatZone.querySelectorAll('.card-slot');
+        const skatPile = document.getElementById('pile-skat');
 
-        this.ui.els.skatZone.classList.remove('hidden');
         deckEl.innerHTML = '';
         this.ui.els.player0Cards.innerHTML = '';
         this.ui.els.player1Cards.innerHTML = '';
         this.ui.els.player2Cards.innerHTML = '';
-        skatSlots.forEach(s => s.innerHTML = '');
+        
+        // --- CRITICAL FIX: Show and position skat pile BEFORE animating to it ---
+        skatPile.innerHTML = '';
+        skatPile.className = 'trick-pile pos-center'; 
+        skatPile.classList.remove('hidden');
 
         const deckMockup = this.createTempCard();
         deckEl.appendChild(deckMockup);
@@ -176,7 +178,7 @@ class CardAnimations {
             
             let targetEl;
             if (step.target === 'skat') {
-                targetEl = skatSlots[skatReceived];
+                targetEl = skatPile;
             } else {
                 targetEl = step.target === 0 ? this.ui.els.player0Cards :
                     step.target === 1 ? this.ui.els.player1Cards :
@@ -195,11 +197,18 @@ class CardAnimations {
                 for (let i = 0; i < step.count; i++) {
                     if (step.target === 'skat') {
                         const placedCard = this.createTempCard();
-                        placedCard.style.position = 'static';
+                        placedCard.style.position = 'absolute';
                         placedCard.style.margin = '0';
                         placedCard.style.width = '100%';
                         placedCard.style.height = '100%';
-                        skatSlots[skatReceived].appendChild(placedCard);
+                        
+                        const rot = (Math.random() * 10) - 5;
+                        const ox = (Math.random() * 4) - 2;
+                        const oy = (Math.random() * 4) - 2;
+                        placedCard.style.transform = `translate(${ox}px, ${oy}px) rotate(${rot}deg)`;
+                        
+                        skatPile.appendChild(placedCard);
+                        skatPile.classList.add('has-cards');
                         skatReceived++;
                     } else {
                         receivedCards[step.target]++;

@@ -650,9 +650,15 @@ body {
 
 /* Skat Pile (Always near declarer) */
 #pile-skat {
-    width: 60px;
-    height: 85px;
-    opacity: 0.8;
+    width: 65px;
+    height: 95px;
+    opacity: 0.9;
+}
+
+#pile-skat.pos-center {
+    top: 50%;
+    left: 42%;
+    transform: translateY(-50%);
 }
 
 #pile-skat.pos-bottom { bottom: 40px; right: 20%; }
@@ -844,29 +850,7 @@ body {
 }
 
 #skat-zone {
-    position: absolute;
-    top: 50%;
-    left: 40px;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-}
-
-#skat-zone .card-slot {
-    width: 80px;
-    height: 120px;
-    border: none;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
-
-#skat-zone .card-slot:nth-child(2) {
-    margin-top: -60px;
-    /* Overlap by half */
-    z-index: 2;
+    display: none !important; /* Removed as requested */
 }
 
 #played-card-bot2 {

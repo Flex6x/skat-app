@@ -197,7 +197,6 @@ class UI {
             trickBot1: document.getElementById('played-card-bot1'),
             trickPlayer: document.getElementById('played-card-player'),
 
-            skatZone: document.getElementById('skat-zone'),
             skatDecisionOverlay: document.getElementById('skat-decision-overlay'),
             skatDiscardArea: document.getElementById('skat-discard-area'),
             skatDiscardSlots: document.querySelectorAll('.skat-slot'),
@@ -833,23 +832,6 @@ class UI {
         });
     }
 
-    updateSkatZone(visible = true) {
-        if (!visible) {
-            this.els.skatZone.classList.add('hidden');
-            return;
-        }
-        this.els.skatZone.classList.remove('hidden');
-        const slots = this.els.skatZone.querySelectorAll('.card-slot');
-        slots.forEach(s => {
-            s.innerHTML = '';
-            const cardBack = document.createElement('div');
-            cardBack.classList.add('card', 'card-back');
-            cardBack.style.width = '100%';
-            cardBack.style.height = '100%';
-            s.appendChild(cardBack);
-        });
-    }
-
     showBiddingOverlay(nextBid, onBid, onPass) {
         // Kept for backwards compatibility if needed, though we replace it
         this.showAdvancedBiddingOverlay(nextBid, true, false, onBid, onPass);
@@ -1228,7 +1210,7 @@ class UI {
         const allPiles = document.querySelectorAll('.trick-pile');
         allPiles.forEach(p => {
             p.classList.add('hidden');
-            p.classList.remove('has-cards', 'pos-bottom', 'pos-bot2', 'pos-bot1', 'pos-top', 'pos-right', 'pos-left');
+            p.classList.remove('has-cards', 'pos-bottom', 'pos-bot2', 'pos-bot1', 'pos-center', 'pos-top', 'pos-right', 'pos-left');
             p.innerHTML = '';
         });
 
@@ -1288,7 +1270,7 @@ class UI {
         
         if (visible) {
             pSkat.innerHTML = '';
-            // We only use this for the initial skat on table before bidding/discarding
+            pSkat.className = 'trick-pile pos-center'; // Ensure it is centered initially
             // Chaotic look here too
             for (let i = 0; i < 2; i++) {
                 const back = document.createElement('div');

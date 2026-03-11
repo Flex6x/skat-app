@@ -132,15 +132,12 @@ class Game {
         
         // Animate sequence
         await this.animations.animateDealSequence(this.forehandIndex, this.players);
-        
+
         this.ui.renderAllHands(this.players);
-        this.ui.updateSkatZone(this.skat);
-        this.ui.updateSkatPile(true); // Show visual skat on table
-        
+
         this.phase = PHASES.BIDDING;
         this.startBiddingPhase();
-    }
-
+        }
     async startBiddingPhase() {
         this.biddingEngine = new BiddingEngine();
         this.botBidding = new BotBidding();
@@ -217,7 +214,6 @@ class Game {
                 // Take Skat
                 () => {
                     this.handGame = false;
-                    this.ui.updateSkatZone(false);
                     // Start dragging game: The two cards in this.skat are shown in slots
                     this.ui.showSkatDiscardUI(this.players[this.declarerIndex].hand, this.skat, (discardedIds) => {
                         // The user confirmed physically what 2 cards go into skat. 
