@@ -23,7 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
         new AIController(1, 'Bot 1')
     ];
     
-    const game = new Game(ui, aiControllers, window.appSettings);
+    window.game = new Game(ui, aiControllers, window.appSettings);
+    const game = window.game;
     
     let sessionRounds = 0;
     let completedRounds = 0;

@@ -135,6 +135,7 @@ class Game {
         
         this.ui.renderAllHands(this.players);
         this.ui.updateSkatZone(this.skat);
+        this.ui.updateSkatPile(true); // Show visual skat on table
         
         this.phase = PHASES.BIDDING;
         this.startBiddingPhase();
@@ -187,7 +188,7 @@ class Game {
                 }
             }
 
-            this.ui.setDeclarer(this.players[this.declarerIndex].name, finalBid);
+            this.ui.setDeclarer(this.players[this.declarerIndex].name, finalBid, this.declarerIndex);
             this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt (${finalBid}).`);
             await this.delay(1500);
             this.phase = PHASES.SKAT_DECISION;
@@ -199,7 +200,7 @@ class Game {
         this.phase = PHASES.RAMSCH;
         this.trumpMode = TRUMP_MODES.GRAND; // Ramsch is often played like Grand (only Jacks are trump)
         this.ui.setTrump('Ramsch');
-        this.ui.setDeclarer('Ramsch');
+        this.ui.setDeclarer('Ramsch', null, -1);
 
         // Sorting hands for Grand
         this.players.forEach(p => this.sortHand(p.hand));
@@ -230,6 +231,7 @@ class Game {
                         // Resort and Re-render hand legally
                         this.sortHand(this.players[this.declarerIndex].hand);
                         this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
+                        this.ui.updateSkatPile(true); // Show pile on table
                         this.startTrumpSelection();
                     });
                 },
@@ -292,6 +294,7 @@ class Game {
         this.sortHand(botHand); // Resort after discarding
         
         this.ui.updateSkatZone(false);
+        this.ui.updateSkatPile(true); // Show pile back on table near declarer
         this.ui.renderBotHand(this.declarerIndex, botHand.length);
         this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt ${this.trumpMode}.`);
         await this.delay(1500);
@@ -463,6 +466,9 @@ class Game {
         this.players[winnerId].tricks.push(...trickCards);
         
         this.ui.showMessage(`${this.players[winnerId].name} gewinnt den Stich!`);
+        
+        // Update visual trick piles on table
+        this.ui.updateTrickPiles(this.players, this.declarerIndex, this.phase === PHASES.RAMSCH);
         
         this.currentTrick = { cards: [], leadSuit: null };
         this.trickCount++;

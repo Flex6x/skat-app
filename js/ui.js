@@ -1214,13 +1214,106 @@ class UI {
         else document.getElementById('player-area').style.opacity = '1';
     }
 
-    setDeclarer(name, bidValue) {
+    setDeclarer(name, bidValue, declarerIndex = -1) {
         const displayName = name === 'Du' ? ((window.appSettings && window.appSettings.current.nickname) || 'Du') : name;
         this.els.currentDeclarer.textContent = `${this.getTranslation('declarer')}: ${displayName}`;
         if (bidValue) {
             this.els.currentBid.textContent = `${this.getTranslation('bid_value')}: ${bidValue}`;
         } else {
             this.els.currentBid.textContent = `${this.getTranslation('bid_value')}: -`;
+        }
+
+        // --- Visual Piles Initialization ---
+        // Hide all first
+        const allPiles = document.querySelectorAll('.trick-pile');
+        allPiles.forEach(p => {
+            p.classList.add('hidden');
+            p.classList.remove('has-cards', 'pos-bottom', 'pos-bot2', 'pos-bot1', 'pos-top', 'pos-right', 'pos-left');
+            p.innerHTML = '';
+        });
+
+        if (declarerIndex === -1 && name === 'Ramsch') {
+            // Ramsch: use p0, p1, p2
+            document.getElementById('pile-p0').classList.remove('hidden');
+            document.getElementById('pile-p1').classList.remove('hidden');
+            document.getElementById('pile-p2').classList.remove('hidden');
+        } else if (declarerIndex !== -1) {
+            // Regular Game
+            const pDeclarer = document.getElementById('pile-declarer');
+            const pDefenders = document.getElementById('pile-defenders');
+            const pSkat = document.getElementById('pile-skat');
+
+            pDeclarer.classList.remove('hidden');
+            pDefenders.classList.remove('hidden');
+            pSkat.classList.remove('hidden');
+
+            if (declarerIndex === 2) { // Human
+                pDeclarer.classList.add('pos-bottom');
+                pDefenders.classList.add('pos-top');
+                pSkat.classList.add('pos-bottom');
+            } else if (declarerIndex === 0) { // Bot 2 (Top Left)
+                pDeclarer.classList.add('pos-bot2');
+                pDefenders.classList.add('pos-right');
+                pSkat.classList.add('pos-bot2');
+            } else if (declarerIndex === 1) { // Bot 1 (Top Right)
+                pDeclarer.classList.add('pos-bot1');
+                pDefenders.classList.add('pos-left');
+                pSkat.classList.add('pos-bot1');
+            }
+        }
+    }
+
+    updateTrickPiles(players, declarerIndex, isRamsch = false) {
+        if (isRamsch) {
+            for (let i = 0; i < 3; i++) {
+                this.renderPileCards(`pile-p${i}`, players[i].tricks.length / 3);
+            }
+        } else {
+            // Declarer pile
+            const declarer = players[declarerIndex];
+            this.renderPileCards('pile-declarer', declarer.tricks.length / 3);
+
+            // Defenders pile (shared)
+            let defenderTricks = 0;
+            players.forEach((p, idx) => {
+                if (idx !== declarerIndex) defenderTricks += p.tricks.length;
+            });
+            this.renderPileCards('pile-defenders', defenderTricks / 3);
+        }
+    }
+
+    updateSkatPile(visible = true) {
+        const pSkat = document.getElementById('pile-skat');
+        if (!pSkat) return;
+        
+        if (visible) {
+            pSkat.innerHTML = '';
+            for (let i = 0; i < 2; i++) {
+                const back = document.createElement('div');
+                back.classList.add('card', 'card-back');
+                pSkat.appendChild(back);
+            }
+            pSkat.classList.add('has-cards');
+        } else {
+            pSkat.innerHTML = '';
+            pSkat.classList.remove('has-cards');
+        }
+    }
+
+    renderPileCards(pileId, trickCount) {
+        const el = document.getElementById(pileId);
+        if (!el) return;
+        el.innerHTML = '';
+        if (trickCount > 0) {
+            el.classList.add('has-cards');
+            const visualCount = Math.min(trickCount, 5);
+            for (let i = 0; i < visualCount; i++) {
+                const back = document.createElement('div');
+                back.classList.add('card', 'card-back');
+                el.appendChild(back);
+            }
+        } else {
+            el.classList.remove('has-cards');
         }
     }
 

@@ -16,3 +16,5 @@
 
 
 ## Bugs:
+
+- übersetzungssbugs
