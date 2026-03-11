@@ -37,17 +37,66 @@ class AIController {
 
         // 2. If following, try to win if last player, or play lowest if can't win
         const highestSoFar = this.getHighestCardLevel(currentTrick, trumpMode);
-        
-        // Filter winning cards
         const winningCards = validMoves.filter(card => this.beatsCard(card, highestSoFar, currentTrick.leadSuit, trumpMode));
         
+        // --- Enhanced Tactical Logic for Defenders ---
+        const isDeclarer = (this.id === declarerIndex);
+        if (!isDeclarer && trumpMode !== 'Null') {
+            const currentWinnerId = this.determineCurrentWinner(currentTrick, trumpMode);
+            const partnerId = this.getPartnerId(this.id, declarerIndex);
+            
+            // Case A: Partner has already won the trick (and we are 3rd player)
+            if (currentWinnerId === partnerId && currentTrick.cards.length === 2) {
+                // SCHMIEREN! Partner wins, so give them all the points we can spare
+                return this.getHighestPointCard(validMoves);
+            }
+            
+            // Case B: Declarer has already won the trick and we can't beat it
+            if (currentWinnerId === declarerIndex && winningCards.length === 0) {
+                // LUSCHEN! Declarer wins, so give them as few points as possible
+                return this.getLowestPointCard(validMoves);
+            }
+        }
+
         if (winningCards.length > 0) {
             // Play lowest winning card to conserve high cards
             return this.getLowestCard(winningCards, trumpMode);
         } else {
-            // Can't win (or don't want to waste high card), play absolute lowest
+            // Can't win, play absolute lowest rank to keep options open
             return this.getLowestCard(validMoves, trumpMode);
         }
+    }
+
+    determineCurrentWinner(trick, trumpMode) {
+        if (trick.cards.length === 0) return null;
+        let highest = trick.cards[0];
+        for (let i = 1; i < trick.cards.length; i++) {
+            if (this.beatsCard(trick.cards[i].card, highest.card, trick.leadSuit, trumpMode)) {
+                highest = trick.cards[i];
+            }
+        }
+        return highest.playerId;
+    }
+
+    getPartnerId(myId, declarerIndex) {
+        // In 3-player Skat, if I'm not the declarer, the other non-declarer is my partner
+        for (let i = 0; i < 3; i++) {
+            if (i !== myId && i !== declarerIndex) return i;
+        }
+        return null;
+    }
+
+    getLowestPointCard(cards) {
+        return cards.reduce((lowest, current) => {
+            const pCurrent = CARD_VALUES[current.rank] || 0;
+            const pLowest = CARD_VALUES[lowest.rank] || 0;
+            if (pCurrent < pLowest) return current;
+            if (pCurrent === pLowest) {
+                const rp = RANK_POWER;
+                return rp[current.rank] < rp[lowest.rank] ? current : lowest;
+            }
+            return lowest;
+        }, cards[0]);
     }
 
     chooseRamschCard(validMoves, currentTrick, trumpMode) {
