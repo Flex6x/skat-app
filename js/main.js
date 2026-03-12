@@ -30,13 +30,43 @@ document.addEventListener('DOMContentLoaded', () => {
     let completedRounds = 0;
     let gameHistory = [];
 
+    const saveSessionState = () => {
+        const state = {
+            sessionRounds,
+            completedRounds,
+            gameHistory
+        };
+        localStorage.setItem('skatSessionState', JSON.stringify(state));
+    };
+
     const startNewSession = () => {
+        const savedSession = localStorage.getItem('skatSessionState');
+        const savedGame = localStorage.getItem('skatGameState');
+
+        if (savedSession && savedGame) {
+            const session = JSON.parse(savedSession);
+            const gameData = JSON.parse(savedGame);
+            
+            // Restore session automatically
+            sessionRounds = session.sessionRounds;
+            completedRounds = session.completedRounds;
+            gameHistory = session.gameHistory;
+            
+            ui.hideMainMenu();
+            ui.updateScoreboard(gameHistory);
+            
+            // Initialize game and resume
+            game.resume(gameData);
+            return;
+        }
+
         ui.showRoundSelection((rounds) => {
             sessionRounds = rounds;
             completedRounds = 0;
             gameHistory = [];
             ui.resetScoreboard();
             ui.hideMainMenu();
+            saveSessionState();
             startNewGame();
         }, () => {
             // Cancelled -> Go back to index
@@ -46,8 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const startNewGame = () => {
         game.reset();
+        saveSessionState();
         game.start((result) => {
             // Callback when game ends
+            localStorage.removeItem('skatGameState');
             if (result) {
                 if (result.passedIn) {
                     gameHistory.push({ passedIn: true });
@@ -67,10 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 ui.updateScoreboard(gameHistory);
             }
             completedRounds++;
+            saveSessionState();
             
             if (completedRounds >= sessionRounds) {
                 // Session finished -> SAVE TO STATS
                 saveListToStats(gameHistory);
+                localStorage.removeItem('skatSessionState');
 
                 ui.els.btnRestart.textContent = ui.getTranslation('back_to_menu');
                 ui.els.btnRestart.onclick = () => {
@@ -120,6 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.bindHomeButton(() => {
         const msg = ui.getTranslation('home_confirm');
         if (window.confirm(msg)) {
+            localStorage.removeItem('skatSessionState');
+            localStorage.removeItem('skatGameState');
             window.location.href = 'index.html';
         }
     });

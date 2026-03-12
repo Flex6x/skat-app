@@ -83,6 +83,152 @@ class Game {
             }
         });
     }
+
+    saveGameState() {
+        if (this.phase === PHASES.GAME_OVER || this.aborted) {
+            localStorage.removeItem("skatGameState");
+            return;
+        }
+
+        const state = {
+            dealerIndex: this.dealerIndex,
+            players: this.players.map(p => ({
+                id: p.id,
+                type: p.type,
+                name: p.name,
+                hand: p.hand,
+                score: p.score,
+                tricks: p.tricks
+            })),
+            skat: this.skat,
+            initialSkat: this.initialSkat,
+            handGame: this.handGame,
+            bidValue: this.bidValue,
+            originalDeclarerHand: this.originalDeclarerHand,
+            announcedSchneider: this.announcedSchneider,
+            announcedSchwarz: this.announcedSchwarz,
+            phase: this.phase,
+            forehandIndex: this.forehandIndex,
+            turnIndex: this.turnIndex,
+            declarerIndex: this.declarerIndex,
+            trumpMode: this.trumpMode,
+            currentTrick: this.currentTrick,
+            trickCount: this.trickCount,
+            lastTrick: this.lastTrick,
+            biddingState: this.biddingController ? this.biddingController.getState() : null
+        };
+
+        localStorage.setItem("skatGameState", JSON.stringify(state));
+    }
+
+    loadGameState(state) {
+        this.dealerIndex = state.dealerIndex;
+        this.biddingState = state.biddingState;
+        
+        // Reconstruct Cards
+        const reconstructCards = (cards) => cards.map(c => new Card(c.suit, c.rank));
+        
+        this.players = state.players.map(p => ({
+            ...p,
+            hand: reconstructCards(p.hand),
+            tricks: reconstructCards(p.tricks)
+        }));
+        
+        this.skat = reconstructCards(state.skat);
+        this.initialSkat = reconstructCards(state.initialSkat);
+        this.handGame = state.handGame;
+        this.bidValue = state.bidValue;
+        this.originalDeclarerHand = reconstructCards(state.originalDeclarerHand);
+        this.announcedSchneider = state.announcedSchneider;
+        this.announcedSchwarz = state.announcedSchwarz;
+        this.phase = state.phase;
+        this.forehandIndex = state.forehandIndex;
+        this.turnIndex = state.turnIndex;
+        this.declarerIndex = state.declarerIndex;
+        this.trumpMode = state.trumpMode;
+        this.currentTrick = {
+            cards: state.currentTrick.cards.map(tc => ({
+                playerId: tc.playerId,
+                card: new Card(tc.card.suit, tc.card.rank)
+            })),
+            leadSuit: state.currentTrick.leadSuit
+        };
+        this.trickCount = state.trickCount;
+        this.lastTrick = state.lastTrick ? state.lastTrick.map(tc => ({
+            playerId: tc.playerId,
+            card: new Card(tc.card.suit, tc.card.rank)
+        })) : null;
+
+        // Re-render UI
+        this.ui.resetAllOverlays();
+        
+        // Update roles
+        const mittelhandIndex = (this.dealerIndex + 2) % 3;
+        const hinterhandIndex = this.dealerIndex;
+        this.ui.updatePlayerRoles(this.forehandIndex, mittelhandIndex, hinterhandIndex);
+        
+        if (this.declarerIndex !== -1) {
+            const declarerName = this.players[this.declarerIndex].name;
+            this.ui.setDeclarer(declarerName, this.bidValue, this.declarerIndex);
+        }
+        
+        if (this.trumpMode) {
+            this.ui.setTrump(this.trumpMode, this.handGame, this.announcedSchneider, this.announcedSchwarz);
+        }
+        
+        this.ui.renderAllHands(this.players);
+        this.updateLiveScore();
+        
+        if (this.currentTrick.cards.length > 0) {
+            this.currentTrick.cards.forEach(tc => {
+                this.ui.renderPlayedCard(tc.playerId, tc.card);
+            });
+        }
+        
+        if (this.trickCount > 0) {
+            this.ui.updateTrickPiles(this.players, this.declarerIndex, this.phase === PHASES.RAMSCH);
+        }
+
+        if (this.lastTrick) {
+            this.ui.showLastTrickBtn(() => {
+                if (this.lastTrick) {
+                    this.ui.showLastTrick(this.lastTrick);
+                }
+            });
+        }
+    }
+
+    async resume(state) {
+        this.loadGameState(state);
+        
+        if (!this.animations) {
+            this.animations = new CardAnimations(this.ui);
+        }
+
+        // Determine where to pick up
+        switch (this.phase) {
+            case PHASES.BIDDING:
+                this.startBiddingPhase(this.biddingState);
+                break;
+            case PHASES.SKAT_DECISION:
+                this.startSkatDecision(this.bidValue);
+                break;
+            case PHASES.TRUMP_SELECTION:
+                this.startTrumpSelection();
+                break;
+            case PHASES.ANNOUNCEMENT:
+                this.startAnnouncement();
+                break;
+            case PHASES.PLAYING:
+            case PHASES.RAMSCH:
+                this.processTurn();
+                break;
+            default:
+                // If it was dealing or game over, just start fresh or something
+                this.ui.showMainMenu(() => this.start(this.onGameEnd));
+                break;
+        }
+    }
     
     abort() {
         this.aborted = true;
@@ -141,10 +287,11 @@ class Game {
         this.ui.renderAllHands(this.players);
 
         this.phase = PHASES.BIDDING;
+        this.saveGameState();
         this.startBiddingPhase();
     }
 
-    async startBiddingPhase() {
+    async startBiddingPhase(savedState = null) {
         this.biddingEngine = new BiddingEngine();
         this.botBidding = new BotBidding();
         
@@ -156,7 +303,8 @@ class Game {
             this.dealerIndex, 
             (declarerId, finalBid) => {
                 this.onBiddingComplete(declarerId, finalBid);
-            }
+            },
+            savedState
         );
 
         this.biddingController.start();
@@ -195,6 +343,7 @@ class Game {
             this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt (${finalBid}).`);
             await this.delay(1500);
             this.phase = PHASES.SKAT_DECISION;
+            this.saveGameState();
             this.startSkatDecision(finalBid);
         }
     }
@@ -233,6 +382,7 @@ class Game {
                         // Resort and Re-render hand legally
                         this.sortHand(this.players[this.declarerIndex].hand);
                         this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
+                        this.saveGameState();
                         this.startTrumpSelection();
                     });
                 },
@@ -263,6 +413,7 @@ class Game {
             this.sortHand(this.players[2].hand);
             this.ui.renderPlayerHand(this.players[2].hand);
 
+            this.saveGameState();
             await this.delay(1500);
             this.startGameplay();
             return;
@@ -306,6 +457,7 @@ class Game {
         this.sortHand(this.players[2].hand);
         this.ui.renderPlayerHand(this.players[2].hand);
 
+        this.saveGameState();
         await this.delay(1500);
         
         this.startGameplay();
@@ -327,6 +479,7 @@ class Game {
                 this.sortHand(this.players[this.declarerIndex].hand);
                 this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
                 
+                this.saveGameState();
                 if (this.handGame && this.trumpMode !== TRUMP_MODES.NULL) {
                     this.startAnnouncement();
                 } else {
@@ -345,6 +498,7 @@ class Game {
             // Update UI display with suffixes
             this.ui.setTrump(this.trumpMode, this.handGame, this.announcedSchneider, this.announcedSchwarz);
             
+            this.saveGameState();
             this.startGameplay();
         });
     }
@@ -359,6 +513,7 @@ class Game {
         // not here, to avoid interfering with game startup
         this.ui.updateSkatPile(false);
         
+        this.saveGameState();
         this.turnIndex = this.forehandIndex;
         this.processTurn();
     }
@@ -445,6 +600,8 @@ class Game {
             this.ui.renderBotHand(playerId, this.players[playerId].hand.length); // Update bot card count
         }
 
+        this.saveGameState();
+
         // Check if trick is full
         if (this.currentTrick.cards.length === 3) {
             await this.resolveTrick();
@@ -491,6 +648,8 @@ class Game {
         // Update live score if enabled
         this.updateLiveScore();
 
+        this.saveGameState();
+
         if (this.trumpMode === TRUMP_MODES.NULL && winnerId === this.declarerIndex) {
             this.endGame(false); // Null declarer loses immediately on winning a trick
             return;
@@ -511,6 +670,7 @@ class Game {
 
     resolveRamsch() {
         this.phase = PHASES.GAME_OVER;
+        this.saveGameState();
         
         let playerPoints = [0, 0, 0];
         for (let i = 0; i < 3; i++) {
@@ -602,6 +762,7 @@ class Game {
 
     endGame(wonOverride = null) {
         this.phase = PHASES.GAME_OVER;
+        this.saveGameState();
         
         // Count points
         let declarerPoints = 0;
@@ -689,6 +850,7 @@ class Game {
 
     endGamePassedIn() {
         this.phase = PHASES.GAME_OVER;
+        this.saveGameState();
         this.ui.showGameOverPassedIn(this.initialSkat);
         this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
 

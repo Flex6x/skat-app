@@ -160,23 +160,50 @@ class GameValueEngine {
         if (announcedSchneider && !schneider) won = false;
         if (announcedSchwarz && !schwarz) won = false;
 
-        const matadorType = getT(matadors.type); 
-        const gameLabel = getT('game'); 
+        const matadorType = matadors.type; // 'mit' or 'ohne'
+        const matadorCount = matadors.count;
+
+        let currentMult = matadorCount + 1; // Spitzen + 1 (Spiel)
+        const parts = [`${matadorType} ${matadorCount}`, `Spiel ${currentMult}`];
         
-        const parts = [`${matadorType} ${matadors.count}`, gameLabel];
-        if (handGame) parts.push(getT('hand_game'));
-        if (schneider) parts.push('Schneider');
-        if (announcedSchneider) parts.push(`${getT('announced')} Schneider`);
-        if (schwarz) parts.push('Schwarz');
-        if (announcedSchwarz) parts.push(`${getT('announced')} Schwarz`);
+        if (handGame) {
+            currentMult += 1;
+            parts.push(`Hand ${currentMult}`);
+            
+            if (schneider) {
+                currentMult += 1;
+                parts.push(`Schneider ${currentMult}`);
+            }
+            if (announcedSchneider) {
+                currentMult += 1;
+                parts.push(`Schneider angesagt ${currentMult}`);
+            }
+            if (schwarz) {
+                currentMult += 1;
+                parts.push(`Schwarz ${currentMult}`);
+            }
+            if (announcedSchwarz) {
+                currentMult += 1;
+                parts.push(`Schwarz angesagt ${currentMult}`);
+            }
+        } else {
+            if (schneider) {
+                currentMult += 1;
+                parts.push(`Schneider ${currentMult}`);
+            }
+            if (schwarz) {
+                currentMult += 1;
+                parts.push(`Schwarz ${currentMult}`);
+            }
+        }
 
         const baseValue = this.BASE_VALUES[trumpMode];
-        const details = `${parts.join(', ')} ${multiplier}, ${multiplier} * ${baseValue} = ${gameValue}`;
+        const details = `${parts.join(', ')}, ${currentMult} × ${baseValue} = ${gameValue}`;
 
         return {
             gameValue,
             matadors,
-            multiplier,
+            multiplier: currentMult,
             schneider,
             schwarz,
             overbid,

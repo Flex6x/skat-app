@@ -19,6 +19,10 @@
 - tutorial verbessern/löschen/überspringen button
 - skat soll erst im richtigen moment verschwinden
 
+- Coole Stats, z.b. wie oft Roll Mops, wie oft perfekt null oder grand mit 4.
+- Badges
+
 ## Bugs:
 
+- reload bugt
 - übersetzungssbugs

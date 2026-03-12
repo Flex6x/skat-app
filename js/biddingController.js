@@ -4,7 +4,7 @@
  */
 
 class BiddingController {
-    constructor(biddingEngine, botBidding, ui, players, dealerIndex, onComplete) {
+    constructor(biddingEngine, botBidding, ui, players, dealerIndex, onComplete, savedState = null) {
         this.engine = biddingEngine;
         this.botBidding = botBidding;
         this.ui = ui;
@@ -24,20 +24,43 @@ class BiddingController {
             }
         });
 
-        this.currentBid = 0;
-        
-        // State tracking
-        this.survivor = this.vorhand;
-        this.challenger = this.mittelhand;
-        this.activeTurn = this.challenger; // Middlehand speaks first
-        this.phase = 1; // 1: M vs V | 2: Winner(M,V) vs H | 3: Final check for Forehand if all passed
-        this.hasBidBeenMade = false;
-        this.passedPlayers = new Set();
+        if (savedState) {
+            this.currentBid = savedState.currentBid;
+            this.survivor = savedState.survivor;
+            this.challenger = savedState.challenger;
+            this.activeTurn = savedState.activeTurn;
+            this.phase = savedState.phase;
+            this.hasBidBeenMade = savedState.hasBidBeenMade;
+            this.passedPlayers = new Set(savedState.passedPlayers);
+        } else {
+            this.currentBid = 0;
+            // State tracking
+            this.survivor = this.vorhand;
+            this.challenger = this.mittelhand;
+            this.activeTurn = this.challenger; // Middlehand speaks first
+            this.phase = 1; // 1: M vs V | 2: Winner(M,V) vs H | 3: Final check for Forehand if all passed
+            this.hasBidBeenMade = false;
+            this.passedPlayers = new Set();
+        }
+    }
+
+    getState() {
+        return {
+            currentBid: this.currentBid,
+            survivor: this.survivor,
+            challenger: this.challenger,
+            activeTurn: this.activeTurn,
+            phase: this.phase,
+            hasBidBeenMade: this.hasBidBeenMade,
+            passedPlayers: Array.from(this.passedPlayers)
+        };
     }
 
     async start() {
-        this.ui.showMessage('Die Reiz-Phase beginnt.');
-        await this.delay(1000);
+        if (!this.hasBidBeenMade && this.passedPlayers.size === 0) {
+            this.ui.showMessage('Die Reiz-Phase beginnt.');
+            await this.delay(1000);
+        }
         this.processTurn();
     }
 
