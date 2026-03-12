@@ -32,7 +32,7 @@ class Game {
         this.ui = ui;
         this.aiControllers = aiControllers; // Array of AI instances
         this.settings = settings;
-        this.dealerIndex = 0; // Initialize dealer once
+        this.dealerIndex = Math.floor(Math.random() * 3); // Randomly choose first dealer
         
         this.reset();
     }
@@ -55,6 +55,10 @@ class Game {
         this.phase = PHASES.DEALING;
         // Compute roles relative to dealer
         this.forehandIndex = (this.dealerIndex + 1) % 3;
+        const mittelhandIndex = (this.dealerIndex + 2) % 3;
+        const hinterhandIndex = this.dealerIndex;
+        this.ui.updatePlayerRoles(this.forehandIndex, mittelhandIndex, hinterhandIndex);
+
         this.turnIndex = this.forehandIndex;
         
         this.declarerIndex = -1;
@@ -254,6 +258,11 @@ class Game {
             this.ui.setTrump(this.trumpMode);
             
             this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt ${this.trumpMode} (Hand).`);
+
+            // Resort player hand based on bot's trump choice
+            this.sortHand(this.players[2].hand);
+            this.ui.renderPlayerHand(this.players[2].hand);
+
             await this.delay(1500);
             this.startGameplay();
             return;
@@ -292,6 +301,11 @@ class Game {
         
         this.ui.renderBotHand(this.declarerIndex, botHand.length);
         this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt ${this.trumpMode}.`);
+
+        // Resort player hand based on bot's trump choice
+        this.sortHand(this.players[2].hand);
+        this.ui.renderPlayerHand(this.players[2].hand);
+
         await this.delay(1500);
         
         this.startGameplay();

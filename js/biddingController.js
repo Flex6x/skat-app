@@ -16,8 +16,6 @@ class BiddingController {
         this.mittelhand = (this.dealer + 2) % 3;
         this.hinterhand = this.dealer;
 
-        this.ui.updatePlayerRoles(this.vorhand, this.mittelhand, this.hinterhand);
-
         // Precalculate bots
         this.botData = [];
         this.players.forEach(p => {
