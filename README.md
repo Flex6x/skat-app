@@ -15,8 +15,8 @@
 - Überprüfen: Siegquotenberechnung
 - verzögerter sound
 - bei kleinen Screens: Icons auf Karten anpassen
-- Karten Sortierung auch anpassen, wenn der Gegner Alleinspieler wird und einen Trumpf wählt. 
 - nach reload kein neues spiel.
+- tutorial verbessern/löschen/überspringen button
 
 ## Bugs:
 
@@ -24,6 +24,5 @@
 
 ## Prompts:
 
-Bitte achte auf eine strenge Trennung zwischen Headline (also mit logo, settings, tutorial, settings) und dem rest der seite (also vor allem den inhalt in stats und settings) - überschneidet manchmal.
 Mache settings.html scrollbar. Aber nur auf der y achse! Nicht von links nach rechts scrollbar! Und außer dier scroll funktion nix anderes ändern!
 Ordne den Skat (aktuell in der Mitte des Tisches) etwas linker an. aktuell ist der immer vom reiz fenster blockiert.

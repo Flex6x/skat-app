@@ -10,19 +10,19 @@
 </head>
 
 <body>
-    <header class="menu-header">
-        <div class="header-left" id="btn-logo-home" style="cursor: pointer;" onclick="window.location.href='index.html'">
-            <div class="app-logo">S</div>
-            <span class="app-name">Skat</span>
-        </div>
-        <nav class="header-right">
-            <button id="btn-show-tutorial" class="nav-link" data-i18n="tutorial" onclick="window.location.href='tutorial.html'">Tutorial</button>
-            <button id="btn-show-stats" class="nav-link" data-i18n="statistics" onclick="window.location.href='stats.html'">Statistics</button>
-            <button id="btn-show-settings" class="nav-link" data-i18n="settings" onclick="window.location.href='settings.html'">Settings</button>
-        </nav>
-    </header>
-
     <div id="main-menu" class="menu-overlay">
+        <header class="menu-header">
+            <div class="header-left" id="btn-logo-home" style="cursor: pointer;" onclick="window.location.href='index.html'">
+                <div class="app-logo">S</div>
+                <span class="app-name">Skat</span>
+            </div>
+            <nav class="header-right">
+                <button id="btn-show-tutorial" class="nav-link" data-i18n="tutorial" onclick="window.location.href='tutorial.html'">Tutorial</button>
+                <button id="btn-show-stats" class="nav-link" data-i18n="statistics" onclick="window.location.href='stats.html'">Statistics</button>
+                <button id="btn-show-settings" class="nav-link" data-i18n="settings" onclick="window.location.href='settings.html'">Settings</button>
+            </nav>
+        </header>
+
         <div class="menu-content" id="settings-view">
             <header class="view-header">
                 <h1 data-i18n="settings">Settings</h1>
@@ -150,9 +150,6 @@
                 </div>
             </div>
 
-            <div class="menu-buttons footer-actions">
-                <button id="btn-back-settings" class="btn primary large-btn" data-i18n="back_to_menu" onclick="window.location.href='index.html'">Zurück zum Menü</button>
-            </div>
         </div>
     </div>
 

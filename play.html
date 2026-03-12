@@ -12,6 +12,18 @@
 <body>
     <!-- Round Selection Overlay (shown before game starts) -->
     <div id="main-menu" class="menu-overlay hidden">
+        <header class="menu-header">
+            <div class="header-left" id="btn-logo-home" style="cursor: pointer;" onclick="window.location.href='index.html'">
+                <div class="app-logo">S</div>
+                <span class="app-name">Skat</span>
+            </div>
+            <nav class="header-right">
+                <button id="btn-show-tutorial-nav" class="nav-link" data-i18n="tutorial" onclick="window.location.href='tutorial.html'">Tutorial</button>
+                <button id="btn-show-stats-nav" class="nav-link" data-i18n="statistics" onclick="window.location.href='stats.html'">Statistics</button>
+                <button id="btn-show-settings-nav" class="nav-link" data-i18n="settings" onclick="window.location.href='settings.html'">Settings</button>
+            </nav>
+        </header>
+
         <div class="menu-content" id="round-selection-view">
             <h2 data-i18n="select_rounds">Rundenanzahl wählen</h2>
             <p class="subtitle" data-i18n="how_many_games">Wie viele Spiele sollen absolviert werden?</p>
@@ -29,6 +41,18 @@
     </div>
 
     <div id="game-container" class="hidden">
+        <header class="menu-header">
+            <div class="header-left" id="btn-logo-home-game" style="cursor: pointer;" onclick="window.location.href='index.html'">
+                <div class="app-logo">S</div>
+                <span class="app-name">Skat</span>
+            </div>
+            <nav class="header-right">
+                <button id="btn-show-tutorial-game" class="nav-link" data-i18n="tutorial" onclick="window.location.href='tutorial.html'">Tutorial</button>
+                <button id="btn-show-stats-game" class="nav-link" data-i18n="statistics" onclick="window.location.href='stats.html'">Statistics</button>
+                <button id="btn-show-settings-game" class="nav-link" data-i18n="settings" onclick="window.location.href='settings.html'">Settings</button>
+            </nav>
+        </header>
+
         <!-- In-Game Info Box Top Center -->
         <div class="game-info-container">
             <div class="game-info-top">

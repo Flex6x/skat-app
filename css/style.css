@@ -56,15 +56,19 @@ body {
 
 /* Header in Menu */
 .menu-header {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    padding: 20px 40px;
+    height: 80px;
+    padding: 0 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    z-index: 1001;
+    z-index: 2000;
+    background: rgba(18, 18, 18, 0.5);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .header-left {
@@ -119,6 +123,7 @@ body {
 .menu-content {
     background: rgba(40, 40, 55, 0.5);
     padding: 60px 80px;
+    margin-top: 100px; /* Space for fixed header */
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(5px);
@@ -128,12 +133,26 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
 }
 
 .hero-section {
     background: none;
     border: none;
     backdrop-filter: none;
+    margin-top: 0; /* Hero section can be centered */
+}
+
+/* Specific view adjustments */
+#stats-view, #settings-view {
+    margin-top: 80px;
+    padding-top: 40px;
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    background: none;
+    backdrop-filter: none;
+    border: none;
 }
 
 .glow-text {
@@ -690,6 +709,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 20px;
+    padding-top: 100px; /* Space for fixed header */
     gap: 20px;
     transition: opacity 0.4s ease, filter 0.4s ease;
 }

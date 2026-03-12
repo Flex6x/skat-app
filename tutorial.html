@@ -11,6 +11,18 @@
 
 <body>
     <div id="game-container">
+        <header class="menu-header">
+            <div class="header-left" id="btn-logo-home-tut" style="cursor: pointer;" onclick="window.location.href='index.html'">
+                <div class="app-logo">S</div>
+                <span class="app-name">Skat</span>
+            </div>
+            <nav class="header-right">
+                <button id="btn-show-tutorial-tut" class="nav-link" data-i18n="tutorial" onclick="window.location.href='tutorial.html'">Tutorial</button>
+                <button id="btn-show-stats-tut" class="nav-link" data-i18n="statistics" onclick="window.location.href='stats.html'">Statistics</button>
+                <button id="btn-show-settings-tut" class="nav-link" data-i18n="settings" onclick="window.location.href='settings.html'">Settings</button>
+            </nav>
+        </header>
+
         <!-- Minimal game elements for tutorial to point to -->
         <div class="game-info-container">
             <div class="game-info-top">
