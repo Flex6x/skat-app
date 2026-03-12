@@ -123,9 +123,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             window.appSettings = new Settings();
-            const ui = new UI();
-            ui.updateLanguageUI();
-            ui.renderStats();
+            window.ui = new UI();
+            window.ui.updateLanguageUI();
+            window.ui.renderStats();
         });
     </script>
 </body>
