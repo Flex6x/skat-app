@@ -676,7 +676,7 @@ body {
 
 #pile-skat.pos-center {
     top: 50%;
-    left: 42%;
+    left: 20%;
     transform: translateY(-50%);
 }
 

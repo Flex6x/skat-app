@@ -25,4 +25,3 @@
 ## Prompts:
 
 Mache settings.html scrollbar. Aber nur auf der y achse! Nicht von links nach rechts scrollbar! Und außer dier scroll funktion nix anderes ändern!
-Ordne den Skat (aktuell in der Mitte des Tisches) etwas linker an. aktuell ist der immer vom reiz fenster blockiert.
