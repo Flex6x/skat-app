@@ -54,6 +54,7 @@ class Tutorial {
         
         this.btnNext = document.getElementById('btn-next-tutorial');
         this.btnPrev = document.getElementById('btn-prev-tutorial');
+        this.btnSkip = document.getElementById('btn-skip-tutorial');
 
         this.initEvents();
     }
@@ -61,6 +62,7 @@ class Tutorial {
     initEvents() {
         this.btnNext.onclick = () => this.next();
         this.btnPrev.onclick = () => this.prev();
+        if (this.btnSkip) this.btnSkip.onclick = () => this.stop();
     }
 
     start() {
