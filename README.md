@@ -17,11 +17,8 @@
 - bei kleinen Screens: Icons auf Karten anpassen
 - nach reload kein neues spiel.
 - tutorial verbessern/löschen/überspringen button
+- skat soll erst im richtigen moment verschwinden
 
 ## Bugs:
 
 - übersetzungssbugs
-
-## Prompts:
-
-Mache settings.html scrollbar. Aber nur auf der y achse! Nicht von links nach rechts scrollbar! Und außer dier scroll funktion nix anderes ändern!
