@@ -28,38 +28,90 @@
                 <h1 data-i18n="statistics">Statistics</h1>
             </header>
 
-            <div class="stats-dashboard">
-                <div class="stat-card">
-                    <span class="stat-label" data-i18n="total_lists">Total Lists</span>
-                    <span id="stat-total-games" class="stat-value">0</span>
+            <!-- Tab Navigation -->
+            <div class="stats-tabs-nav">
+                <button class="stats-tab-btn active" data-tab="overview" onclick="ui.switchStatsTab('overview')">
+                    <span data-i18n="overview">Übersicht</span>
+                </button>
+                <button class="stats-tab-btn" data-tab="history" onclick="ui.switchStatsTab('history')">
+                    <span data-i18n="game_history">Spielverlauf</span>
+                </button>
+            </div>
+
+            <!-- Tab 1: Overview -->
+            <div class="stats-overview" id="stats-overview">
+                <div class="stats-dashboard" id="stats-main-dashboard">
+                    <div class="stat-card">
+                        <span class="stat-label" data-i18n="total_lists">Total Lists</span>
+                        <span id="stat-total-games" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label" data-i18n="win_ratio">Win Ratio</span>
+                        <span id="stat-win-ratio" class="stat-value">0%</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label" data-i18n="best_streak">Best Streak</span>
+                        <span id="stat-win-streak" class="stat-value">0</span>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-label" data-i18n="win_ratio">Win Ratio</span>
-                    <span id="stat-win-ratio" class="stat-value">0%</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-label" data-i18n="best_streak">Best Streak</span>
-                    <span id="stat-win-streak" class="stat-value">0</span>
+
+                <!-- New Overall Totals Section -->
+                <div class="stats-dashboard secondary-stats" id="stats-secondary-dashboard">
+                    <div class="stat-card mini">
+                        <span class="stat-label">Grand</span>
+                        <span id="stat-total-grand" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card mini">
+                        <span class="stat-label">Null</span>
+                        <span id="stat-total-null" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card mini">
+                        <span class="stat-label">Hand</span>
+                        <span id="stat-total-hand" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card mini">
+                        <span class="stat-label">Schneider</span>
+                        <span id="stat-total-schneider" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card mini">
+                        <span class="stat-label">Schwarz</span>
+                        <span id="stat-total-schwarz" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card mini">
+                        <span class="stat-label">Rollmops</span>
+                        <span id="stat-total-rollmops" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card mini">
+                        <span class="stat-label">Ramsch</span>
+                        <span id="stat-total-ramsch" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-card mini">
+                        <span class="stat-label">Big Busch</span>
+                        <span id="stat-total-bigbusch" class="stat-value">0</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="stats-table-full-container">
-                <table id="stats-table">
-                    <thead>
-                        <tr>
-                            <th data-i18n="date">Datum</th>
-                            <th data-i18n="winner">Gewinner</th>
-                            <th data-i18n="rounds">Runden</th>
-                            <th data-i18n="rule_set">Regeln</th>
-                            <th data-i18n="pts_aicore">Aicore</th>
-                            <th data-i18n="pts_aiden">Aiden</th>
-                            <th id="stats-player-name-head">Du</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stats-table-body">
-                        <!-- Filled by JS -->
-                    </tbody>
-                </table>
+            <!-- Tab 2: Game History -->
+            <div class="stats-history hidden" id="stats-history">
+                <div class="stats-table-full-container">
+                    <table id="stats-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="date">Datum</th>
+                                <th data-i18n="winner">Gewinner</th>
+                                <th data-i18n="rounds">Runden</th>
+                                <th data-i18n="rule_set">Regeln</th>
+                                <th data-i18n="pts_aicore">Aicore</th>
+                                <th data-i18n="pts_aiden">Aiden</th>
+                                <th id="stats-player-name-head">Du</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stats-table-body">
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
         </div>

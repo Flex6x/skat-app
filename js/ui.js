@@ -93,7 +93,9 @@ const TRANSLATIONS = {
         tut_step3: "Als Alleinspieler wählst du hier den Spieltyp (Farbe, Grand oder Null).",
         tut_step4: "In der Mitte des Tisches werden die Karten ausgespielt. Wer die höchste Karte legt, gewinnt den Stich.",
         tut_step5: "Hier oben findest du alle wichtigen Infos zum aktuellen Spiel, inklusive der Punkte.",
-        tut_step6: "Über das Logo kommst du immer zurück. Hier findest du auch die Liste und Statistiken."
+        tut_step6: "Über das Logo kommst du immer zurück. Hier findest du auch die Liste und Statistiken.",
+        overview: "Übersicht",
+        game_history: "Spielverlauf"
     },
     en: {
         select_rounds: "Select Rounds",
@@ -182,7 +184,9 @@ const TRANSLATIONS = {
         tut_step3: "As declarer, you choose the game type here (Suit, Grand, or Null).",
         tut_step4: "Cards are played in the center of the table. The highest card wins the trick.",
         tut_step5: "Up here you'll find all important game info, including current points.",
-        tut_step6: "Use the logo to return home. You can also find the game list and statistics here."
+        tut_step6: "Use the logo to return home. You can also find the game list and statistics here.",
+        overview: "Overview",
+        game_history: "Game History"
     }
 };
 
@@ -706,26 +710,66 @@ class UI {
     }
     renderStats() {
         const stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
-        this.els.statsTableBody.innerHTML = '';
         const playerName = (window.appSettings && window.appSettings.current.nickname) || 'Du';
-        
+
+        // Render both tabs
+        this._renderStatsOverview(stats, playerName);
+        this._renderStatsHistory(stats, playerName);
+
+        // Show overview tab by default
+        this.switchStatsTab('overview');
+    }
+
+    _renderStatsOverview(stats, playerName) {
+        const mainDashboardEl = document.getElementById('stats-main-dashboard');
+        const secondaryDashboardEl = document.getElementById('stats-secondary-dashboard');
+
+        // References for secondary stats
+        const els = {
+            grand: document.getElementById('stat-total-grand'),
+            null: document.getElementById('stat-total-null'),
+            hand: document.getElementById('stat-total-hand'),
+            schneider: document.getElementById('stat-total-schneider'),
+            schwarz: document.getElementById('stat-total-schwarz'),
+            rollmops: document.getElementById('stat-total-rollmops'),
+            ramsch: document.getElementById('stat-total-ramsch'),
+            bigbusch: document.getElementById('stat-total-bigbusch')
+        };
+
         if (stats.length === 0) {
-            this.els.statsTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px; color: #666;">${this.getTranslation('no_lists')}</td></tr>`;
-            this.els.statTotalGames.textContent = '0';
-            this.els.statWinRatio.textContent = '0%';
-            this.els.statWinStreak.textContent = '0';
+            mainDashboardEl.innerHTML = `
+                <div class="stat-card">
+                    <span class="stat-label" data-i18n="total_lists">Total Lists</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label" data-i18n="win_ratio">Win Ratio</span>
+                    <span class="stat-value">0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label" data-i18n="best_streak">Best Streak</span>
+                    <span class="stat-value">0</span>
+                </div>
+            `;
+            Object.values(els).forEach(el => { if(el) el.textContent = '0'; });
             return;
         }
 
+        // Calculate statistics
         let totalLists = stats.length;
         let wins = 0;
         let currentStreak = 0;
         let bestStreak = 0;
 
-        // Process Dashboard
+        let totalsSum = {
+            grand: 0, null: 0, hand: 0, schneider: 0, schwarz: 0, rollmops: 0, ramsch: 0, bigbusch: 0
+        };
+
         stats.forEach(list => {
-            const isWinner = list.winner === playerName || list.winner === 'Du';
-            
+            const scores = list.scores;
+            const maxScore = Math.max(...scores);
+            const isWinner = scores[2] === maxScore; // Player is index 2
+
             if (isWinner) {
                 wins++;
                 currentStreak++;
@@ -733,18 +777,60 @@ class UI {
             } else {
                 currentStreak = 0;
             }
+
+            // Aggregate totals from each list
+            totalsSum.grand += (list.anzahlGrandSpiele || 0);
+            totalsSum.null += (list.anzahlNullSpiele || 0);
+            totalsSum.hand += (list.anzahlHandspiele || 0);
+            totalsSum.schneider += (list.anzahlSchneider || 0);
+            totalsSum.schwarz += (list.anzahlSchwarz || 0);
+            totalsSum.rollmops += (list.anzahlRollmops || 0);
+            totalsSum.ramsch += (list.anzahlRamsch || 0);
+            totalsSum.bigbusch += (list.anzahlBigBusch || 0);
         });
 
-        this.els.statTotalGames.textContent = totalLists;
-        this.els.statWinRatio.textContent = Math.round((wins / totalLists) * 100) + '%';
-        this.els.statWinStreak.textContent = bestStreak;
-        
+        // Render primary dashboard
+        mainDashboardEl.innerHTML = `
+            <div class="stat-card">
+                <span class="stat-label" data-i18n="total_lists">Total Lists</span>
+                <span class="stat-value">${totalLists}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label" data-i18n="win_ratio">Win Ratio</span>
+                <span class="stat-value">${Math.round((wins / totalLists) * 100)}%</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label" data-i18n="best_streak">Best Streak</span>
+                <span class="stat-value">${bestStreak}</span>
+            </div>
+        `;
+
+        // Update secondary stats UI
+        if (els.grand) els.grand.textContent = totalsSum.grand;
+        if (els.null) els.null.textContent = totalsSum.null;
+        if (els.hand) els.hand.textContent = totalsSum.hand;
+        if (els.schneider) els.schneider.textContent = totalsSum.schneider;
+        if (els.schwarz) els.schwarz.textContent = totalsSum.schwarz;
+        if (els.rollmops) els.rollmops.textContent = totalsSum.rollmops;
+        if (els.ramsch) els.ramsch.textContent = totalsSum.ramsch;
+        if (els.bigbusch) els.bigbusch.textContent = totalsSum.bigbusch;
+    }
+
+    _renderStatsHistory(stats, playerName) {
+        const tableBody = this.els.statsTableBody;
+        tableBody.innerHTML = '';
+
+        if (stats.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px; color: #666;">${this.getTranslation('no_lists')}</td></tr>`;
+            return;
+        }
+
         // Render Table (Newest first)
         [...stats].reverse().forEach(list => {
             const tr = document.createElement('tr');
             const scores = list.scores;
             const names = ['Aicore', 'Aiden', playerName];
-            
+
             // Find max score
             const maxScore = Math.max(...scores);
             const winnersIndices = [];
@@ -760,7 +846,7 @@ class UI {
             } else {
                 winnerDisplay = winnersIndices.map(i => names[i]).join(' & ');
             }
-            
+
             tr.innerHTML = `
                 <td>${list.date}</td>
                 <td style="font-weight: bold; color: ${isUserWinner ? '#4caf50' : '#fff'}">${winnerDisplay}</td>
@@ -770,8 +856,27 @@ class UI {
                 <td>${scores[1]}</td>
                 <td>${scores[2]}</td>
             `;
-            this.els.statsTableBody.appendChild(tr);
+            tableBody.appendChild(tr);
         });
+    }
+
+    switchStatsTab(tabName) {
+        const overviewEl = document.getElementById('stats-overview');
+        const historyEl = document.getElementById('stats-history');
+        const overviewBtn = document.querySelector('[data-tab="overview"]');
+        const historyBtn = document.querySelector('[data-tab="history"]');
+
+        if (tabName === 'overview') {
+            overviewEl.classList.remove('hidden');
+            historyEl.classList.add('hidden');
+            if (overviewBtn) overviewBtn.classList.add('active');
+            if (historyBtn) historyBtn.classList.remove('active');
+        } else if (tabName === 'history') {
+            overviewEl.classList.add('hidden');
+            historyEl.classList.remove('hidden');
+            if (overviewBtn) overviewBtn.classList.remove('active');
+            if (historyBtn) historyBtn.classList.add('active');
+        }
     }
 
     hideMainMenu() {
