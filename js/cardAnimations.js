@@ -276,4 +276,31 @@ class CardAnimations {
         // Clear the trick zone actually after animations are done
         this.ui.clearTrickZone();
     }
+
+    /**
+     * Animates all cards on the table back to the deck
+     */
+    async animateReturnToDeck() {
+        const deckEl = document.getElementById('deck-zone');
+        const piles = document.querySelectorAll('.trick-pile.has-cards');
+        const animations = [];
+
+        piles.forEach(pile => {
+            const cards = pile.querySelectorAll('.card-back');
+            cards.forEach(card => {
+                const animatedCard = card.cloneNode(true);
+                card.style.opacity = '0';
+                animations.push(this.animateCardMove(animatedCard, pile, deckEl, this.trickDuration));
+            });
+        });
+
+        await Promise.all(animations);
+        
+        // Hide piles after they returned
+        piles.forEach(pile => {
+            pile.classList.add('hidden');
+            pile.classList.remove('has-cards');
+            pile.innerHTML = '';
+        });
+    }
 }

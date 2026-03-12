@@ -71,6 +71,7 @@ class Game {
         this.inputLocked = false;
         
         this.ui.resetLiveScore();
+        this.ui.resetTrumpUI();
         // Setup Last trick binding
         this.ui.showLastTrickBtn(() => {
             if (this.lastTrick) {
@@ -137,7 +138,8 @@ class Game {
 
         this.phase = PHASES.BIDDING;
         this.startBiddingPhase();
-        }
+    }
+
     async startBiddingPhase() {
         this.biddingEngine = new BiddingEngine();
         this.botBidding = new BotBidding();
@@ -288,7 +290,6 @@ class Game {
         this.skat.push(d1, d2);
         this.sortHand(botHand); // Resort after discarding
         
-        this.ui.updateSkatZone(false);
         this.ui.renderBotHand(this.declarerIndex, botHand.length);
         this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt ${this.trumpMode}.`);
         await this.delay(1500);
@@ -339,9 +340,10 @@ class Game {
         // Originale Karten des Alleinspielers sichern (Hand + Skat) für Spitzenberechnung
         this.originalDeclarerHand = [...this.players[this.declarerIndex].hand, ...this.skat];
         
-        // Visuals: Hide skat pile and initialize trick piles (declarer gets 2 cards)
+        // Visuals: Hide skat pile
+        // Note: Trick piles are initialized after the first trick (in resolveTrick), 
+        // not here, to avoid interfering with game startup
         this.ui.updateSkatPile(false);
-        this.ui.updateTrickPiles(this.players, this.declarerIndex, false);
         
         this.turnIndex = this.forehandIndex;
         this.processTurn();
@@ -651,6 +653,11 @@ class Game {
         const humanWon = this.declarerIndex === 2 ? won : !won;
         this.ui.showGameOver(humanWon, resultMsg, declarerPoints, defendersPoints, evaluation, this.initialSkat, this.skat);
         this.dealerIndex = (this.dealerIndex + 1) % 3; // Rotate dealer
+
+        // Visual: Return all cards to deck
+        if (this.animations) {
+            this.animations.animateReturnToDeck();
+        }
 
         if (this.onGameEnd) {
             this.onGameEnd({

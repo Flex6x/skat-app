@@ -666,6 +666,10 @@ class UI {
         this.els.liveScore.classList.add('hidden');
         this.els.liveScore.textContent = `${this.getTranslation('eyes')}: -`;
     }
+
+    resetTrumpUI() {
+        this.els.currentTrump.textContent = `${this.getTranslation('trump')}: -`;
+    }
     
     // --- Last Trick UI Methods ---
     showLastTrickBtn(onClick) {
@@ -1286,6 +1290,8 @@ class UI {
             pSkat.classList.remove('hidden');
             pSkat.classList.add('has-cards');
         } else {
+            // Clear DOM elements and classes when hiding to prevent stale elements
+            pSkat.innerHTML = '';
             pSkat.classList.add('hidden');
             pSkat.classList.remove('has-cards');
         }
