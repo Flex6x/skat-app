@@ -59,6 +59,15 @@ class AIController {
         }
 
         if (winningCards.length > 0) {
+            // TACTICAL IMPROVEMENT: Declarer should conserve high trumps (Unters) early in the game
+            if (isDeclarer && currentTrick.cards.length > 0) {
+                // If we have winning cards that are NOT Unters, use those first to conserve Unters
+                const nonUnterWinning = winningCards.filter(c => c.rank !== 'U');
+                if (nonUnterWinning.length > 0) {
+                    return this.getLowestCard(nonUnterWinning, trumpMode);
+                }
+            }
+
             // Play lowest winning card to conserve high cards
             return this.getLowestCard(winningCards, trumpMode);
         } else {

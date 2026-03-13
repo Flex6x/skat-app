@@ -134,12 +134,15 @@ class GameValueEngine {
                 schwarz: false,
                 overbid,
                 won,
-                details: `${details} = ${gameValue}`
+                details: `${details} = ${gameValue}`,
+                handGame
             };
         }
 
-        const allDeclarerCards = [...declarerCards, ...skat];
-        const matadors = this.calculateMatadors(allDeclarerCards);
+        // --- MATADOR CALCULATION FIX ---
+        // Calculate matadors based ONLY on the 10 cards the player kept (declarerCards).
+        // This allows discarding jacks to change the matador count and avoid overbidding.
+        const matadors = this.calculateMatadors(declarerCards);
 
         const schneider = defenderPoints <= 30;
         const schwarz = defenderTrickCount === 0;

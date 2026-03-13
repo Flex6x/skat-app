@@ -506,8 +506,9 @@ class Game {
 
     startGameplay() {
         this.phase = PHASES.PLAYING;
-        // Originale Karten des Alleinspielers sichern (Hand + Skat) für Spitzenberechnung
-        this.originalDeclarerHand = [...this.players[this.declarerIndex].hand, ...this.skat];
+        // Nur die 10 Handkarten sichern für Spitzenberechnung (wie vom User gewünscht)
+        // Die gedrückten Karten (skat) zählen nicht mehr für Matadore
+        this.originalDeclarerHand = [...this.players[this.declarerIndex].hand];
         
         // Visuals: Hide skat pile
         // Note: Trick piles are initialized after the first trick (in resolveTrick), 

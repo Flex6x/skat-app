@@ -1612,6 +1612,13 @@ class UI {
         if (!individualScores) {
             finalSkatContainer.innerHTML = '';
             finalSkat.forEach(c => finalSkatContainer.appendChild(c.createDOMElement()));
+            
+            // Hide "Discarded" cards group for Hand games
+            if (evaluation && evaluation.handGame) {
+                finalSkatContainer.parentElement.classList.add('hidden');
+            } else {
+                finalSkatContainer.parentElement.classList.remove('hidden');
+            }
         }
 
         // Reset elements
