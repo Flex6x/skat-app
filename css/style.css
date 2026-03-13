@@ -1964,6 +1964,126 @@ body {
     padding: 0;
 }
 
+/* === Reiztabelle Modal === */
+.reiztabelle-modal {
+    min-width: 500px;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.reiztabelle-modal .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.reiztabelle-modal .modal-content {
+    padding: 20px;
+}
+
+.reiztabelle {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.reiztabelle th, .reiztabelle td {
+    padding: 12px 8px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.reiztabelle thead th {
+    background: rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.reiztabelle tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.reiztabelle tbody tr:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.reiztabelle .suit-Schellen { color: var(--color-schellen); }
+.reiztabelle .suit-Rot { color: var(--color-rot); }
+.reiztabelle .suit-Grün { color: var(--color-gruen); }
+.reiztabelle .suit-Eichel { color: var(--color-eichel); }
+.reiztabelle .suit-Grand { color: #fff; font-weight: 800; }
+
+.null-games-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.null-game {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.null-game strong {
+    color: var(--accent-color);
+}
+
+/* Close button for modals */
+.btn-close {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.btn-close:hover {
+    color: #fff;
+}
+
+/* Light theme support */
+[data-theme="light"] .reiztabelle-modal {
+    background: #fff;
+    border-color: #e0f2fe;
+}
+
+[data-theme="light"] .reiztabelle thead th {
+    background: #f0f9ff;
+    color: var(--text-color);
+}
+
+[data-theme="light"] .reiztabelle td {
+    border-color: #f1f5f9;
+    color: #334155;
+}
+
+[data-theme="light"] .null-games-section {
+    background: #f8fafc;
+}
+
+[data-theme="light"] .null-game {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+}
+
 /* === Scoreboard Drawer === */
 .drawer {
     position: fixed;

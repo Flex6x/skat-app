@@ -43,7 +43,70 @@
             <div class="game-controls-bottom" style="display: flex; gap: 15px; margin-top: 10px;">
                 <button id="btn-home" class="floating-btn" title="Zurück zum Hauptmenü">🏠</button>
                 <button id="btn-show-scoreboard" class="floating-btn" title="Spielliste anzeigen">📋</button>
+                <button id="btn-show-reiztabelle" class="floating-btn" title="Reizwerttabelle anzeigen">18</button>
                 <button id="btn-last-trick" class="floating-btn smaller hidden" title="Letzten Stich ansehen">👁️</button>
+            </div>
+        </div>
+
+        <!-- Reiztabelle Overlay -->
+        <div id="reiztabelle-overlay" class="overlay hidden reiztabelle-modal">
+            <div class="modal-header">
+                <h2 data-i18n="bid_value_table">Reizwerttabelle</h2>
+                <button id="btn-close-reiztabelle" class="btn-close">×</button>
+            </div>
+            <div class="modal-content">
+                <table class="reiztabelle">
+                    <thead>
+                        <tr>
+                            <th>Spiel</th>
+                            <th class="suit-Schellen"><img src="media/schellen.png" class="suit-icon" alt="Schellen"> 9</th>
+                            <th class="suit-Rot"><img src="media/rot.png" class="suit-icon" alt="Rot"> 10</th>
+                            <th class="suit-Grün"><img src="media/gruen.png" class="suit-icon" alt="Grün"> 11</th>
+                            <th class="suit-Eichel"><img src="media/eichel.png" class="suit-icon" alt="Eichel"> 12</th>
+                            <th class="suit-Grand">Grand 24</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2</td>
+                            <td>18</td>
+                            <td>20</td>
+                            <td>22</td>
+                            <td>24</td>
+                            <td>48</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>27</td>
+                            <td>30</td>
+                            <td>33</td>
+                            <td>36</td>
+                            <td>72</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>36</td>
+                            <td>40</td>
+                            <td>44</td>
+                            <td>48</td>
+                            <td>96</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>45</td>
+                            <td>50</td>
+                            <td>55</td>
+                            <td>60</td>
+                            <td>120</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="null-games-section">
+                    <div class="null-game"><span>Null</span> <strong>23</strong></div>
+                    <div class="null-game"><span>Null Hand</span> <strong>35</strong></div>
+                    <div class="null-game"><span>Null Ouvert</span> <strong>46</strong></div>
+                    <div class="null-game"><span>Null Ouvert Hand</span> <strong>59</strong></div>
+                </div>
             </div>
         </div>
 

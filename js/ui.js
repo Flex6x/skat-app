@@ -268,6 +268,7 @@ class UI {
             biddingControls: document.getElementById('bidding-controls'),
             trumpOverlay: document.getElementById('trump-overlay'),
             gameOverOverlay: document.getElementById('game-over-overlay'),
+            reiztabelleOverlay: document.getElementById('reiztabelle-overlay'),
             
             currentTrump: document.getElementById('current-trump'),
             currentTurn: document.getElementById('current-turn'),
@@ -289,6 +290,8 @@ class UI {
             btnBackMenu: document.getElementById('btn-back-menu'),
             btnHome: document.getElementById('btn-home'),
             btnLastTrick: document.getElementById('btn-last-trick'),
+            btnShowReiztabelle: document.getElementById('btn-show-reiztabelle'),
+            btnCloseReiztabelle: document.getElementById('btn-close-reiztabelle'),
             
             lastTrickOverlay: document.getElementById('last-trick-overlay'),
             lastTrickCards: document.getElementById('last-trick-cards'),
@@ -384,6 +387,26 @@ class UI {
                 window.location.href = 'index.html';
             };
         }
+
+        // Reiztabelle toggle
+        if (this.els.btnShowReiztabelle) {
+            this.els.btnShowReiztabelle.onclick = (e) => {
+                e.stopPropagation();
+                this.toggleReiztabelle();
+            };
+        }
+        if (this.els.btnCloseReiztabelle) {
+            this.els.btnCloseReiztabelle.onclick = () => {
+                this.els.reiztabelleOverlay.classList.add('hidden');
+            };
+        }
+        if (this.els.reiztabelleOverlay) {
+            this.els.reiztabelleOverlay.onclick = (e) => {
+                if (e.target === this.els.reiztabelleOverlay) {
+                    this.els.reiztabelleOverlay.classList.add('hidden');
+                }
+            };
+        }
     }
 
     resetAllOverlays() {
@@ -394,7 +417,8 @@ class UI {
             this.els.trumpOverlay,
             this.els.gameOverOverlay,
             this.els.lastTrickOverlay,
-            this.els.scoreboardDrawer
+            this.els.scoreboardDrawer,
+            this.els.reiztabelleOverlay
         ];
         overlays.forEach(o => {
             if (o) o.classList.add('hidden');
@@ -1856,5 +1880,10 @@ class UI {
         // Hide other details
         document.getElementById('overbid-warning').classList.add('hidden');
         document.getElementById('game-value-details').classList.add('hidden');
+    }
+
+    toggleReiztabelle() {
+        if (!this.els.reiztabelleOverlay) return;
+        this.els.reiztabelleOverlay.classList.toggle('hidden');
     }
 }
