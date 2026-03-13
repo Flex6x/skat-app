@@ -12,9 +12,7 @@
 - bei kleinen Screens: Icons auf Karten anpassen
 - tutorial verbessern/löschen/überspringen button
 - skat soll erst im richtigen moment verschwinden
-- Karten mit zahlen spielbar machen. 
 - Ouvert einbauen.
-- Besser mischen
 - Bots sollen effizienter stechen, weniger unter am anfang
 - neue reizwert berechnung nach dem Drücken
 - bei hand: "Gedrückt" weglassen bei ende

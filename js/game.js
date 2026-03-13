@@ -276,14 +276,15 @@ class Game {
         this.skat = dealt.skat;
         this.initialSkat = [...dealt.skat]; // Capture initial skat
         
-        // Sort hands
-        this.players.forEach(p => this.sortHand(p.hand));
-        
         this.ui.setDeclarer('-');
         
-        // Animate sequence
+        // Animate sequence (uses the raw unsorted hand for visual dealing)
         await this.animations.animateDealSequence(this.forehandIndex, this.players);
 
+        // Sort hands AFTER animation
+        this.players.forEach(p => this.sortHand(p.hand));
+
+        // Re-render all hands in their sorted state
         this.ui.renderAllHands(this.players);
 
         this.phase = PHASES.BIDDING;
