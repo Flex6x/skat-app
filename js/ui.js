@@ -1461,6 +1461,36 @@ class UI {
         const cardEls = this.els.player2Cards.querySelectorAll('.card-face');
         
         const tableArea = document.getElementById('table-area');
+
+        // KEYBOARD SUPPORT: Remove old handler if exists
+        if (this._activeKeyHandler) {
+            document.removeEventListener('keydown', this._activeKeyHandler);
+        }
+
+        // New key handler
+        this._activeKeyHandler = (e) => {
+            let index = -1;
+            // Keys 1-9 (codes 49-57)
+            if (e.keyCode >= 49 && e.keyCode <= 57) {
+                index = e.keyCode - 49;
+            } 
+            // Key 0 (code 48) for the 10th card
+            else if (e.keyCode === 48) {
+                index = 9;
+            }
+
+            if (index !== -1 && index < cardEls.length) {
+                const targetCardEl = cardEls[index];
+                const cardId = targetCardEl.dataset.id;
+                if (validIds.includes(cardId)) {
+                    // Play card
+                    document.removeEventListener('keydown', this._activeKeyHandler);
+                    this._activeKeyHandler = null;
+                    onPlay(cardId);
+                }
+            }
+        };
+        document.addEventListener('keydown', this._activeKeyHandler);
         
         // Make cards draggable / clickable / touchable
         cardEls.forEach(el => {
