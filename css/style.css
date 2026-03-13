@@ -1966,7 +1966,8 @@ body {
 
 /* === Reiztabelle Modal === */
 .reiztabelle-modal {
-    min-width: 450px;
+    width: 520px;
+    min-width: 520px;
     padding: 0;
     overflow: hidden;
     border-radius: 16px;
@@ -1975,79 +1976,99 @@ body {
     left: auto !important;
     right: 30px !important;
     transform: translate(0, -50%) !important;
+    height: 90vh;
+    max-height: 90vh;
 }
 
-.reiz-hints {
+.reiz-hints-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.hint-card {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 20px;
-    padding: 15px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    text-align: left;
-    font-size: 0.85rem;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    align-items: center;
+    text-align: center;
 }
 
-.hint-group {
-    display: flex;
-    gap: 10px;
-    line-height: 1.4;
-}
-
-.hint-title {
-    font-weight: 700;
+.hint-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
     color: var(--accent-color);
-    min-width: 85px;
-    flex-shrink: 0;
+    margin-bottom: 4px;
+    font-weight: 800;
 }
 
-.hint-text {
-    color: #ccc;
+.hint-val {
+    font-size: 0.8rem;
+    color: #eee;
+    line-height: 1.3;
 }
 
-[data-theme="light"] .reiz-hints {
+.hint-val strong {
+    color: #fff;
+}
+
+.hint-val small {
+    display: block;
+    font-size: 0.65rem;
+    margin-top: 4px;
+    color: #aaa;
+    line-height: 1.1;
+}
+
+[data-theme="light"] .hint-card {
     background: #f8fafc;
     border-color: #e2e8f0;
 }
 
-[data-theme="light"] .hint-text {
-    color: #475569;
+[data-theme="light"] .hint-val {
+    color: var(--text-color);
 }
 
 .reiztabelle-modal .modal-header {
-    padding: 20px;
+    padding: 15px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .reiztabelle-modal .modal-content {
     padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .reiztabelle {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     background: rgba(255, 255, 255, 0.02);
     border-radius: 8px;
     overflow: hidden;
 }
 
 .reiztabelle th, .reiztabelle td {
-    padding: 12px 8px;
+    padding: 10px 5px;
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.85rem;
 }
 
 .reiztabelle thead th {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4);
     font-weight: 700;
-    font-size: 0.9rem;
 }
 
 .reiztabelle tbody tr:nth-child(even) {
@@ -2056,6 +2077,14 @@ body {
 
 .reiztabelle tbody tr:hover {
     background: rgba(255, 255, 255, 0.07);
+}
+
+.reiztabelle .suit-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
 }
 
 .reiztabelle .suit-Schellen { color: var(--color-schellen); }
@@ -2067,19 +2096,19 @@ body {
 .null-games-section {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 8px;
     background: rgba(0, 0, 0, 0.2);
-    padding: 15px;
+    padding: 10px;
     border-radius: 8px;
 }
 
 .null-game {
     display: flex;
     justify-content: space-between;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.04);
     border-radius: 4px;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
 }
 
 .null-game strong {
