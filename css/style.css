@@ -1966,12 +1966,54 @@ body {
 
 /* === Reiztabelle Modal === */
 .reiztabelle-modal {
-    min-width: 500px;
+    min-width: 450px;
     padding: 0;
     overflow: hidden;
     border-radius: 16px;
     display: flex;
     flex-direction: column;
+    left: auto !important;
+    right: 30px !important;
+    transform: translate(0, -50%) !important;
+}
+
+.reiz-hints {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    text-align: left;
+    font-size: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hint-group {
+    display: flex;
+    gap: 10px;
+    line-height: 1.4;
+}
+
+.hint-title {
+    font-weight: 700;
+    color: var(--accent-color);
+    min-width: 85px;
+    flex-shrink: 0;
+}
+
+.hint-text {
+    color: #ccc;
+}
+
+[data-theme="light"] .reiz-hints {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+[data-theme="light"] .hint-text {
+    color: #475569;
 }
 
 .reiztabelle-modal .modal-header {
