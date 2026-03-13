@@ -55,19 +55,27 @@
                 <button id="btn-close-reiztabelle" class="btn-close">×</button>
             </div>
             <div class="modal-content">
-                <div class="reiz-hints-grid">
-                    <div class="hint-card">
-                        <span class="hint-label">Formel</span>
-                        <div class="hint-val">(Spitzen + Spiel) × Wert</div>
+                <div class="reiz-hints-list">
+                    <div class="hint-card formula">
+                        <span class="hint-label">Die Formel</span>
+                        <div class="hint-val"><span>(Spitzen + Spiel)</span> <i class="math-op">×</i> <span>Grundwert</span></div>
                     </div>
-                    <div class="hint-card">
-                        <span class="hint-label">Beispiel</span>
-                        <div class="hint-val">Mit 2 (oder Ohne 2) + Spiel 1 = <strong>Spiel 3</strong></div>
+                    <div class="hint-card example">
+                        <span class="hint-label">Das Beispiel</span>
+                        <div class="hint-val">Mit 2 (oder Ohne 2) + 1 = <strong>Spiel 3</strong></div>
                     </div>
-                    <div class="hint-card">
-                        <span class="hint-label">Extras</span>
-                        <div class="hint-val">Hand (+1), Schneider (+1), Schwarz (+1)<br>
-                        <small>*Angesagt: Schn. (+1), Schw. (+1), Ouvert (+1)</small></div>
+                    <div class="hint-card extras">
+                        <span class="hint-label">Die Extras</span>
+                        <div class="hint-val">
+                            <div class="bonus-tags">
+                                <span class="tag">Hand +1</span>
+                                <span class="tag">Schneider +1</span>
+                                <span class="tag">Schwarz +1</span>
+                            </div>
+                            <div class="hand-hints">
+                                <small>* Schneider angesagt (+1), Schwarz angesagt (+1), Ouvert (+1)</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <table class="reiztabelle">
