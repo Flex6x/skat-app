@@ -708,7 +708,11 @@ class Game {
         if (this.onGameEnd) {
             this.onGameEnd({
                 isRamsch: true,
-                loserIndices: loserIndices
+                loserIndices: loserIndices,
+                trumpMode: this.trumpMode,
+                handGame: this.handGame,
+                announcedSchneider: this.announcedSchneider,
+                announcedSchwarz: this.announcedSchwarz
             });
         }
     }
@@ -839,7 +843,13 @@ class Game {
                 passedIn: false,
                 declarerId: this.declarerIndex,
                 gameValue: evaluation.gameValue,
-                won: evaluation.won
+                won: evaluation.won,
+                trumpMode: this.trumpMode,
+                handGame: this.handGame,
+                schneider: evaluation.schneider,
+                schwarz: evaluation.schwarz,
+                announcedSchneider: this.announcedSchneider,
+                announcedSchwarz: this.announcedSchwarz
             });
         }
     }
@@ -856,7 +866,11 @@ class Game {
 
         if (this.onGameEnd) {
             this.onGameEnd({
-                passedIn: true
+                passedIn: true,
+                trumpMode: this.trumpMode,
+                handGame: this.handGame,
+                announcedSchneider: this.announcedSchneider,
+                announcedSchwarz: this.announcedSchwarz
             });
         }
     }
