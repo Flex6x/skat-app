@@ -51,6 +51,7 @@ class Game {
         this.originalDeclarerHand = [];
         this.announcedSchneider = false;
         this.announcedSchwarz = false;
+        this.isOuvert = false;
         
         this.phase = PHASES.DEALING;
         // Compute roles relative to dealer
@@ -107,6 +108,7 @@ class Game {
             originalDeclarerHand: this.originalDeclarerHand,
             announcedSchneider: this.announcedSchneider,
             announcedSchwarz: this.announcedSchwarz,
+            isOuvert: this.isOuvert,
             phase: this.phase,
             forehandIndex: this.forehandIndex,
             turnIndex: this.turnIndex,
@@ -141,6 +143,7 @@ class Game {
         this.originalDeclarerHand = reconstructCards(state.originalDeclarerHand);
         this.announcedSchneider = state.announcedSchneider;
         this.announcedSchwarz = state.announcedSchwarz;
+        this.isOuvert = state.isOuvert || false;
         this.phase = state.phase;
         this.forehandIndex = state.forehandIndex;
         this.turnIndex = state.turnIndex;
@@ -173,10 +176,15 @@ class Game {
         }
         
         if (this.trumpMode) {
-            this.ui.setTrump(this.trumpMode, this.handGame, this.announcedSchneider, this.announcedSchwarz);
+            this.ui.setTrump(this.trumpMode, this.handGame, this.announcedSchneider, this.announcedSchwarz, this.isOuvert);
         }
         
         this.ui.renderAllHands(this.players);
+        
+        if (this.isOuvert && this.phase === PHASES.PLAYING) {
+            this.revealDeclarerCards();
+        }
+
         this.updateLiveScore();
         
         if (this.currentTrick.cards.length > 0) {
@@ -370,6 +378,7 @@ class Game {
                 // Take Skat
                 () => {
                     this.handGame = false;
+                    this.isOuvert = false; // Will be set in trump selection if they choose Null Ouvert
                     // Start dragging game: The two cards in this.skat are shown in slots
                     this.ui.showSkatDiscardUI(this.players[this.declarerIndex].hand, this.skat, (discardedIds) => {
                         // The user confirmed physically what 2 cards go into skat. 
@@ -384,6 +393,7 @@ class Game {
                         this.sortHand(this.players[this.declarerIndex].hand);
                         this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
                         this.saveGameState();
+                        
                         this.startTrumpSelection();
                     });
                 },
@@ -406,8 +416,12 @@ class Game {
             const botHand = this.players[this.declarerIndex].hand;
             const data = this.botBidding.evaluateHand(botHand);
             this.trumpMode = data.trumpSuit; 
-            this.ui.setTrump(this.trumpMode);
             
+            // Bot logic for Ouvert: Only if win prob is 100%
+            // For now, let's say they never do it unless we implement 100% check
+            this.isOuvert = false; 
+
+            this.ui.setTrump(this.trumpMode, this.handGame, false, false, this.isOuvert);
             this.ui.showMessage(`${this.players[this.declarerIndex].name} spielt ${this.trumpMode} (Hand).`);
 
             // Resort player hand based on bot's trump choice
@@ -430,7 +444,9 @@ class Game {
         // Use evaluated trump logic from bot Data
         const data = this.botBidding.evaluateHand(botHand);
         this.trumpMode = data.trumpSuit; 
-        this.ui.setTrump(this.trumpMode);
+        this.isOuvert = false;
+        
+        this.ui.setTrump(this.trumpMode, this.handGame, false, false, this.isOuvert);
         
         this.sortHand(botHand);
         
@@ -473,18 +489,35 @@ class Game {
     startTrumpSelection() {
         this.phase = PHASES.TRUMP_SELECTION;
         if (this.players[this.declarerIndex].type === PLAYER_TYPES.HUMAN) {
-            this.ui.showTrumpSelectionOverlay((trumpSuit) => {
+            this.ui.showTrumpSelectionOverlay(this.handGame, (trumpSuit, ouvert = false) => {
                 this.trumpMode = trumpSuit;
-                this.ui.setTrump(this.trumpMode);
-                // Resort hand based on new trump mode
-                this.sortHand(this.players[this.declarerIndex].hand);
-                this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
+                this.isOuvert = ouvert;
                 
-                this.saveGameState();
-                if (this.handGame && this.trumpMode !== TRUMP_MODES.NULL) {
-                    this.startAnnouncement();
-                } else {
+                if (this.isOuvert && this.trumpMode === TRUMP_MODES.NULL) {
+                    this.ui.setTrump(this.trumpMode, this.handGame, false, false, true);
+                    this.sortHand(this.players[this.declarerIndex].hand);
+                    this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
+                    this.saveGameState();
                     this.startGameplay();
+                } else if (this.isOuvert && this.trumpMode === TRUMP_MODES.GRAND) {
+                    // Grand Ouvert implies Schwarz angesagt
+                    this.announcedSchneider = true;
+                    this.announcedSchwarz = true;
+                    this.ui.setTrump(this.trumpMode, this.handGame, true, true, true);
+                    this.sortHand(this.players[this.declarerIndex].hand);
+                    this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
+                    this.saveGameState();
+                    this.startGameplay();
+                } else {
+                    this.ui.setTrump(this.trumpMode, this.handGame, false, false, false);
+                    this.sortHand(this.players[this.declarerIndex].hand);
+                    this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
+                    this.saveGameState();
+                    if (this.handGame) {
+                        this.startAnnouncement();
+                    } else {
+                        this.startGameplay();
+                    }
                 }
             });
         }
@@ -497,7 +530,7 @@ class Game {
             this.announcedSchwarz = schwarz;
             
             // Update UI display with suffixes
-            this.ui.setTrump(this.trumpMode, this.handGame, this.announcedSchneider, this.announcedSchwarz);
+            this.ui.setTrump(this.trumpMode, this.handGame, this.announcedSchneider, this.announcedSchwarz, this.isOuvert);
             
             this.saveGameState();
             this.startGameplay();
@@ -514,13 +547,19 @@ class Game {
         this.declarerTrumpCount = this.originalDeclarerHand.filter(c => this.isTrump(c)).length;
 
         // Visuals: Hide skat pile
-        // Note: Trick piles are initialized after the first trick (in resolveTrick), 
-        // not here, to avoid interfering with game startup
         this.ui.updateSkatPile(false);
+        
+        if (this.isOuvert) {
+            this.revealDeclarerCards();
+        }
         
         this.saveGameState();
         this.turnIndex = this.forehandIndex;
         this.processTurn();
+    }
+
+    revealDeclarerCards() {
+        this.ui.revealDeclarerCards(this.declarerIndex, this.players[this.declarerIndex].hand);
     }
 
     isTrump(card) {
@@ -584,7 +623,19 @@ class Game {
             await this.delay(800 + Math.random() * 500); // 0.8s - 1.3s delay
             const aiController = this.aiControllers[currentPlayer.id];
             const isRamsch = (this.phase === PHASES.RAMSCH);
-            const selectedCard = aiController.chooseCard(validMoves, this.currentTrick, this.trumpMode, this.declarerIndex, isRamsch);
+            
+            // Perfect Information for Bots if isOuvert is true
+            const declarerHand = this.isOuvert ? this.players[this.declarerIndex].hand : null;
+            
+            const selectedCard = aiController.chooseCard(
+                validMoves, 
+                this.currentTrick, 
+                this.trumpMode, 
+                this.declarerIndex, 
+                isRamsch, 
+                this.isOuvert, 
+                declarerHand
+            );
             await this.playCard(this.turnIndex, selectedCard.id);
         }
     }
@@ -603,6 +654,9 @@ class Game {
             this.ui.renderPlayerHand(this.players[playerId].hand); // Update hand visually
         } else {
             this.ui.renderBotHand(playerId, this.players[playerId].hand.length); // Update bot card count
+            if (this.isOuvert && playerId === this.declarerIndex) {
+                this.revealDeclarerCards(); // Keep cards revealed
+            }
         }
 
         this.saveGameState();
@@ -801,6 +855,7 @@ class Game {
             skat: this.skat,
             bidValue: this.bidValue,
             handGame: this.handGame,
+            isOuvert: this.isOuvert,
             announcedSchneider: this.announcedSchneider,
             announcedSchwarz: this.announcedSchwarz,
             declarerPoints,
@@ -855,6 +910,7 @@ class Game {
                 schwarz: evaluation.schwarz,
                 announcedSchneider: this.announcedSchneider,
                 announcedSchwarz: this.announcedSchwarz,
+                isOuvert: this.isOuvert,
                 declarerTrumpCount: this.declarerTrumpCount,
                 matadors: evaluation.matadors
             });

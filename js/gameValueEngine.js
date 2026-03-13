@@ -62,20 +62,29 @@ class GameValueEngine {
 
     /**
      * Berechnet den Multiplikator.
-     * Bonusstufen bei Hand: Hand(1), Schneider(1), Schneider angesagt(1), Schwarz(1), Schwarz angesagt(1)
+     * Bonusstufen bei Hand: Hand(1), Schneider(1), Schneider angesagt(1), Schwarz(1), Schwarz angesagt(1), Ouvert(1)
      */
-    static calculateMultiplier({ matadors, handGame, schneider, schwarz, announcedSchneider, announcedSchwarz }) {
+    static calculateMultiplier({ matadors, handGame, schneider, schwarz, announcedSchneider, announcedSchwarz, isOuvert }) {
         let multiplier = matadors + 1; // Spitze(n) + Spiel
 
         if (handGame) {
             multiplier += 1; // +1 Hand
-            if (schneider) multiplier += 1; // +1 Schneider erreicht
-            if (announcedSchneider) multiplier += 1; // +1 Schneider angesagt
-            if (schwarz) multiplier += 1; // +1 Schwarz erreicht
-            if (announcedSchwarz) multiplier += 1; // +1 Schwarz angesagt
+            
+            // In Hand games, announcements imply all previous stages
+            const hasSchneider = schneider || announcedSchneider || announcedSchwarz || isOuvert;
+            const hasAnnouncedSchneider = announcedSchneider || announcedSchwarz || isOuvert;
+            const hasSchwarz = schwarz || announcedSchwarz || isOuvert;
+            const hasAnnouncedSchwarz = announcedSchwarz || isOuvert;
+
+            if (hasSchneider) multiplier += 1;
+            if (hasAnnouncedSchneider) multiplier += 1;
+            if (hasSchwarz) multiplier += 1;
+            if (hasAnnouncedSchwarz) multiplier += 1;
+            if (isOuvert) multiplier += 1;
         } else {
             if (schneider) multiplier += 1;
             if (schwarz) multiplier += 1;
+            if (isOuvert) multiplier += 1; // Generally Hand, but for completeness
         }
 
         return multiplier;
@@ -87,7 +96,10 @@ class GameValueEngine {
         return baseValue * multiplier;
     }
 
-    static getNullGameValue(handGame) {
+    static getNullGameValue(handGame, isOuvert) {
+        if (isOuvert) {
+            return handGame ? this.NULL_VALUES.ouvertHand : this.NULL_VALUES.ouvert;
+        }
         return handGame ? this.NULL_VALUES.hand : this.NULL_VALUES.normal;
     }
 
@@ -104,6 +116,7 @@ class GameValueEngine {
         skat,
         bidValue,
         handGame,
+        isOuvert = false,
         announcedSchneider = false,
         announcedSchwarz = false,
         declarerPoints,
@@ -121,10 +134,13 @@ class GameValueEngine {
         };
 
         if (trumpMode === 'Null') {
-            const gameValue = this.getNullGameValue(handGame);
+            const gameValue = this.getNullGameValue(handGame, isOuvert);
             const overbid = this.checkOverbid(bidValue, gameValue);
             const won = overbid ? false : declarerWonNormally;
-            const details = handGame ? `Null ${getT('hand_game')}` : 'Null';
+            
+            let details = 'Null';
+            if (handGame) details += ` ${getT('hand_game')}`;
+            if (isOuvert) details += ` Ouvert`;
 
             return {
                 gameValue,
@@ -135,13 +151,13 @@ class GameValueEngine {
                 overbid,
                 won,
                 details: `${details} = ${gameValue}`,
-                handGame
+                handGame,
+                isOuvert
             };
         }
 
         // --- MATADOR CALCULATION FIX ---
         // Calculate matadors based ONLY on the 10 cards the player kept (declarerCards).
-        // This allows discarding jacks to change the matador count and avoid overbidding.
         const matadors = this.calculateMatadors(declarerCards);
 
         const schneider = defenderPoints <= 30;
@@ -153,7 +169,8 @@ class GameValueEngine {
             schneider,
             schwarz,
             announcedSchneider,
-            announcedSchwarz
+            announcedSchwarz,
+            isOuvert
         });
 
         const gameValue = this.calculateGameValue(trumpMode, multiplier);
@@ -162,32 +179,43 @@ class GameValueEngine {
         let won = overbid ? false : declarerWonNormally;
         if (announcedSchneider && !schneider) won = false;
         if (announcedSchwarz && !schwarz) won = false;
+        if (isOuvert && !schwarz) won = false; // Ouvert in Suit/Grand implies winning all tricks
 
         const matadorType = matadors.type; // 'mit' or 'ohne'
         const matadorCount = matadors.count;
 
-        let currentMult = matadorCount + 1; // Spitzen + 1 (Spiel)
+        let currentMult = matadorCount + 1; // 1. Spiel
         const parts = [`${matadorType} ${matadorCount}`, `Spiel ${currentMult}`];
         
         if (handGame) {
-            currentMult += 1;
+            currentMult += 1; // 2. Hand
             parts.push(`Hand ${currentMult}`);
             
-            if (schneider) {
+            // Re-use logic from calculateMultiplier for details
+            const hasSchneider = schneider || announcedSchneider || announcedSchwarz || isOuvert;
+            const hasAnnouncedSchneider = announcedSchneider || announcedSchwarz || isOuvert;
+            const hasSchwarz = schwarz || announcedSchwarz || isOuvert;
+            const hasAnnouncedSchwarz = announcedSchwarz || isOuvert;
+
+            if (hasSchneider) {
                 currentMult += 1;
                 parts.push(`Schneider ${currentMult}`);
             }
-            if (announcedSchneider) {
+            if (hasAnnouncedSchneider) {
                 currentMult += 1;
                 parts.push(`Schneider angesagt ${currentMult}`);
             }
-            if (schwarz) {
+            if (hasSchwarz) {
                 currentMult += 1;
                 parts.push(`Schwarz ${currentMult}`);
             }
-            if (announcedSchwarz) {
+            if (hasAnnouncedSchwarz) {
                 currentMult += 1;
                 parts.push(`Schwarz angesagt ${currentMult}`);
+            }
+            if (isOuvert) {
+                currentMult += 1;
+                parts.push(`Ouvert ${currentMult}`);
             }
         } else {
             if (schneider) {
@@ -197,6 +225,10 @@ class GameValueEngine {
             if (schwarz) {
                 currentMult += 1;
                 parts.push(`Schwarz ${currentMult}`);
+            }
+            if (isOuvert) {
+                currentMult += 1;
+                parts.push(`Ouvert ${currentMult}`);
             }
         }
 
@@ -211,7 +243,9 @@ class GameValueEngine {
             schwarz,
             overbid,
             won,
-            details
+            details,
+            handGame,
+            isOuvert
         };
     }
 }

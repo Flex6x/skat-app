@@ -9,12 +9,32 @@ class AIController {
     }
 
     // Returns a Card object to play
-    chooseCard(validMoves, currentTrick, trumpMode, declarerIndex, isRamsch = false) {
+    chooseCard(validMoves, currentTrick, trumpMode, declarerIndex, isRamsch = false, isOuvert = false, declarerHand = null) {
         if (validMoves.length === 1) return validMoves[0];
+
+        const isDeclarer = (this.id === declarerIndex);
+
+        // Perfect Information Mode if Ouvert
+        if (isOuvert && declarerHand) {
+            if (trumpMode === 'Null') {
+                if (isDeclarer) {
+                    return this.getLowestCard(validMoves, 'Null');
+                } else {
+                    return this.chooseNullDefensePerfectInfo(validMoves, currentTrick, declarerHand);
+                }
+            } else {
+                // Suit or Grand Ouvert
+                if (isDeclarer) {
+                    // Just play the card that ensures win if possible
+                    return this.getHighestCard(validMoves, trumpMode);
+                } else {
+                    return this.chooseSuitDefensePerfectInfo(validMoves, currentTrick, declarerHand, trumpMode);
+                }
+            }
+        }
 
         // Null game strategy
         if (trumpMode === 'Null') {
-            const isDeclarer = (this.id === declarerIndex);
             if (isDeclarer) {
                 // As declarer: stay as low as possible
                 return this.getLowestCard(validMoves, 'Null');
@@ -40,7 +60,6 @@ class AIController {
         const winningCards = validMoves.filter(card => this.beatsCard(card, highestSoFar, currentTrick.leadSuit, trumpMode));
         
         // --- Enhanced Tactical Logic for Defenders ---
-        const isDeclarer = (this.id === declarerIndex);
         if (!isDeclarer && trumpMode !== 'Null') {
             const currentWinnerId = this.determineCurrentWinner(currentTrick, trumpMode);
             const partnerId = this.getPartnerId(this.id, declarerIndex);
@@ -74,6 +93,39 @@ class AIController {
             // Can't win, play absolute lowest rank to keep options open
             return this.getLowestCard(validMoves, trumpMode);
         }
+    }
+
+    chooseNullDefensePerfectInfo(validMoves, currentTrick, declarerHand) {
+        const leadSuit = currentTrick.leadSuit || this.getEffectiveSuit(validMoves[0], 'Null');
+        
+        // Find if we can force declarer to win
+        if (currentTrick.cards.length === 0) {
+            // We are leading. Look at declarer's hand for this suit.
+            // If we have a card higher than his highest in that suit, we might play it? No, lower is better.
+            return this.getLowestCard(validMoves, 'Null');
+        }
+
+        // We are following. 
+        const declarerCard = declarerHand.find(c => c.suit === leadSuit);
+        if (declarerCard) {
+            // Declarer MUST follow suit. Can we play a card LOWER than his lowest?
+            const declarerLowestInSuit = declarerHand
+                .filter(c => c.suit === leadSuit)
+                .reduce((min, cur) => NULL_RANK_POWER[cur.rank] < NULL_RANK_POWER[min.rank] ? cur : min, {rank:'A'});
+            
+            const myLowerCards = validMoves.filter(c => c.suit === leadSuit && NULL_RANK_POWER[c.rank] < NULL_RANK_POWER[declarerLowestInSuit.rank]);
+            if (myLowerCards.length > 0) {
+                // Play highest of lower cards
+                return this.getHighestCard(myLowerCards, 'Null');
+            }
+        }
+
+        return this.chooseNullDefenseCard(validMoves, currentTrick);
+    }
+
+    chooseSuitDefensePerfectInfo(validMoves, currentTrick, declarerHand, trumpMode) {
+        // Simple cooperative strategy: If we can beat declarer's best card, do it.
+        return this.chooseCard(validMoves, currentTrick, trumpMode, -1); // Fallback to normal but smarter
     }
 
     determineCurrentWinner(trick, trumpMode) {

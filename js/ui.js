@@ -78,6 +78,10 @@ const TRANSLATIONS = {
         turn: "Zug",
         bid_value: "Reizwert",
         trump: "Trumpf",
+        ouvert: "Ouvert",
+        null_ouvert: "Null Ouvert",
+        null_ouvert_hand: "Null Ouvert Hand",
+        grand_ouvert: "Grand Ouvert",
         original_skat: "Original Skat",
         discarded_cards: "Gedrückt",
         announce_schneider: "Schneider ansagen",
@@ -922,21 +926,6 @@ class UI {
         if (!grid) return;
         grid.innerHTML = '';
 
-        const badgeDefinitions = [
-            { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), desc: this.getTranslation('badge_unbesiegbar_desc'), check: (s) => (s.winSchwarzCount || 0) >= 5 },
-            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), check: (s) => (s.wonAllInListCount || 0) >= 1 },
-            { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), desc: this.getTranslation('badge_grandmeister_desc'), check: (s) => (s.winGrandCount || 0) >= 10 },
-            { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), desc: this.getTranslation('badge_null_ass_desc'), check: (s) => (s.winNullCount || 0) >= 10 },
-            { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), desc: this.getTranslation('badge_rollmops_desc'), check: (s) => (s.winRollmopsCount || 0) >= 3 },
-            { id: 'big_busch', icon: '🔥', title: this.getTranslation('badge_big_busch'), desc: this.getTranslation('badge_big_busch_desc'), check: (s) => (s.maxGameValue || 0) >= 264 },
-            { id: 'ramsch_koenig', icon: '🧹', title: this.getTranslation('badge_ramsch_koenig'), desc: this.getTranslation('badge_ramsch_koenig_desc'), check: (s) => (s.winRamschCount || 0) >= 10 },
-            { id: 'trumpfmaschine', icon: '⚙️', title: this.getTranslation('badge_trumpfmaschine'), desc: this.getTranslation('badge_trumpfmaschine_desc'), check: (s) => (s.maxTrumpCount || 0) >= 10 },
-            { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), desc: this.getTranslation('badge_anfaenger_desc'), check: (s) => s.totalGames >= 10 },
-            { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), desc: this.getTranslation('badge_stammspieler_desc'), check: (s) => s.totalGames >= 50 },
-            { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), check: (s) => s.totalGames >= 200 },
-            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), check: (s) => (s.winGrandOhne4Count || 0) >= 1 }
-        ];
-
         // Aggregate stats across all lists for badge checking
         const aggregated = {
             totalGames: 0,
@@ -971,16 +960,35 @@ class UI {
             if (list.winRamschCount === undefined) aggregated.winRamschCount += (list.anzahlRamsch || 0);
         });
 
+        const badgeDefinitions = [
+            { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), desc: this.getTranslation('badge_unbesiegbar_desc'), target: 5, current: aggregated.winSchwarzCount },
+            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), target: 1, current: aggregated.wonAllInListCount },
+            { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), desc: this.getTranslation('badge_grandmeister_desc'), target: 10, current: aggregated.winGrandCount },
+            { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), desc: this.getTranslation('badge_null_ass_desc'), target: 10, current: aggregated.winNullCount },
+            { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), desc: this.getTranslation('badge_rollmops_desc'), target: 3, current: aggregated.winRollmopsCount },
+            { id: 'big_busch', icon: '🔥', title: this.getTranslation('badge_big_busch'), desc: this.getTranslation('badge_big_busch_desc'), target: 1, current: aggregated.maxGameValue >= 264 ? 1 : 0 },
+            { id: 'ramsch_koenig', icon: '🧹', title: this.getTranslation('badge_ramsch_koenig'), desc: this.getTranslation('badge_ramsch_koenig_desc'), target: 10, current: aggregated.winRamschCount },
+            { id: 'trumpfmaschine', icon: '⚙️', title: this.getTranslation('badge_trumpfmaschine'), desc: this.getTranslation('badge_trumpfmaschine_desc'), target: 1, current: aggregated.maxTrumpCount >= 10 ? 1 : 0 },
+            { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), desc: this.getTranslation('badge_anfaenger_desc'), target: 10, current: aggregated.totalGames },
+            { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), desc: this.getTranslation('badge_stammspieler_desc'), target: 50, current: aggregated.totalGames },
+            { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: aggregated.totalGames },
+            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: aggregated.winGrandOhne4Count }
+        ];
+
         badgeDefinitions.forEach(badge => {
-            const isUnlocked = badge.check(aggregated);
+            const isUnlocked = badge.current >= badge.target;
             const item = document.createElement('div');
             item.className = `badge-item ${isUnlocked ? 'unlocked' : 'locked'}`;
             
+            const progressText = `${Math.min(badge.current, badge.target)} / ${badge.target}`;
+
             item.innerHTML = `
                 <span class="badge-icon">${badge.icon}</span>
                 <span class="badge-title">${badge.title}</span>
                 <span class="badge-description">${badge.desc}</span>
-                <span class="badge-status">${isUnlocked ? this.getTranslation('unlocked') : this.getTranslation('locked')}</span>
+                <div class="badge-status-container" style="margin-top: 10px; width: 100%;">
+                    <span class="badge-progress" style="font-size: 0.8rem; color: ${isUnlocked ? '#4caf50' : '#888'}; font-weight: bold;">${progressText}</span>
+                </div>
             `;
             grid.appendChild(item);
         });
@@ -1227,13 +1235,22 @@ class UI {
         const h2 = this.els.skatDecisionOverlay.querySelector('h2');
         h2.textContent = this.getTranslation('take_skat');
 
+        // Reset display
         this.els.btnSkatTake.style.display = 'block';
         this.els.btnSkatHand.style.display = 'block';
         
+        // Remove extra buttons if they exist from previous calls
+        const extraBtn = document.getElementById('btn-skat-null-ouvert');
+        if (extraBtn) extraBtn.remove();
+
         this.els.btnSkatTake.textContent = this.getTranslation('take');
         this.els.btnSkatHand.textContent = this.getTranslation('hand_game');
 
-        this.els.btnSkatTake.onclick = () => { onTake(); };
+        this.els.btnSkatTake.onclick = () => { 
+            // When taking skat, we need to show the discard UI first
+            onTake(); 
+        };
+
         this.els.btnSkatHand.onclick = () => {
             this.els.skatDecisionOverlay.classList.add('hidden');
             onHand();
@@ -1386,41 +1403,75 @@ class UI {
         };
     }
 
-    showTrumpSelectionOverlay(onSelect) {
+    showTrumpSelectionOverlay(isHand, onSelect) {
         this.els.trumpOverlay.classList.remove('hidden');
         const h2 = this.els.trumpOverlay.querySelector('h2');
         h2.textContent = this.getTranslation('choose_trump');
         
+        const btnGrandOuvert = document.getElementById('btn-grand-ouvert');
+        const btnNullOuvert = document.getElementById('btn-null-ouvert');
+
+        // Hand game rules: Grand Ouvert and Null Ouvert allowed
+        // Skat taken rules: Only Null Ouvert allowed (standard Skat)
+        if (isHand) {
+            btnGrandOuvert.style.display = 'inline-block';
+            btnNullOuvert.style.display = 'inline-block';
+            btnNullOuvert.textContent = this.getTranslation('null_ouvert_hand');
+        } else {
+            btnGrandOuvert.style.display = 'none';
+            btnNullOuvert.style.display = 'inline-block';
+            btnNullOuvert.textContent = this.getTranslation('null_ouvert');
+        }
+
         this.els.trumpBtns.forEach(btn => {
-            // Remove previous listeners using clone node
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
             
             newBtn.addEventListener('click', () => {
                 this.els.trumpOverlay.classList.add('hidden');
-                onSelect(newBtn.dataset.suit);
+                const isOuvert = newBtn.dataset.ouvert === 'true';
+                onSelect(newBtn.dataset.suit, isOuvert);
             });
         });
         
-        // Update references after clone
         this.els.trumpBtns = document.querySelectorAll('.trump-btn');
     }
 
-    setTrump(trump, hand = false, schneider = false, schwarz = false) {
+    setTrump(trump, hand = false, schneider = false, schwarz = false, ouvert = false) {
         let symbol = trump;
         if (SUIT_SYMBOLS[trump]) {
             symbol = `${trump} ${SUIT_SYMBOLS[trump]}`;
         }
         
         let suffix = "";
-        if (hand) {
-            const parts = [this.getTranslation('hand')];
-            if (schwarz) parts.push(this.getTranslation('schwarz'));
-            else if (schneider) parts.push(this.getTranslation('schneider'));
+        const parts = [];
+        if (hand) parts.push(this.getTranslation('hand'));
+        if (ouvert) parts.push(this.getTranslation('ouvert'));
+        if (schwarz) parts.push(this.getTranslation('schwarz'));
+        else if (schneider) parts.push(this.getTranslation('schneider'));
+        
+        if (parts.length > 0) {
             suffix = ` (${parts.join(', ')})`;
         }
 
         this.els.currentTrump.innerHTML = `${this.getTranslation('trump')}: ${symbol}${suffix}`;
+    }
+
+    revealDeclarerCards(declarerIndex, hand) {
+        const container = declarerIndex === 0 ? this.els.player0Cards : 
+                         declarerIndex === 1 ? this.els.player1Cards : 
+                         this.els.player2Cards;
+        
+        if (!container) return;
+        
+        container.innerHTML = '';
+        container.classList.add('revealed-hand');
+        
+        hand.forEach(card => {
+            const el = card.createDOMElement();
+            el.classList.add('revealed-card');
+            container.appendChild(el);
+        });
     }
 
     updateTurn(turnIndex) {

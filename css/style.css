@@ -2311,3 +2311,17 @@ body {
     height: 4px;
     background: #4caf50;
 }
+
+
+/* --- Ouvert Styles --- */
+.revealed-hand {
+    background: rgba(255, 255, 0, 0.05);
+    border-radius: 8px;
+    padding: 5px;
+    border: 1px dashed rgba(255, 255, 0, 0.2);
+}
+
+.revealed-card {
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+    border: 1px solid rgba(255, 255, 0, 0.5);
+}
