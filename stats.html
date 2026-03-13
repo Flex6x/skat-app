@@ -36,6 +36,9 @@
                 <button class="stats-tab-btn" data-tab="history" onclick="ui.switchStatsTab('history')">
                     <span data-i18n="game_history">Spielverlauf</span>
                 </button>
+                <button class="stats-tab-btn" data-tab="badges" onclick="ui.switchStatsTab('badges')">
+                    <span data-i18n="badges">Badges</span>
+                </button>
             </div>
 
             <!-- Tab 1: Overview -->
@@ -111,6 +114,13 @@
                             <!-- Filled by JS -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Tab 3: Badges -->
+            <div class="stats-badges hidden" id="stats-badges">
+                <div class="badges-grid" id="badges-grid">
+                    <!-- Badges will be rendered here -->
                 </div>
             </div>
 

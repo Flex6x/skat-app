@@ -95,7 +95,34 @@ const TRANSLATIONS = {
         tut_step5: "Hier oben findest du alle wichtigen Infos zum aktuellen Spiel, inklusive der Punkte.",
         tut_step6: "Über das Logo kommst du immer zurück. Hier findest du auch die Liste und Statistiken.",
         overview: "Übersicht",
-        game_history: "Spielverlauf"
+        game_history: "Spielverlauf",
+        badges: "Badges",
+        unlocked: "Freigeschaltet",
+        locked: "Gesperrt",
+        badge_unbesiegbar: "Unbesiegbar",
+        badge_unbesiegbar_desc: "Gewinne 5-mal Schwarz.",
+        badge_seriensieger: "Seriensieger",
+        badge_seriensieger_desc: "Gewinne alle Spiele in einer Liste.",
+        badge_grandmeister: "Grandmeister",
+        badge_grandmeister_desc: "Gewinne 10 Grand-Spiele.",
+        badge_null_ass: "Null-Ass",
+        badge_null_ass_desc: "Gewinne 10 Null-Spiele.",
+        badge_rollmops: "Rollmops",
+        badge_rollmops_desc: "Gewinne 3-mal mit einem Rollmops-Blatt.",
+        badge_big_busch: "Big Busch",
+        badge_big_busch_desc: "Erreiche einen Spielwert von mindestens 264 (Grand Ouvert).",
+        badge_ramsch_koenig: "Ramsch König",
+        badge_ramsch_koenig_desc: "Gewinne 10-mal Ramsch.",
+        badge_trumpfmaschine: "Trumpfmaschine",
+        badge_trumpfmaschine_desc: "Habe 10 Trumpfkarten in einem Spiel.",
+        badge_anfaenger: "Anfänger",
+        badge_anfaenger_desc: "Absolviere 10 Spiele.",
+        badge_stammspieler: "Stammspieler",
+        badge_stammspieler_desc: "Absolviere 50 Spiele.",
+        badge_veteran: "Skat Veteran",
+        badge_veteran_desc: "Absolviere 200 Spiele.",
+        badge_ohne_4: "Ohne 4",
+        badge_ohne_4_desc: "Gewinne einen Grand 'ohne 4'."
     },
     en: {
         select_rounds: "Select Rounds",
@@ -186,7 +213,34 @@ const TRANSLATIONS = {
         tut_step5: "Up here you'll find all important game info, including current points.",
         tut_step6: "Use the logo to return home. You can also find the game list and statistics here.",
         overview: "Overview",
-        game_history: "Game History"
+        game_history: "Game History",
+        badges: "Badges",
+        unlocked: "Unlocked",
+        locked: "Locked",
+        badge_unbesiegbar: "Invincible",
+        badge_unbesiegbar_desc: "Win Schwarz 5 times.",
+        badge_seriensieger: "Serial Winner",
+        badge_seriensieger_desc: "Win all games within a single Liste.",
+        badge_grandmeister: "Grand Master",
+        badge_grandmeister_desc: "Win 10 Grand games.",
+        badge_null_ass: "Null Ace",
+        badge_null_ass_desc: "Successfully play Null 10 times.",
+        badge_rollmops: "Rollmops",
+        badge_rollmops_desc: "Win 3 games with a Rollmops hand.",
+        badge_big_busch: "Big Busch",
+        badge_big_busch_desc: "Achieve a game value of at least 264 (Grand Ouvert).",
+        badge_ramsch_koenig: "Ramsch King",
+        badge_ramsch_koenig_desc: "Win Ramsch 10 times.",
+        badge_trumpfmaschine: "Trump Machine",
+        badge_trumpfmaschine_desc: "Have 10 trump cards in a game.",
+        badge_anfaenger: "Beginner",
+        badge_anfaenger_desc: "Play 10 games.",
+        badge_stammspieler: "Regular",
+        badge_stammspieler_desc: "Play 50 games.",
+        badge_veteran: "Skat Veteran",
+        badge_veteran_desc: "Play 200 games.",
+        badge_ohne_4: "Without 4",
+        badge_ohne_4_desc: "Win a Grand 'without 4'."
     }
 };
 
@@ -712,9 +766,10 @@ class UI {
         const stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
         const playerName = (window.appSettings && window.appSettings.current.nickname) || 'Du';
 
-        // Render both tabs
+        // Render all tabs
         this._renderStatsOverview(stats, playerName);
         this._renderStatsHistory(stats, playerName);
+        this._renderStatsBadges(stats);
 
         // Show overview tab by default
         this.switchStatsTab('overview');
@@ -722,8 +777,7 @@ class UI {
 
     _renderStatsOverview(stats, playerName) {
         const mainDashboardEl = document.getElementById('stats-main-dashboard');
-        const secondaryDashboardEl = document.getElementById('stats-secondary-dashboard');
-
+        
         // References for secondary stats
         const els = {
             grand: document.getElementById('stat-total-grand'),
@@ -735,6 +789,8 @@ class UI {
             ramsch: document.getElementById('stat-total-ramsch'),
             bigbusch: document.getElementById('stat-total-bigbusch')
         };
+
+        if (!mainDashboardEl) return;
 
         if (stats.length === 0) {
             mainDashboardEl.innerHTML = `
@@ -818,6 +874,7 @@ class UI {
 
     _renderStatsHistory(stats, playerName) {
         const tableBody = this.els.statsTableBody;
+        if (!tableBody) return;
         tableBody.innerHTML = '';
 
         if (stats.length === 0) {
@@ -860,22 +917,95 @@ class UI {
         });
     }
 
+    _renderStatsBadges(stats) {
+        const grid = document.getElementById('badges-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        const badgeDefinitions = [
+            { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), desc: this.getTranslation('badge_unbesiegbar_desc'), check: (s) => (s.winSchwarzCount || 0) >= 5 },
+            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), check: (s) => (s.wonAllInListCount || 0) >= 1 },
+            { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), desc: this.getTranslation('badge_grandmeister_desc'), check: (s) => (s.winGrandCount || 0) >= 10 },
+            { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), desc: this.getTranslation('badge_null_ass_desc'), check: (s) => (s.winNullCount || 0) >= 10 },
+            { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), desc: this.getTranslation('badge_rollmops_desc'), check: (s) => (s.winRollmopsCount || 0) >= 3 },
+            { id: 'big_busch', icon: '🔥', title: this.getTranslation('badge_big_busch'), desc: this.getTranslation('badge_big_busch_desc'), check: (s) => (s.maxGameValue || 0) >= 264 },
+            { id: 'ramsch_koenig', icon: '🧹', title: this.getTranslation('badge_ramsch_koenig'), desc: this.getTranslation('badge_ramsch_koenig_desc'), check: (s) => (s.winRamschCount || 0) >= 10 },
+            { id: 'trumpfmaschine', icon: '⚙️', title: this.getTranslation('badge_trumpfmaschine'), desc: this.getTranslation('badge_trumpfmaschine_desc'), check: (s) => (s.maxTrumpCount || 0) >= 10 },
+            { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), desc: this.getTranslation('badge_anfaenger_desc'), check: (s) => s.totalGames >= 10 },
+            { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), desc: this.getTranslation('badge_stammspieler_desc'), check: (s) => s.totalGames >= 50 },
+            { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), check: (s) => s.totalGames >= 200 },
+            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), check: (s) => (s.winGrandOhne4Count || 0) >= 1 }
+        ];
+
+        // Aggregate stats across all lists for badge checking
+        const aggregated = {
+            totalGames: 0,
+            winSchwarzCount: 0,
+            wonAllInListCount: 0,
+            winGrandCount: 0,
+            winNullCount: 0,
+            winRollmopsCount: 0,
+            maxGameValue: 0,
+            winRamschCount: 0,
+            maxTrumpCount: 0,
+            winGrandOhne4Count: 0
+        };
+
+        stats.forEach(list => {
+            aggregated.totalGames += (list.rounds || 0);
+            aggregated.winSchwarzCount += (list.winSchwarzCount || 0);
+            if (list.wonAllInList) aggregated.wonAllInListCount++;
+            aggregated.winGrandCount += (list.winGrandCount || 0);
+            aggregated.winNullCount += (list.winNullCount || 0);
+            aggregated.winRollmopsCount += (list.winRollmopsCount || 0);
+            aggregated.maxGameValue = Math.max(aggregated.maxGameValue, list.maxGameValue || 0);
+            aggregated.winRamschCount += (list.winRamschCount || 0);
+            aggregated.maxTrumpCount = Math.max(aggregated.maxTrumpCount, list.maxTrumpCount || 0);
+            aggregated.winGrandOhne4Count += (list.winGrandOhne4Count || 0);
+
+            // Legacy support / inference if new fields don't exist yet
+            if (list.winSchwarzCount === undefined) aggregated.winSchwarzCount += (list.anzahlSchwarz || 0);
+            if (list.winGrandCount === undefined) aggregated.winGrandCount += (list.anzahlGrandSpiele || 0);
+            if (list.winNullCount === undefined) aggregated.winNullCount += (list.anzahlNullSpiele || 0);
+            if (list.winRollmopsCount === undefined) aggregated.winRollmopsCount += (list.anzahlRollmops || 0);
+            if (list.winRamschCount === undefined) aggregated.winRamschCount += (list.anzahlRamsch || 0);
+        });
+
+        badgeDefinitions.forEach(badge => {
+            const isUnlocked = badge.check(aggregated);
+            const item = document.createElement('div');
+            item.className = `badge-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+            
+            item.innerHTML = `
+                <span class="badge-icon">${badge.icon}</span>
+                <span class="badge-title">${badge.title}</span>
+                <span class="badge-description">${badge.desc}</span>
+                <span class="badge-status">${isUnlocked ? this.getTranslation('unlocked') : this.getTranslation('locked')}</span>
+            `;
+            grid.appendChild(item);
+        });
+    }
+
     switchStatsTab(tabName) {
         const overviewEl = document.getElementById('stats-overview');
         const historyEl = document.getElementById('stats-history');
+        const badgesEl = document.getElementById('stats-badges');
         const overviewBtn = document.querySelector('[data-tab="overview"]');
         const historyBtn = document.querySelector('[data-tab="history"]');
+        const badgesBtn = document.querySelector('[data-tab="badges"]');
+
+        [overviewEl, historyEl, badgesEl].forEach(el => { if(el) el.classList.add('hidden'); });
+        [overviewBtn, historyBtn, badgesBtn].forEach(btn => { if(btn) btn.classList.remove('active'); });
 
         if (tabName === 'overview') {
-            overviewEl.classList.remove('hidden');
-            historyEl.classList.add('hidden');
+            if (overviewEl) overviewEl.classList.remove('hidden');
             if (overviewBtn) overviewBtn.classList.add('active');
-            if (historyBtn) historyBtn.classList.remove('active');
         } else if (tabName === 'history') {
-            overviewEl.classList.add('hidden');
-            historyEl.classList.remove('hidden');
-            if (overviewBtn) overviewBtn.classList.remove('active');
+            if (historyEl) historyEl.classList.remove('hidden');
             if (historyBtn) historyBtn.classList.add('active');
+        } else if (tabName === 'badges') {
+            if (badgesEl) badgesEl.classList.remove('hidden');
+            if (badgesBtn) badgesBtn.classList.add('active');
         }
     }
 

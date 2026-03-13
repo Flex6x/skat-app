@@ -510,6 +510,9 @@ class Game {
         // Die gedrückten Karten (skat) zählen nicht mehr für Matadore
         this.originalDeclarerHand = [...this.players[this.declarerIndex].hand];
         
+        // Count trumps for badges
+        this.declarerTrumpCount = this.originalDeclarerHand.filter(c => this.isTrump(c)).length;
+
         // Visuals: Hide skat pile
         // Note: Trick piles are initialized after the first trick (in resolveTrick), 
         // not here, to avoid interfering with game startup
@@ -851,7 +854,9 @@ class Game {
                 schneider: evaluation.schneider,
                 schwarz: evaluation.schwarz,
                 announcedSchneider: this.announcedSchneider,
-                announcedSchwarz: this.announcedSchwarz
+                announcedSchwarz: this.announcedSchwarz,
+                declarerTrumpCount: this.declarerTrumpCount,
+                matadors: evaluation.matadors
             });
         }
     }

@@ -92,7 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         schneider: result.schneider,
                         schwarz: result.schwarz,
                         announcedSchneider: result.announcedSchneider,
-                        announcedSchwarz: result.announcedSchwarz
+                        announcedSchwarz: result.announcedSchwarz,
+                        declarerTrumpCount: result.declarerTrumpCount,
+                        matadors: result.matadors
                     });
                 } else {
                     gameHistory.push({
@@ -105,7 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         schneider: result.schneider,
                         schwarz: result.schwarz,
                         announcedSchneider: result.announcedSchneider,
-                        announcedSchwarz: result.announcedSchwarz
+                        announcedSchwarz: result.announcedSchwarz,
+                        declarerTrumpCount: result.declarerTrumpCount,
+                        matadors: result.matadors
                     });
                 }
                 ui.updateScoreboard(gameHistory);
@@ -137,6 +141,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveListToStats = (history) => {
         let totals = [0, 0, 0];
         
+        // For badge tracking across the list
+        let winGrandCount = 0;
+        let winNullCount = 0;
+        let winSchwarzCount = 0;
+        let winRollmopsCount = 0;
+        let winRamschCount = 0;
+        let maxGameValue = 0;
+        let maxTrumpCount = 0;
+        let winGrandOhne4Count = 0;
+        let humanGamesPlayed = 0;
+        let humanGamesWon = 0;
+
         // Initialize game type counters (User specific)
         let gameTypeCounts = {
             anzahlGrandSpiele: 0,
@@ -154,6 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (game.isRamsch) {
                 game.loserIndices.forEach(idx => totals[idx] -= 25);
+                if (!game.loserIndices.includes(2)) {
+                    winRamschCount++;
+                }
                 gameTypeCounts.anzahlRamsch++;
             } else {
                 const val = game.won ? game.value : -game.value;
@@ -161,47 +180,67 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // ONLY count game type stats if the HUMAN player (id 2) was the declarer
                 if (game.declarerId === 2) {
-                    if (game.trumpMode === 'Grand') {
-                        gameTypeCounts.anzahlGrandSpiele++;
-                    } else if (game.trumpMode === 'Null') {
-                        gameTypeCounts.anzahlNullSpiele++;
-                    }
-                    
-                    if (game.handGame) {
-                        gameTypeCounts.anzahlHandspiele++;
-                    }
-                    
-                    // Count both announced and actual Schneider/Schwarz (if won)
-                    if (game.schneider || game.announcedSchneider) {
-                        gameTypeCounts.anzahlSchneider++;
-                    }
-                    
-                    if (game.schwarz || game.announcedSchwarz) {
-                        gameTypeCounts.anzahlSchwarz++;
-                    }
-                    
-                    // Big Busch: Hand Grand
-                    if (game.handGame && game.trumpMode === 'Grand') {
-                        gameTypeCounts.anzahlBigBusch++;
-                    }
-                    
-                    // Rollmops: Hand Null
-                    if (game.handGame && game.trumpMode === 'Null') {
-                        gameTypeCounts.anzahlRollmops++;
+                    humanGamesPlayed++;
+                    if (game.won) {
+                        humanGamesWon++;
+                        maxGameValue = Math.max(maxGameValue, game.value);
+                        maxTrumpCount = Math.max(maxTrumpCount, game.declarerTrumpCount || 0);
+
+                        if (game.trumpMode === 'Grand') {
+                            winGrandCount++;
+                            gameTypeCounts.anzahlGrandSpiele++;
+                            // Ohne 4: check matadors
+                            if (game.matadors && game.matadors.type === 'ohne' && game.matadors.count >= 4) {
+                                winGrandOhne4Count++;
+                            }
+                        } else if (game.trumpMode === 'Null') {
+                            winNullCount++;
+                            gameTypeCounts.anzahlNullSpiele++;
+                        }
+                        
+                        if (game.handGame) {
+                            gameTypeCounts.anzahlHandspiele++;
+                        }
+                        
+                        // Count both announced and actual Schneider/Schwarz (if won)
+                        if (game.schwarz || game.announcedSchwarz) {
+                            winSchwarzCount++;
+                            gameTypeCounts.anzahlSchwarz++;
+                        } else if (game.schneider || game.announcedSchneider) {
+                            gameTypeCounts.anzahlSchneider++;
+                        }
+                        
+                        // Big Busch: Hand Grand
+                        if (game.handGame && game.trumpMode === 'Grand') {
+                            gameTypeCounts.anzahlBigBusch++;
+                        }
+                        
+                        // Rollmops: Hand Null
+                        if (game.handGame && game.trumpMode === 'Null') {
+                            winRollmopsCount++;
+                            gameTypeCounts.anzahlRollmops++;
+                        }
                     }
                 }
             }
         });
 
-        // Determine winner
-        const playerName = window.appSettings.current.nickname || 'Du';
-        
         const listResult = {
             date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
             scores: totals, // [bot2, bot1, player]
             rounds: history.length,
             ruleSet: window.appSettings.current.ruleSet,
-            ...gameTypeCounts // Spread the game type counts into the listResult
+            ...gameTypeCounts,
+            // New Badge Fields
+            winGrandCount,
+            winNullCount,
+            winSchwarzCount,
+            winRollmopsCount,
+            winRamschCount,
+            maxGameValue,
+            maxTrumpCount,
+            winGrandOhne4Count,
+            wonAllInList: (humanGamesPlayed > 0 && humanGamesPlayed === humanGamesWon)
         };
 
         let stats = JSON.parse(localStorage.getItem("skatListStats")) || [];

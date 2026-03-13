@@ -12,9 +12,6 @@
 - skat soll erst im richtigen moment verschwinden
 - Ouvert einbauen.
 
-- Badges
-
 ## Bugs:
 
 - übersetzungssbugs
-
