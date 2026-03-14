@@ -114,7 +114,7 @@ const TRANSLATIONS = {
         badge_rollmops: "Rollmops",
         badge_rollmops_desc: "Gewinne 3-mal mit einem Rollmops-Blatt.",
         badge_big_busch: "Big Busch",
-        badge_big_busch_desc: "Erreiche einen Spielwert von mindestens 264 (Grand Ouvert).",
+        badge_big_busch_desc: "Erreiche einen Spielwert von 264 (Grand Ouvert).",
         badge_ramsch_koenig: "Ramsch König",
         badge_ramsch_koenig_desc: "Gewinne 10-mal Ramsch.",
         badge_trumpfmaschine: "Trumpfmaschine",
@@ -126,7 +126,7 @@ const TRANSLATIONS = {
         badge_veteran: "Skat Veteran",
         badge_veteran_desc: "Absolviere 200 Spiele.",
         badge_ohne_4: "Ohne 4",
-        badge_ohne_4_desc: "Gewinne einen Grand 'ohne 4'."
+        badge_ohne_4_desc: "Gewinne einen Grand \"ohne 4\"."
     },
     en: {
         select_rounds: "Select Rounds",
