@@ -1966,18 +1966,30 @@ body {
 
 /* === Reiztabelle Modal === */
 .reiztabelle-modal {
-    width: 520px;
-    min-width: 520px;
-    padding: 0;
-    overflow: hidden;
-    border-radius: 16px;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 350px;
+    height: 100%;
+    background: rgba(25, 25, 35, 0.98);
+    backdrop-filter: blur(15px);
+    z-index: 2000;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
+    transform: translateX(0) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
     left: auto !important;
-    right: 30px !important;
-    transform: translate(0, -50%) !important;
-    height: 90vh;
-    max-height: 90vh;
+}
+
+.reiztabelle-modal.hidden {
+    transform: translateX(100%) !important;
+    display: flex !important;
+    pointer-events: none;
 }
 
 .reiz-hints-list {
@@ -2051,15 +2063,92 @@ body {
     font-size: 0.8rem;
     font-weight: 600;
     border: 1px solid rgba(255, 152, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.hand-hints {
-    margin-top: 5px;
+.tag-underscore {
+    color: #888;
+    font-weight: 400;
+    font-size: 0.7rem;
+}
+
+.extras-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.extra-box {
+    padding: 10px 8px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.extra-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.extra-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+/* Farbige Extras */
+.extra-hand {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+    border-color: rgba(76, 175, 80, 0.3);
+    color: #81c784;
+}
+
+.extra-schneider {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.2), rgba(255, 152, 0, 0.1));
+    border-color: rgba(255, 152, 0, 0.3);
+    color: #ffb74d;
+}
+
+.extra-schneider-angesagt {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1));
+    border-color: rgba(255, 193, 7, 0.3);
+    color: #ffd54f;
+}
+
+.extra-schwarz {
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.2), rgba(156, 39, 176, 0.1));
+    border-color: rgba(156, 39, 176, 0.3);
+    color: #ce93d8;
+}
+
+.extra-schwarz-angesagt {
+    background: linear-gradient(135deg, rgba(233, 30, 99, 0.2), rgba(233, 30, 99, 0.1));
+    border-color: rgba(233, 30, 99, 0.3);
+    color: #f06292;
+}
+
+.extra-grand-ouvert {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.2), rgba(33, 150, 243, 0.1));
+    border-color: rgba(33, 150, 243, 0.3);
+    color: #64b5f6;
+}
+
+.extras-note {
+    margin-top: 8px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding-top: 5px;
+    padding-top: 8px;
 }
 
-.hand-hints small {
+.extras-note small {
     color: #aaa;
     font-size: 0.75rem;
     font-style: italic;
