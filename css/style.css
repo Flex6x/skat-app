@@ -2082,27 +2082,28 @@ body {
 }
 
 .extra-box {
-    padding: 10px 8px;
+    padding: 8px 6px;
     border-radius: 8px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 3px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.2s ease;
 }
 
 .extra-name {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
     text-align: center;
-    line-height: 1.2;
+    line-height: 1.1;
 }
 
 .extra-value {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 700;
+    white-space: nowrap;
 }
 
 /* Farbige Extras */
