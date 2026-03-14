@@ -92,7 +92,48 @@ const TRANSLATIONS = {
         finish: "Fertig",
         step: "Schritt",
         announced: "angesagt",
+        bid_value_table: "Reizwerttabelle",
+        formula: "Formel",
+        example: "Beispiel",
+        spitzen: "Spitzen",
+        ground_value: "Grundwert",
+        schneider_announced: "Schneider angesagt",
+        schwarz_announced: "Schwarz angesagt",
+        hand_only_info: "* nur bei Handspiel möglich",
+        new_game: "Neues Spiel",
+        game_over: "Spiel beendet",
+        back_home_title: "Zurück zum Hauptmenü",
+        show_list_title: "Spielliste anzeigen",
+        show_reiztabelle_title: "Reizwerttabelle anzeigen",
+        view_last_trick_title: "Letzten Stich ansehen",
+        placeholder_nickname: "Dein Name",
+        theme_dark: "Dunkel",
+        theme_light: "Hell",
+        preferences: "Präferenzen",
+        suit_eichel: "Eichel",
+        suit_gruen: "Grün",
+        suit_rot: "Rot",
+        suit_schellen: "Schellen",
+        suit_grand: "Grand",
+        suit_null: "Null",
+        game_won_msg: "gewinnt das Spiel.",
+        game_lost_msg: "verliert das Spiel.",
+        overbid_msg: "hat überreizt! (Reizwert {bid} > Spielwert {val})",
+        ramsch_msg: "Ramsch beendet.",
+        ramsch_loser_msg: "verliert mit {pts} Augen.",
+        trick_winner_msg: "gewinnt den Stich!",
+        playing_msg: "spielt",
+        take_skat_msg: "nimmt den Skat auf.",
+        hand_msg: "spielt Hand.",
+        plays_suit_msg: "spielt",
+        plays_suit_hand_msg: "spielt",
+        you: "Du",
+        opponents_win: "Gegner gewinnen mit {pts} Augen!",
+        declarer_win: "gewinnt mit {pts} Augen!",
+        null_win: "gewinnt das Null-Spiel!",
+        null_lose: "verliert das Null-Spiel!",
         tut_step1: "Hier siehst du deine Karten. Du nutzt sie, um Stiche zu machen und zu entscheiden, ob du reizen möchtest.",
+
         tut_step2: "Dies ist das Reiz-Fenster. Wer am höchsten reizt, wird Alleinspieler und darf den Skat aufnehmen.",
         tut_step3: "Als Alleinspieler wählst du hier den Spieltyp (Farbe, Grand oder Null).",
         tut_step4: "In der Mitte des Tisches werden die Karten ausgespielt. Wer die höchste Karte legt, gewinnt den Stich.",
@@ -210,6 +251,46 @@ const TRANSLATIONS = {
         finish: "Finish",
         step: "Step",
         announced: "announced",
+        bid_value_table: "Bidding Table",
+        formula: "Formula",
+        example: "Example",
+        spitzen: "Matadors",
+        ground_value: "Base Value",
+        schneider_announced: "Schneider announced",
+        schwarz_announced: "Schwarz announced",
+        hand_only_info: "* only possible in Hand games",
+        new_game: "New Game",
+        game_over: "Game Over",
+        back_home_title: "Back to Main Menu",
+        show_list_title: "Show Game List",
+        show_reiztabelle_title: "Show Bidding Table",
+        view_last_trick_title: "View Last Trick",
+        placeholder_nickname: "Your Name",
+        theme_dark: "Dark",
+        theme_light: "Light",
+        preferences: "Preferences",
+        suit_eichel: "Acorns",
+        suit_gruen: "Leaves",
+        suit_rot: "Hearts",
+        suit_schellen: "Bells",
+        suit_grand: "Grand",
+        suit_null: "Null",
+        game_won_msg: "wins the game.",
+        game_lost_msg: "loses the game.",
+        overbid_msg: "overbid! (Bid {bid} > Value {val})",
+        ramsch_msg: "Ramsch finished.",
+        ramsch_loser_msg: "loses with {pts} points.",
+        trick_winner_msg: "wins the trick!",
+        playing_msg: "plays",
+        take_skat_msg: "takes the Skat.",
+        hand_msg: "plays Hand.",
+        plays_suit_msg: "plays",
+        plays_suit_hand_msg: "plays",
+        you: "You",
+        opponents_win: "Opponents win with {pts} points!",
+        declarer_win: "wins with {pts} points!",
+        null_win: "wins the Null game!",
+        null_lose: "loses the Null game!",
         tut_step1: "Here you see your cards. You use them to play tricks and decide whether you want to bid.",
         tut_step2: "This is the bidding window. The highest bidder becomes the declarer and can take the Skat.",
         tut_step3: "As declarer, you choose the game type here (Suit, Grand, or Null).",
@@ -473,6 +554,21 @@ class UI {
             const key = el.dataset.i18n;
             if (dict[key]) {
                 el.textContent = dict[key];
+            }
+        });
+
+        // Update titles and placeholders
+        document.querySelectorAll('[data-i18n-title]').forEach(el => {
+            const key = el.dataset.i18nTitle;
+            if (dict[key]) {
+                el.title = dict[key];
+            }
+        });
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.dataset.i18nPlaceholder;
+            if (dict[key]) {
+                el.placeholder = dict[key];
             }
         });
 

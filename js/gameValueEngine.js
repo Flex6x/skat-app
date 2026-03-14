@@ -126,9 +126,9 @@ class GameValueEngine {
     }) {
 
         const getT = (key) => {
-            if (typeof UI !== 'undefined' && UI.TRANSLATIONS) {
+            if (typeof TRANSLATIONS !== 'undefined') {
                 const lang = (window.appSettings && window.appSettings.current.language) || 'de';
-                return UI.TRANSLATIONS[lang][key] || key;
+                return TRANSLATIONS[lang][key] || key;
             }
             return key;
         };
@@ -139,8 +139,11 @@ class GameValueEngine {
             const won = overbid ? false : declarerWonNormally;
             
             let details = 'Null';
-            if (handGame) details += ` ${getT('hand_game')}`;
-            if (isOuvert) details += ` Ouvert`;
+            if (isOuvert) {
+                details += handGame ? ` ${getT('null_ouvert_hand')}` : ` ${getT('null_ouvert')}`;
+            } else if (handGame) {
+                details += ` ${getT('hand')}`;
+            }
 
             return {
                 gameValue,
@@ -181,15 +184,15 @@ class GameValueEngine {
         if (announcedSchwarz && !schwarz) won = false;
         if (isOuvert && !schwarz) won = false; // Ouvert in Suit/Grand implies winning all tricks
 
-        const matadorType = matadors.type; // 'mit' or 'ohne'
+        const matadorType = getT(matadors.type); // 'mit' or 'ohne'
         const matadorCount = matadors.count;
 
         let currentMult = matadorCount + 1; // 1. Spiel
-        const parts = [`${matadorType} ${matadorCount}`, `Spiel ${currentMult}`];
+        const parts = [`${matadorType} ${matadorCount}`, `${getT('game')} ${currentMult}`];
         
         if (handGame) {
             currentMult += 1; // 2. Hand
-            parts.push(`Hand ${currentMult}`);
+            parts.push(`${getT('hand')} ${currentMult}`);
             
             // Re-use logic from calculateMultiplier for details
             const hasSchneider = schneider || announcedSchneider || announcedSchwarz || isOuvert;
@@ -199,41 +202,41 @@ class GameValueEngine {
 
             if (hasSchneider) {
                 currentMult += 1;
-                parts.push(`Schneider ${currentMult}`);
+                parts.push(`${getT('schneider')} ${currentMult}`);
             }
             if (hasAnnouncedSchneider) {
                 currentMult += 1;
-                parts.push(`Schneider angesagt ${currentMult}`);
+                parts.push(`${getT('schneider_announced')} ${currentMult}`);
             }
             if (hasSchwarz) {
                 currentMult += 1;
-                parts.push(`Schwarz ${currentMult}`);
+                parts.push(`${getT('schwarz')} ${currentMult}`);
             }
             if (hasAnnouncedSchwarz) {
                 currentMult += 1;
-                parts.push(`Schwarz angesagt ${currentMult}`);
+                parts.push(`${getT('schwarz_announced')} ${currentMult}`);
             }
             if (isOuvert) {
                 currentMult += 1;
-                parts.push(`Ouvert ${currentMult}`);
+                parts.push(`${getT('ouvert')} ${currentMult}`);
             }
         } else {
             if (schneider) {
                 currentMult += 1;
-                parts.push(`Schneider ${currentMult}`);
+                parts.push(`${getT('schneider')} ${currentMult}`);
             }
             if (schwarz) {
                 currentMult += 1;
-                parts.push(`Schwarz ${currentMult}`);
+                parts.push(`${getT('schwarz')} ${currentMult}`);
             }
             if (isOuvert) {
                 currentMult += 1;
-                parts.push(`Ouvert ${currentMult}`);
+                parts.push(`${getT('ouvert')} ${currentMult}`);
             }
         }
 
         const baseValue = this.BASE_VALUES[trumpMode];
-        const details = `${parts.join(', ')}, ${currentMult} × ${baseValue} = ${gameValue}`;
+        const details = `${parts.join(', ')} | ${currentMult} × ${baseValue} = ${gameValue}`;
 
         return {
             gameValue,

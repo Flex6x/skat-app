@@ -329,7 +329,7 @@ class Game {
             } else {
                 this.declarerIndex = -1;
                 this.ui.setDeclarer('-');
-                this.ui.showMessage('Eingepasst! Niemand möchte spielen.');
+                this.ui.showMessage(`${this.ui.getTranslation('passed_in')} ${this.ui.getTranslation('nobody_bid')}`);
                 await this.delay(1500);
                 this.endGamePassedIn();
             }
@@ -705,7 +705,7 @@ class Game {
         const trickCards = this.currentTrick.cards.map(c => c.card);
         this.players[winnerId].tricks.push(...trickCards);
         
-        this.ui.showMessage(`${this.players[winnerId].name} gewinnt den Stich!`);
+        this.ui.showMessage(`${this.players[winnerId].name} ${this.ui.getTranslation('trick_winner_msg')}`);
         
         // Update visual trick piles on table
         this.ui.updateTrickPiles(this.players, this.declarerIndex, this.phase === PHASES.RAMSCH);
@@ -755,9 +755,10 @@ class Game {
         // If everyone has 40 points, it's a draw, but usually someone loses.
         // We just pick the loser(s) and give -25.
         
-        let resultMsg = `Ramsch beendet. `;
+        let resultMsg = this.ui.getTranslation('ramsch_msg') + ' ';
         loserIndices.forEach(idx => {
-            resultMsg += `${this.players[idx].name} verliert mit ${playerPoints[idx]} Augen (-25). `;
+            const loserMsg = this.ui.getTranslation('ramsch_loser_msg').replace('{pts}', playerPoints[idx]);
+            resultMsg += `${this.players[idx].name} ${loserMsg} `;
         });
 
         this.ui.showGameOver(
@@ -877,20 +878,21 @@ class Game {
         
         // Message construction
         let resultMsg;
+        const declarerName = this.players[this.declarerIndex].name;
         if (this.trumpMode === TRUMP_MODES.NULL) {
             resultMsg = won
-                ? `${this.players[this.declarerIndex].name} gewinnt das Null-Spiel!`
-                : `${this.players[this.declarerIndex].name} verliert das Null-Spiel!`;
+                ? `${declarerName} ${this.ui.getTranslation('null_win')}`
+                : `${declarerName} ${this.ui.getTranslation('null_lose')}`;
         } else if (evaluation.overbid) {
-            resultMsg = `${this.players[this.declarerIndex].name} hat überreizt! (Reizwert ${this.bidValue} > Spielwert ${evaluation.gameValue})`;
+            resultMsg = `${declarerName} ${this.ui.getTranslation('overbid_msg').replace('{bid}', this.bidValue).replace('{val}', evaluation.gameValue)}`;
         } else {
             resultMsg = won 
-                ? `${this.players[this.declarerIndex].name} gewinnt mit ${declarerPoints} Augen!` 
-                : `Gegner gewinnen mit ${defendersPoints} Augen!`;
+                ? `${declarerName} ${this.ui.getTranslation('declarer_win').replace('{pts}', declarerPoints)}` 
+                : `${this.ui.getTranslation('opponents_win').replace('{pts}', defendersPoints)}`;
         }
             
         this.saveGameResult(
-            won ? this.players[this.declarerIndex].name : "Die Gegner",
+            won ? this.players[this.declarerIndex].name : this.ui.getTranslation('opponents'),
             won ? (this.trumpMode === TRUMP_MODES.NULL ? 0 : declarerPoints) : (this.trumpMode === TRUMP_MODES.NULL ? 0 : defendersPoints),
             this.trumpMode ? `${this.trumpMode}` : "Grand"
         );

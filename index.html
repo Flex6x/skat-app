@@ -42,16 +42,18 @@
             ui.updateLanguageUI();
             
             // Auto-start tutorial for first time users
-            const tutorialCompleted = localStorage.getItem('skat_tutorial_completed');
-            if (!tutorialCompleted) {
+            const isFirstVisit = !localStorage.getItem('skat_tutorial_completed');
+            if (isFirstVisit) {
+                const msg = ui.getTranslation('tutorial') + "?";
                 setTimeout(() => {
-                    if (confirm("Willkommen! Möchtest du das Tutorial ansehen?")) {
+                    if (confirm(msg)) {
                         window.location.href = 'tutorial.html';
                     } else {
                         localStorage.setItem('skat_tutorial_completed', 'true');
                     }
                 }, 1000);
             }
+
         });
     </script>
 </body>

@@ -129,7 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.location.href = 'index.html';
                 };
             } else {
-                ui.els.btnRestart.textContent = `Nächstes Spiel (${completedRounds + 1}/${sessionRounds})`;
+                const nextGameLabel = ui.getTranslation('new_game');
+                ui.els.btnRestart.textContent = `${nextGameLabel} (${completedRounds + 1}/${sessionRounds})`;
                 ui.els.btnRestart.onclick = () => {
                     ui.els.gameOverOverlay.classList.add('hidden');
                     ui.clearTrickZone();

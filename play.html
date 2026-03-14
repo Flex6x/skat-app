@@ -32,19 +32,19 @@
         <!-- In-Game Info Box Top Center -->
         <div class="game-info-container">
             <div class="game-info-top">
-                <div id="current-declarer">Alleinspieler: -</div>
-                <div id="current-bid">Reizwert: -</div>
-                <div id="current-trump">Trumpf: -</div>
-                <div id="current-turn">Zug: -</div>
-                <div id="live-score" class="live-score hidden">Punkte: -</div>
+                <div id="current-declarer"><span data-i18n="declarer">Alleinspieler</span>: -</div>
+                <div id="current-bid"><span data-i18n="bid_value">Reizwert</span>: -</div>
+                <div id="current-trump"><span data-i18n="trump">Trumpf</span>: -</div>
+                <div id="current-turn"><span data-i18n="turn">Zug</span>: -</div>
+                <div id="live-score" class="live-score hidden"><span data-i18n="eyes">Punkte</span>: -</div>
             </div>
 
             <!-- Controls below info -->
             <div class="game-controls-bottom" style="display: flex; gap: 15px; margin-top: 10px;">
-                <button id="btn-home" class="floating-btn" title="Zurück zum Hauptmenü">🏠</button>
-                <button id="btn-show-scoreboard" class="floating-btn" title="Spielliste anzeigen">📋</button>
-                <button id="btn-show-reiztabelle" class="floating-btn" title="Reizwerttabelle anzeigen">18</button>
-                <button id="btn-last-trick" class="floating-btn smaller hidden" title="Letzten Stich ansehen">👁️</button>
+                <button id="btn-home" class="floating-btn" data-i18n-title="back_home_title">🏠</button>
+                <button id="btn-show-scoreboard" class="floating-btn" data-i18n-title="show_list_title">📋</button>
+                <button id="btn-show-reiztabelle" class="floating-btn" data-i18n-title="show_reiztabelle_title">18</button>
+                <button id="btn-last-trick" class="floating-btn smaller hidden" data-i18n-title="view_last_trick_title">👁️</button>
             </div>
         </div>
 
@@ -57,43 +57,43 @@
             <div class="modal-content">
                 <div class="reiz-hints-list">
                     <div class="hint-card formula">
-                        <span class="hint-label">Formel</span>
-                        <div class="hint-val"><span><strong>(Spitzen + 1)</strong></span> <i class="math-op">×</i> <span>Grundwert</span></div>
+                        <span class="hint-label" data-i18n="formula">Formel</span>
+                        <div class="hint-val"><span><strong>(<span data-i18n="spitzen">Spitzen</span> + 1)</strong></span> <i class="math-op">×</i> <span data-i18n="ground_value">Grundwert</span></div>
                     </div>
                     <div class="hint-card example">
-                        <span class="hint-label">Beispiel</span>
-                        <div class="hint-val">Mit 2 + 1 = <strong>Spiel 3</strong></div>
+                        <span class="hint-label" data-i18n="example">Beispiel</span>
+                        <div class="hint-val">Mit 2 + 1 = <strong data-i18n="game">Spiel</strong> 3</div>
                     </div>
                     <div class="hint-card extras">
                         <span class="hint-label">Extras</span>
                         <div class="extras-grid">
                             <div class="extra-box extra-hand">
-                                <div class="extra-name">Hand</div>
+                                <div class="extra-name" data-i18n="hand">Hand</div>
                                 <div class="extra-value">+1</div>
                             </div>
                             <div class="extra-box extra-schneider">
-                                <div class="extra-name">Schneider</div>
+                                <div class="extra-name" data-i18n="schneider">Schneider</div>
                                 <div class="extra-value">+1</div>
                             </div>
                             <div class="extra-box extra-schneider-angesagt">
-                                <div class="extra-name">Schneider<br>angesagt<span class="extra-asterisk">*</span></div>
+                                <div class="extra-name" data-i18n="schneider_announced">Schneider angesagt</div>
                                 <div class="extra-value">+1</div>
                             </div>
                             <div class="extra-box extra-schwarz">
-                                <div class="extra-name">Schwarz</div>
+                                <div class="extra-name" data-i18n="schwarz">Schwarz</div>
                                 <div class="extra-value">+1</div>
                             </div>
                             <div class="extra-box extra-schwarz-angesagt">
-                                <div class="extra-name">Schwarz<br>angesagt<span class="extra-asterisk">*</span></div>
+                                <div class="extra-name" data-i18n="schwarz_announced">Schwarz angesagt</div>
                                 <div class="extra-value">+1</div>
                             </div>
                             <div class="extra-box extra-grand-ouvert">
-                                <div class="extra-name">Grand<br>Ouvert<span class="extra-asterisk">*</span></div>
+                                <div class="extra-name" data-i18n="grand_ouvert">Grand Ouvert</div>
                                 <div class="extra-value">+1</div>
                             </div>
                         </div>
                         <div class="extras-note">
-                            <small>* nur bei Handspiel möglich</small>
+                            <small data-i18n="hand_only_info">* nur bei Handspiel möglich</small>
                         </div>
                     </div>
                 </div>
@@ -144,10 +144,10 @@
                     </tbody>
                 </table>
                 <div class="null-games-section">
-                    <div class="null-game"><span>Null</span> <strong>23</strong></div>
-                    <div class="null-game"><span>Null Hand</span> <strong>35</strong></div>
-                    <div class="null-game"><span>Null Ouvert</span> <strong>46</strong></div>
-                    <div class="null-game"><span>Null Ouvert Hand</span> <strong>59</strong></div>
+                    <div class="null-game"><span data-i18n="suit_null">Null</span> <strong>23</strong></div>
+                    <div class="null-game"><span data-i18n="null_hand">Null Hand</span> <strong>35</strong></div>
+                    <div class="null-game"><span data-i18n="null_ouvert">Null Ouvert</span> <strong>46</strong></div>
+                    <div class="null-game"><span data-i18n="null_ouvert_hand">Null Ouvert Hand</span> <strong>59</strong></div>
                 </div>
             </div>
         </div>
