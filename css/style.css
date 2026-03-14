@@ -685,7 +685,7 @@ body {
 /* Individual Ramsch Piles */
 #pile-p0 { top: 20px; left: 30%; }
 #pile-p1 { top: 20px; right: 30%; }
-#pile-p2 { bottom: 20px; left: 50%; transform: translateX(-50%); }
+#pile-p2 { bottom: 20px; right: 20%; transform: none; }
 
 /* Skat Pile (Always near declarer) */
 #pile-skat {

@@ -394,6 +394,9 @@ class Game {
                         this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
                         this.saveGameState();
                         
+                        // Hide skat pile after skat has been taken and discarded
+                        this.ui.updateSkatPile(false);
+                        
                         this.startTrumpSelection();
                     });
                 },
@@ -532,6 +535,9 @@ class Game {
             // Update UI display with suffixes
             this.ui.setTrump(this.trumpMode, this.handGame, this.announcedSchneider, this.announcedSchwarz, this.isOuvert);
             
+            // Hide skat pile after announcement in hand games
+            this.ui.updateSkatPile(false);
+            
             this.saveGameState();
             this.startGameplay();
         });
@@ -546,8 +552,11 @@ class Game {
         // Count trumps for badges
         this.declarerTrumpCount = this.originalDeclarerHand.filter(c => this.isTrump(c)).length;
 
-        // Visuals: Hide skat pile
-        this.ui.updateSkatPile(false);
+        // Visuals: Hide skat pile (only if not already hidden in hand games)
+        // For non-hand games, hide it now. For hand games, it was already hidden in startAnnouncement
+        if (!this.handGame) {
+            this.ui.updateSkatPile(false);
+        }
         
         if (this.isOuvert) {
             this.revealDeclarerCards();
