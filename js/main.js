@@ -109,7 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         announcedSchneider: result.announcedSchneider,
                         announcedSchwarz: result.announcedSchwarz,
                         declarerTrumpCount: result.declarerTrumpCount,
-                        matadors: result.matadors
+                        matadors: result.matadors,
+                        isOuvert: result.isOuvert
                     });
                 }
                 ui.updateScoreboard(gameHistory);
@@ -162,7 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
             anzahlSchwarz: 0,
             anzahlRollmops: 0,
             anzahlRamsch: 0,
-            anzahlBigBusch: 0
+            anzahlBigBusch: 0,
+            anzahlGrandOuvert: 0,
+            anzahlNullOuvert: 0
         };
         
         history.forEach(game => {
@@ -189,6 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (game.trumpMode === 'Grand') {
                             winGrandCount++;
                             gameTypeCounts.anzahlGrandSpiele++;
+                            // Grand Ouvert
+                            if (game.isOuvert) {
+                                gameTypeCounts.anzahlGrandOuvert++;
+                            }
                             // Ohne 4: check matadors
                             if (game.matadors && game.matadors.type === 'ohne' && game.matadors.count >= 4) {
                                 winGrandOhne4Count++;
@@ -196,6 +203,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else if (game.trumpMode === 'Null') {
                             winNullCount++;
                             gameTypeCounts.anzahlNullSpiele++;
+                            // Null Ouvert
+                            if (game.isOuvert) {
+                                gameTypeCounts.anzahlNullOuvert++;
+                            }
                         }
                         
                         if (game.handGame) {

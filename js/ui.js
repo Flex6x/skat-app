@@ -846,7 +846,7 @@ class UI {
         let bestStreak = 0;
 
         let totalsSum = {
-            grand: 0, null: 0, hand: 0, schneider: 0, schwarz: 0, rollmops: 0, ramsch: 0, bigbusch: 0
+            grand: 0, null: 0, hand: 0, schneider: 0, schwarz: 0, rollmops: 0, ramsch: 0, bigbusch: 0, grandouvert: 0, nullouvert: 0
         };
 
         stats.forEach(list => {
@@ -871,6 +871,8 @@ class UI {
             totalsSum.rollmops += (list.anzahlRollmops || 0);
             totalsSum.ramsch += (list.anzahlRamsch || 0);
             totalsSum.bigbusch += (list.anzahlBigBusch || 0);
+            totalsSum.grandouvert += (list.anzahlGrandOuvert || 0);
+            totalsSum.nullouvert += (list.anzahlNullOuvert || 0);
         });
 
         // Render primary dashboard
