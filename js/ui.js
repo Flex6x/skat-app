@@ -1065,7 +1065,6 @@ class UI {
                 <div class="badge-status-container" style="margin-top: 10px; width: 100%;">
                     <span class="badge-progress" style="font-size: 0.8rem; color: ${isUnlocked ? '#4caf50' : '#888'}; font-weight: bold;">${progressText}</span>
                 </div>
-                <div class="badge-status">${isUnlocked ? 'Unlocked' : 'Locked'}</div>
             `;
             grid.appendChild(item);
         });
