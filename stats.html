@@ -160,6 +160,19 @@
         </div>
     </div>
 
+    <!-- Stats Modal Popup -->
+    <div id="stats-modal" class="stats-modal-overlay hidden">
+        <div class="stats-modal-content">
+            <header class="modal-header">
+                <h2 id="detail-user-name">User Stats</h2>
+                <button class="btn-close-modal" onclick="ui.closeUserDetail()">×</button>
+            </header>
+            <div class="modal-body" id="modal-body-content">
+                <!-- User details (cloned overview/history/badges) will be rendered here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/auth.js"></script>

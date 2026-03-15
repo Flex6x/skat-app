@@ -2200,36 +2200,132 @@ class UI {
         const data = await window.storageService.getUserStats(userId);
         if (!data) return;
 
-        // Hide leaderboard, show detail header
-        document.getElementById('stats-leaderboard').classList.add('hidden');
-        const detailHeader = document.getElementById('user-detail-header');
-        detailHeader.classList.remove('hidden');
-        document.getElementById('detail-user-name').textContent = `User (${userId.substring(0, 8)})`;
-
-        // Switch back to overview tab to show this user's stats
-        const overviewBtn = document.querySelector('[data-tab="overview"]');
-        const historyBtn = document.querySelector('[data-tab="history"]');
-        const badgesBtn = document.querySelector('[data-tab="badges"]');
-        const leaderboardBtn = document.querySelector('[data-tab="leaderboard"]');
+        const modal = document.getElementById('stats-modal');
+        const modalBody = document.getElementById('modal-body-content');
+        const detailUserName = document.getElementById('detail-user-name');
         
-        // Temporarily change how these render to use the fetched user data instead of current user
-        this._renderStatsOverviewFromCloud(data.aggregated, "User");
-        this._renderStatsBadgesFromCloud(data.aggregated);
-        this._renderStatsHistory(data.history.map(h => ({
-            date: h.date,
-            rounds: h.rounds,
-            ruleSet: h.rule_set,
-            scores: [h.score_bot2, h.score_bot1, h.score_player]
-        })), "User");
+        detailUserName.textContent = `User (${userId.substring(0, 8)})`;
+        modalBody.innerHTML = ''; // Clear previous
 
-        this.switchStatsTab('overview');
+        // Create a temporary container for rendering
+        const detailContainer = document.createElement('div');
+        detailContainer.className = 'user-detail-render-area';
+        
+        // Clone relevant parts from original stats view to re-use structure
+        const overviewClone = document.getElementById('stats-overview').cloneNode(true);
+        const historyClone = document.getElementById('stats-history').cloneNode(true);
+        const badgesClone = document.getElementById('stats-badges').cloneNode(true);
+        
+        [overviewClone, historyClone, badgesClone].forEach(c => {
+            c.classList.remove('hidden');
+            c.id = 'modal-' + c.id; // Avoid ID conflicts
+            detailContainer.appendChild(c);
+        });
+
+        modalBody.appendChild(detailContainer);
+        modal.classList.remove('hidden');
+
+        // Render stats into the clones
+        // We need to temporarily swap the IDs or pass container context to renderers
+        // For simplicity, let's manually target the clones' internal IDs if they have any
+        
+        const dashboard = detailContainer.querySelector('#modal-stats-main-dashboard');
+        const totalLists = data.aggregated.lists_played || 0;
+        const ratio = totalLists > 0 ? Math.round(((data.aggregated.wins || 0) / totalLists) * 100) : 0;
+        const streak = data.aggregated.best_streak || 0;
+
+        dashboard.innerHTML = `
+            <div class="stat-card">
+                <span class="stat-label">Total Lists</span>
+                <span class="stat-value">${totalLists}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Win Ratio</span>
+                <span class="stat-value">${ratio}%</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Best Streak</span>
+                <span class="stat-value">${streak}</span>
+            </div>
+        `;
+
+        // Fill secondary stats in clone
+        const map = {
+            'stat-total-grand': data.aggregated.grand_wins,
+            'stat-total-null': data.aggregated.null_wins,
+            'stat-total-ramsch': data.aggregated.ramsch_wins,
+            'stat-total-rollmops': data.aggregated.rollmops_wins,
+            'stat-total-bigbusch': data.aggregated.big_busch,
+            'stat-total-grand-ouvert': data.aggregated.grand_ouvert_wins,
+            'stat-total-null-ouvert': data.aggregated.null_ouvert_wins,
+            'stat-total-hand': data.aggregated.hand_wins,
+            'stat-total-schneider': data.aggregated.schneider_wins,
+            'stat-total-schwarz': data.aggregated.schwarz_wins
+        };
+
+        for (const [id, val] of Object.entries(map)) {
+            const el = detailContainer.querySelector(`#${id}`);
+            if (el) el.innerText = val || 0;
+        }
+
+        // Render History Table into clone
+        const tableBody = detailContainer.querySelector('#stats-table-body');
+        tableBody.innerHTML = '';
+        const historyData = data.history.map(h => ({
+            date: h.date, rounds: h.rounds, ruleSet: h.rule_set, 
+            scores: [h.score_bot2, h.score_bot1, h.score_player]
+        }));
+        
+        [...historyData].reverse().forEach(list => {
+            const tr = document.createElement('tr');
+            const scores = list.scores;
+            const maxScore = Math.max(...scores);
+            const userWon = scores[2] === maxScore;
+            
+            tr.innerHTML = `
+                <td>${list.date}</td>
+                <td style="font-weight: bold; color: ${userWon ? '#4caf50' : '#fff'}">${userWon ? 'User' : 'Others'}</td>
+                <td>${list.rounds}</td>
+                <td>${list.ruleSet}</td>
+                <td>${scores[0]}</td>
+                <td>${scores[1]}</td>
+                <td>${scores[2]}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+
+        // Render Badges into clone
+        const badgesGrid = detailContainer.querySelector('#badges-grid');
+        badgesGrid.innerHTML = '';
+        this._renderStatsBadgesIntoContainer(data.aggregated, badgesGrid);
+    }
+
+    _renderStatsBadgesIntoContainer(agg, container) {
+        const badgeDefinitions = [
+            { id: 'unbesiegbar', icon: '🛡️', title: 'Unbesiegbar', target: 5, current: agg.winSchwarzCount || 0 },
+            { id: 'seriensieger', icon: '🏆', title: 'Seriensieger', target: 1, current: agg.wonAllInListCount || 0 },
+            { id: 'grandmeister', icon: '👑', title: 'Grandmeister', target: 10, current: agg.grand_wins || 0 },
+            { id: 'null_ass', icon: '🃏', title: 'Null-Ass', target: 10, current: agg.null_wins || 0 },
+            { id: 'anfaenger', icon: '🌱', title: 'Anfänger', target: 10, current: agg.games_played || 0 },
+            { id: 'stammspieler', icon: '🌳', title: 'Stammspieler', target: 50, current: agg.games_played || 0 },
+            { id: 'veteran', icon: '🏅', title: 'Veteran', target: 200, current: agg.games_played || 0 }
+        ];
+
+        badgeDefinitions.forEach(badge => {
+            const isUnlocked = badge.current >= badge.target;
+            const item = document.createElement('div');
+            item.className = `badge-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+            item.innerHTML = `
+                <span class="badge-icon">${badge.icon}</span>
+                <span class="badge-title">${badge.title}</span>
+                <div class="badge-status">${isUnlocked ? 'Unlocked' : 'Locked'} (${badge.current}/${badge.target})</div>
+            `;
+            container.appendChild(item);
+        });
     }
 
     closeUserDetail() {
-        document.getElementById('user-detail-header').classList.add('hidden');
-        // Restore own stats
-        this.renderStats();
-        // Go back to leaderboard
-        this.switchStatsTab('leaderboard');
+        const modal = document.getElementById('stats-modal');
+        if (modal) modal.classList.add('hidden');
     }
 }
