@@ -2214,60 +2214,58 @@ class UI {
         const ratio = totalLists > 0 ? Math.round(((data.aggregated.wins || 0) / totalLists) * 100) : 0;
         const streak = data.aggregated.best_streak || 0;
 
-        // Modern Overview Section
+        // Modern Overview Section (No Titles)
         const overviewSection = document.createElement('div');
         overviewSection.className = 'modal-section';
         overviewSection.innerHTML = `
-            <h3 class="modal-section-title">📊 Übersicht</h3>
             <div class="stats-dashboard">
                 <div class="stat-card primary">
-                    <span class="stat-label">Gesamtlisten</span>
+                    <span class="stat-label">📋 Gesamtlisten</span>
                     <span class="stat-value">${totalLists}</span>
                 </div>
                 <div class="stat-card primary">
-                    <span class="stat-label">Siegquote</span>
+                    <span class="stat-label">📈 Siegquote</span>
                     <span class="stat-value">${ratio}%</span>
                 </div>
                 <div class="stat-card primary">
-                    <span class="stat-label">Beste Serie</span>
+                    <span class="stat-label">🔥 Beste Serie</span>
                     <span class="stat-value">${streak}</span>
                 </div>
             </div>
             
             <div class="stats-dashboard secondary-stats" style="margin-top: 20px;">
                 <div class="stat-card mini">
-                    <span class="stat-label">Grand</span>
+                    <span class="stat-label">👑 Grand</span>
                     <span class="stat-value">${data.aggregated.grand_wins || 0}</span>
                 </div>
                 <div class="stat-card mini">
-                    <span class="stat-label">Null</span>
+                    <span class="stat-label">🃏 Null</span>
                     <span class="stat-value">${data.aggregated.null_wins || 0}</span>
                 </div>
                 <div class="stat-card mini">
-                    <span class="stat-label">Hand</span>
+                    <span class="stat-label">✋ Hand</span>
                     <span class="stat-value">${data.aggregated.hand_wins || 0}</span>
                 </div>
                 <div class="stat-card mini">
-                    <span class="stat-label">Schneider</span>
+                    <span class="stat-label">👔 Schneider</span>
                     <span class="stat-value">${data.aggregated.schneider_wins || 0}</span>
                 </div>
                 <div class="stat-card mini">
-                    <span class="stat-label">Schwarz</span>
+                    <span class="stat-label">⚫ Schwarz</span>
                     <span class="stat-value">${data.aggregated.schwarz_wins || 0}</span>
                 </div>
                 <div class="stat-card mini">
-                    <span class="stat-label">Ramsch</span>
+                    <span class="stat-label">🧹 Ramsch</span>
                     <span class="stat-value">${data.aggregated.ramsch_wins || 0}</span>
                 </div>
             </div>
         `;
         detailContainer.appendChild(overviewSection);
 
-        // History Section
+        // History Section (No Titles)
         const historySection = document.createElement('div');
         historySection.className = 'modal-section';
         historySection.innerHTML = `
-            <h3 class="modal-section-title" style="margin-top: 30px;">🕒 Spielverlauf</h3>
             <div class="stats-table-full-container">
                 <table class="stats-table">
                     <thead>
@@ -2311,11 +2309,10 @@ class UI {
             historyTableBody.appendChild(tr);
         });
 
-        // Badges Section
+        // Badges Section (No Titles)
         const badgesSection = document.createElement('div');
         badgesSection.className = 'modal-section';
         badgesSection.innerHTML = `
-            <h3 class="modal-section-title" style="margin-top: 30px;">🏅 Badges</h3>
             <div class="badges-grid" id="modal-badges-grid"></div>
         `;
         detailContainer.appendChild(badgesSection);
