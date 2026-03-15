@@ -2681,3 +2681,146 @@ body {
     box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
     border: 1px solid rgba(255, 255, 0, 0.5);
 }
+
+/* === Auth System Styles === */
+.auth-container {
+    display: flex;
+    align-items: center;
+    margin-left: 20px;
+}
+
+.login-btn, .profile-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.9rem;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.login-btn:hover, .profile-btn:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.profile-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 10px;
+    background: #1e1e2e;
+    min-width: 160px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 3000;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.dropdown-content button {
+    width: 100%;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    color: #ccc;
+    text-align: left;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-content button:hover {
+    background: rgba(63, 81, 181, 0.2);
+    color: #fff;
+}
+
+.login-modal {
+    max-width: 400px;
+    width: 90%;
+    padding: 40px;
+}
+
+.btn-close-modal {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.btn-close-modal:hover {
+    color: #fff;
+}
+
+.login-tabs {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 25px;
+}
+
+.login-tab-btn {
+    flex: 1;
+    padding: 10px;
+    background: none;
+    border: none;
+    color: #888;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.login-tab-btn.active {
+    background: var(--accent-color);
+    color: #fff;
+}
+
+.auth-note {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 15px;
+}
+
+.auth-status {
+    margin-top: 20px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.auth-status.success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.auth-status.error {
+    background: rgba(198, 40, 40, 0.1);
+    color: #f44336;
+    border: 1px solid rgba(198, 40, 40, 0.2);
+}
+
+.import-modal {
+    max-width: 500px;
+    padding: 40px;
+}
+

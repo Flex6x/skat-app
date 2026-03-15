@@ -167,7 +167,15 @@ const TRANSLATIONS = {
         badge_veteran: "Skat Veteran",
         badge_veteran_desc: "Absolviere 200 Spiele.",
         badge_ohne_4: "Ohne 4",
-        badge_ohne_4_desc: "Gewinne einen Grand \"ohne 4\"."
+        badge_ohne_4_desc: "Gewinne einen Grand \"ohne 4\".",
+        login: "Login",
+        logout: "Logout",
+        profile: "Profil",
+        view_stats: "Statistiken",
+        account_login: "Account Login",
+        login_subtitle: "Speichere deine Stats in der Cloud.",
+        import_stats_title: "Lokale Statistiken gefunden",
+        import_stats_desc: "Wir haben lokale Spielstatistiken auf diesem Gerät gefunden. Möchtest du sie in deinen Account importieren?"
     },
     en: {
         select_rounds: "Select Rounds",
@@ -325,7 +333,15 @@ const TRANSLATIONS = {
         badge_veteran: "Skat Veteran",
         badge_veteran_desc: "Play 200 games.",
         badge_ohne_4: "Without 4",
-        badge_ohne_4_desc: "Win a Grand 'without 4'."
+        badge_ohne_4_desc: "Win a Grand 'without 4'.",
+        login: "Login",
+        logout: "Logout",
+        profile: "Profile",
+        view_stats: "Statistics",
+        account_login: "Account Login",
+        login_subtitle: "Save your stats in the cloud.",
+        import_stats_title: "Local statistics found",
+        import_stats_desc: "We found local game statistics on this device. Do you want to import them into your account?"
     }
 };
 
@@ -886,18 +902,110 @@ class UI {
              this.els.lastTrickOverlay.classList.add('hidden');
         };
     }
-    renderStats() {
-        const stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
+    async renderStats() {
+        let stats = [];
+        let aggregatedFromCloud = null;
+
+        if (window.auth) {
+            const data = await window.auth.getStats();
+            if (Array.isArray(data)) {
+                stats = data;
+            } else if (data) {
+                aggregatedFromCloud = data;
+                // If we have cloud stats but no local history, stats remains empty for history tab
+            }
+        } else {
+            stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
+        }
+
         const playerName = (window.appSettings && window.appSettings.current.nickname) || 'Du';
 
         // Render all tabs
-        this._renderStatsOverview(stats, playerName);
-        this._renderStatsHistory(stats, playerName);
-        this._renderStatsBadges(stats);
+        if (aggregatedFromCloud) {
+            this._renderStatsOverviewFromCloud(aggregatedFromCloud, playerName);
+            this._renderStatsHistory([], playerName); // History not synced yet
+            this._renderStatsBadgesFromCloud(aggregatedFromCloud);
+        } else {
+            this._renderStatsOverview(stats, playerName);
+            this._renderStatsHistory(stats, playerName);
+            this._renderStatsBadges(stats);
+        }
 
         // Show overview tab by default
         this.switchStatsTab('overview');
     }
+
+    _renderStatsOverviewFromCloud(agg, playerName) {
+        const totalListsEl = document.getElementById('stat-total-games');
+        const winRatioEl = document.getElementById('stat-win-ratio');
+        const winStreakEl = document.getElementById('stat-win-streak');
+        
+        if (totalListsEl) totalListsEl.innerText = agg.games_played || 0;
+        if (winRatioEl) {
+            const ratio = agg.games_played > 0 ? Math.round((agg.wins / agg.games_played) * 100) : 0;
+            winRatioEl.innerText = ratio + '%';
+        }
+        if (winStreakEl) winStreakEl.innerText = '-';
+
+        // Secondary stats
+        const map = {
+            'stat-total-grand': agg.grand_wins,
+            'stat-total-null': agg.null_wins,
+            'stat-total-ramsch': agg.ramsch_wins,
+            'stat-total-rollmops': agg.rollmops_wins,
+            'stat-total-bigbusch': agg.big_busch,
+            'stat-total-grand-ouvert': '-',
+            'stat-total-null-ouvert': '-',
+            'stat-total-hand': '-',
+            'stat-total-schneider': '-',
+            'stat-total-schwarz': '-'
+        };
+
+        for (const [id, val] of Object.entries(map)) {
+            const el = document.getElementById(id);
+            if (el) el.innerText = val !== undefined ? val : 0;
+        }
+    }
+
+    _renderStatsBadgesFromCloud(agg) {
+        const grid = document.getElementById('badges-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        const badgeDefinitions = [
+            { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), desc: this.getTranslation('badge_unbesiegbar_desc'), target: 5, current: agg.winSchwarzCount || 0 },
+            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), target: 1, current: agg.wonAllInListCount || 0 },
+            { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), desc: this.getTranslation('badge_grandmeister_desc'), target: 10, current: agg.grand_wins },
+            { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), desc: this.getTranslation('badge_null_ass_desc'), target: 10, current: agg.null_wins },
+            { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), desc: this.getTranslation('badge_rollmops_desc'), target: 3, current: agg.rollmops_wins },
+            { id: 'big_busch', icon: '🔥', title: this.getTranslation('badge_big_busch'), desc: this.getTranslation('badge_big_busch_desc'), target: 1, current: agg.big_busch },
+            { id: 'ramsch_koenig', icon: '🧹', title: this.getTranslation('badge_ramsch_koenig'), desc: this.getTranslation('badge_ramsch_koenig_desc'), target: 10, current: agg.ramsch_wins },
+            { id: 'trumpfmaschine', icon: '⚙️', title: this.getTranslation('badge_trumpfmaschine'), desc: this.getTranslation('badge_trumpfmaschine_desc'), target: 1, current: agg.trumpf_count >= 10 ? 1 : 0 },
+            { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), desc: this.getTranslation('badge_anfaenger_desc'), target: 10, current: agg.games_played },
+            { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), desc: this.getTranslation('badge_stammspieler_desc'), target: 50, current: agg.games_played },
+            { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: agg.games_played }
+        ];
+
+        badgeDefinitions.forEach(badge => {
+            const isUnlocked = badge.current >= badge.target;
+            const item = document.createElement('div');
+            item.className = `badge-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+            
+            const progressText = `${Math.min(badge.current, badge.target)} / ${badge.target}`;
+
+            item.innerHTML = `
+                <span class="badge-icon">${badge.icon}</span>
+                <span class="badge-title">${badge.title}</span>
+                <span class="badge-description">${badge.desc}</span>
+                <div class="badge-status-container" style="margin-top: 10px; width: 100%;">
+                    <span class="badge-progress" style="font-size: 0.8rem; color: ${isUnlocked ? '#4caf50' : '#888'}; font-weight: bold;">${progressText}</span>
+                </div>
+                <div class="badge-status">${isUnlocked ? 'Unlocked' : 'Locked'}</div>
+            `;
+            grid.appendChild(item);
+        });
+    }
+
 
     _renderStatsOverview(stats, playerName) {
         const mainDashboardEl = document.getElementById('stats-main-dashboard');
