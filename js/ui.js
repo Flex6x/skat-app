@@ -175,7 +175,10 @@ const TRANSLATIONS = {
         account_login: "Account Login",
         login_subtitle: "Speichere deine Stats in der Cloud.",
         import_stats_title: "Lokale Statistiken gefunden",
-        import_stats_desc: "Wir haben lokale Spielstatistiken auf diesem Gerät gefunden. Möchtest du sie in deinen Account importieren?"
+        import_stats_desc: "Wir haben lokale Spielstatistiken auf diesem Gerät gefunden. Möchtest du sie in deinen Account importieren?",
+        transfer_stats: "Stats auf Acc übertragen",
+        transfer_success: "Statistiken erfolgreich übertragen!",
+        transfer_error: "Fehler beim Übertragen: "
     },
     en: {
         select_rounds: "Select Rounds",
@@ -341,7 +344,10 @@ const TRANSLATIONS = {
         account_login: "Account Login",
         login_subtitle: "Save your stats in the cloud.",
         import_stats_title: "Local statistics found",
-        import_stats_desc: "We found local game statistics on this device. Do you want to import them into your account?"
+        import_stats_desc: "We found local game statistics on this device. Do you want to import them into your account?",
+        transfer_stats: "Transfer stats to account",
+        transfer_success: "Statistics successfully transferred!",
+        transfer_error: "Error during transfer: "
     }
 };
 
@@ -836,6 +842,39 @@ class UI {
                 settings.set('batterySaver', batterySaverChk.checked);
             });
         }
+
+        // Stats Transfer Logic
+        const transferBtn = document.getElementById('btn-transfer-stats');
+        if (transferBtn) {
+            const canMigrate = window.auth && window.auth.isLoggedIn() && window.storageService.hasLocalDataToMigrate();
+            if (canMigrate) {
+                transferBtn.classList.remove('hidden');
+            } else {
+                transferBtn.classList.add('hidden');
+            }
+
+            transferBtn.onclick = async () => {
+                const result = await window.storageService.migrateManual();
+                if (result.success) {
+                    this.showMessage(this.getTranslation('transfer_success'));
+                    transferBtn.classList.add('hidden');
+                } else {
+                    this.showMessage(this.getTranslation('transfer_error') + result.error);
+                }
+            };
+        }
+    }
+
+    refreshTransferButton() {
+        const transferBtn = document.getElementById('btn-transfer-stats');
+        if (transferBtn) {
+            const canMigrate = window.auth && window.auth.isLoggedIn() && window.storageService.hasLocalDataToMigrate();
+            if (canMigrate) {
+                transferBtn.classList.remove('hidden');
+            } else {
+                transferBtn.classList.add('hidden');
+            }
+        }
     }
 
     playSound(name) {
@@ -903,68 +942,92 @@ class UI {
         };
     }
     async renderStats() {
-        let stats = [];
         let aggregatedFromCloud = null;
+        let historyArray = [];
 
-        if (window.auth) {
-            const data = await window.auth.getStats();
+        if (window.storageService) {
+            const data = await window.storageService.getStats();
             if (Array.isArray(data)) {
-                stats = data;
+                // Local Guest Path
+                historyArray = data;
             } else if (data) {
-                aggregatedFromCloud = data;
-                // If we have cloud stats but no local history, stats remains empty for history tab
+                // Cloud Path: data is { aggregated, history }
+                aggregatedFromCloud = data.aggregated;
+                historyArray = data.history || [];
+                
+                // For history rendering, we need to map cloud column names back to expected object format
+                historyArray = historyArray.map(h => ({
+                    date: h.date,
+                    rounds: h.rounds,
+                    ruleSet: h.rule_set,
+                    scores: [h.score_bot2, h.score_bot1, h.score_player]
+                }));
             }
-        } else {
-            stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
         }
 
         const playerName = (window.appSettings && window.appSettings.current.nickname) || 'Du';
 
-        // Render all tabs
+        // Render Overview & Badges
         if (aggregatedFromCloud) {
             this._renderStatsOverviewFromCloud(aggregatedFromCloud, playerName);
-            this._renderStatsHistory([], playerName); // History not synced yet
             this._renderStatsBadgesFromCloud(aggregatedFromCloud);
         } else {
-            this._renderStatsOverview(stats, playerName);
-            this._renderStatsHistory(stats, playerName);
-            this._renderStatsBadges(stats);
+            this._renderStatsOverview(historyArray, playerName);
+            this._renderStatsBadges(historyArray);
         }
+
+        // Render History (Works for both now)
+        this._renderStatsHistory(historyArray, playerName);
 
         // Show overview tab by default
         this.switchStatsTab('overview');
     }
 
     _renderStatsOverviewFromCloud(agg, playerName) {
-        const totalListsEl = document.getElementById('stat-total-games');
-        const winRatioEl = document.getElementById('stat-win-ratio');
-        const winStreakEl = document.getElementById('stat-win-streak');
-        
-        if (totalListsEl) totalListsEl.innerText = agg.games_played || 0;
-        if (winRatioEl) {
-            const ratio = agg.games_played > 0 ? Math.round((agg.wins / agg.games_played) * 100) : 0;
-            winRatioEl.innerText = ratio + '%';
-        }
-        if (winStreakEl) winStreakEl.innerText = '-';
+        const mainDashboardEl = document.getElementById('stats-main-dashboard');
+        if (!mainDashboardEl) return;
 
-        // Secondary stats
+        const totalLists = agg.lists_played || 0;
+        const ratio = totalLists > 0 ? Math.round(((agg.wins || 0) / totalLists) * 100) : 0;
+        const streak = agg.best_streak || 0;
+
+        // Generate the primary cards (identical to local version)
+        mainDashboardEl.innerHTML = `
+            <div class="stat-card">
+                <span class="stat-label" data-i18n="total_lists">Total Lists</span>
+                <span class="stat-value">${totalLists}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label" data-i18n="win_ratio">Win Ratio</span>
+                <span class="stat-value">${ratio}%</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label" data-i18n="best_streak">Best Streak</span>
+                <span class="stat-value">${streak}</span>
+            </div>
+        `;
+
+        // Map secondary stats (existing elements in stats.html)
         const map = {
             'stat-total-grand': agg.grand_wins,
             'stat-total-null': agg.null_wins,
             'stat-total-ramsch': agg.ramsch_wins,
             'stat-total-rollmops': agg.rollmops_wins,
             'stat-total-bigbusch': agg.big_busch,
-            'stat-total-grand-ouvert': '-',
-            'stat-total-null-ouvert': '-',
-            'stat-total-hand': '-',
-            'stat-total-schneider': '-',
-            'stat-total-schwarz': '-'
+            'stat-total-grand-ouvert': agg.grand_ouvert_wins,
+            'stat-total-null-ouvert': agg.null_ouvert_wins,
+            'stat-total-hand': agg.hand_wins,
+            'stat-total-schneider': agg.schneider_wins,
+            'stat-total-schwarz': agg.schwarz_wins
         };
 
         for (const [id, val] of Object.entries(map)) {
             const el = document.getElementById(id);
             if (el) el.innerText = val !== undefined ? val : 0;
         }
+
+        // Re-apply translations for the newly created labels
+        this.updateLanguageUI();
     }
 
     _renderStatsBadgesFromCloud(agg) {

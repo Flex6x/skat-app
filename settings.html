@@ -144,7 +144,8 @@
                 <!-- Data Section -->
                 <div class="settings-card danger-card">
                     <h3 data-i18n="data">Data</h3>
-                    <div class="settings-control">
+                    <div class="settings-control stacked">
+                        <button id="btn-transfer-stats" class="btn primary hidden" style="width: 100%; margin-bottom: 10px;" data-i18n="transfer_stats">Stats auf Acc übertragen</button>
                         <button id="btn-delete-stats" class="btn danger" style="width: 100%;" data-i18n="delete_stats">Statistiken löschen</button>
                     </div>
                 </div>
@@ -161,9 +162,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             window.appSettings = new Settings();
-            const ui = new UI();
-            ui.bindSettingsForm(window.appSettings);
-            ui.updateLanguageUI();
+            window.ui = new UI();
+            window.ui.bindSettingsForm(window.appSettings);
+            window.ui.updateLanguageUI();
         });
     </script>
 </body>

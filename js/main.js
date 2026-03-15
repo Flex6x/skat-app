@@ -255,8 +255,8 @@ document.addEventListener('DOMContentLoaded', () => {
             wonAllInList: (humanGamesPlayed > 0 && humanGamesPlayed === humanGamesWon)
         };
 
-        if (window.auth) {
-            window.auth.saveListResult(listResult);
+        if (window.storageService) {
+            window.storageService.saveGameResult(listResult);
         } else {
             let stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
             stats.push(listResult);
