@@ -373,10 +373,17 @@ class Auth {
             headerRight.appendChild(authContainer);
         }
         if (this.isLoggedIn()) {
-            const shortEmail = this.user.email.split('@')[0];
+            // Priority: Local settings nickname -> Cloud nickname -> Email prefix
+            const settings = window.settings || window.appSettings;
+            let displayName = settings ? settings.current.nickname : null;
+            
+            if (!displayName || displayName === 'Du') {
+                displayName = this.user.email.split('@')[0];
+            }
+
             authContainer.innerHTML = `
                 <div class="profile-dropdown">
-                    <button class="nav-link profile-btn" id="btn-profile"><span class="user-icon">👤</span> ${shortEmail}</button>
+                    <button class="nav-link profile-btn" id="btn-profile"><span class="user-icon">👤</span> ${displayName}</button>
                     <div class="dropdown-content hidden" id="profile-dropdown-content">
                         <button onclick="window.location.href='stats.html'" data-i18n="view_stats">Stats</button>
                         <button id="btn-logout" data-i18n="logout">Logout</button>

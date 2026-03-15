@@ -129,20 +129,18 @@ body {
 }
 
 .menu-content {
-    background: rgba(40, 40, 55, 0.5);
-    padding: 60px 80px;
-    margin-top: 100px; /* Space for fixed header */
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(5px);
-    text-align: center;
-    transform: translateY(0);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-height: calc(100vh - 120px);
+    width: 100%;
+    height: calc(100vh - 80px);
+    margin-top: 80px;
+    padding: 40px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    backdrop-filter: none;
+    text-align: left;
+    display: block;
     overflow-y: auto;
+    max-height: none;
 }
 
 .hero-section {
@@ -2963,3 +2961,107 @@ body {
     padding: 40px;
 }
 
+/* Rules Page Styles */
+.rules-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
+}
+
+.rules-section {
+    margin-bottom: 40px;
+}
+
+.rules-section h2 {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.rule-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.rule-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.accordion-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.rule-icon {
+    font-size: 1.5rem;
+    margin-right: 15px;
+    min-width: 30px;
+    text-align: center;
+}
+
+.accordion-header h3 {
+    margin: 0;
+    flex-grow: 1;
+    font-size: 1.2rem;
+    color: #eee;
+}
+
+.accordion-arrow {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+    color: #888;
+}
+
+.rule-card.open .accordion-arrow {
+    transform: rotate(180deg);
+}
+
+.rule-card.open {
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.accordion-content p {
+    padding: 0 20px 20px 65px;
+    margin: 0;
+    line-height: 1.6;
+    color: #ccc;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .rules-container {
+        padding: 10px;
+    }
+    
+    .rules-section h2 {
+        font-size: 1.4rem;
+    }
+    
+    .accordion-header {
+        padding: 15px;
+    }
+    
+    .accordion-content p {
+        padding: 0 15px 15px 15px;
+    }
+}

@@ -105,6 +105,9 @@ class Settings {
                 if (window.storageService) {
                     window.storageService.updateNickname(value);
                 }
+                if (window.auth) {
+                    window.auth.updateUI();
+                }
                 break;
         }
 
