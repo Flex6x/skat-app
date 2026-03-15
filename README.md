@@ -1,4 +1,4 @@
-# Skat App
+# Skat-König App
 
 ## Hinweise
 
