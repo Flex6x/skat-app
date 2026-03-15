@@ -148,7 +148,7 @@ const TRANSLATIONS = {
         badge_unbesiegbar: "Unbesiegbar",
         badge_unbesiegbar_desc: "Gewinne 5-mal Schwarz.",
         badge_seriensieger: "Seriensieger",
-        badge_seriensieger_desc: "Gewinne alle Spiele in einer Liste.",
+        badge_seriensieger_desc: "Gewinne 5-mal alle Spiele in einer Liste.",
         badge_grandmeister: "Grandmeister",
         badge_grandmeister_desc: "Gewinne 10 Grand-Spiele.",
         badge_null_ass: "Null-Ass",
@@ -156,7 +156,7 @@ const TRANSLATIONS = {
         badge_rollmops: "Rollmops",
         badge_rollmops_desc: "Gewinne 3-mal mit einem Rollmops-Blatt.",
         badge_big_busch: "Big Busch",
-        badge_big_busch_desc: "Erreiche einen Spielwert von 264 (Grand Ouvert).",
+        badge_big_busch_desc: "Erreiche einen Spielwert von 264.",
         badge_ramsch_koenig: "Ramsch König",
         badge_ramsch_koenig_desc: "Gewinne 10-mal Ramsch.",
         badge_trumpfmaschine: "Trumpfmaschine",
@@ -325,7 +325,7 @@ const TRANSLATIONS = {
         badge_rollmops: "Rollmops",
         badge_rollmops_desc: "Win 3 games with a Rollmops hand.",
         badge_big_busch: "Big Busch",
-        badge_big_busch_desc: "Achieve a game value of at least 264 (Grand Ouvert).",
+        badge_big_busch_desc: "Achieve a game value of at least 264.",
         badge_ramsch_koenig: "Ramsch King",
         badge_ramsch_koenig_desc: "Win Ramsch 10 times.",
         badge_trumpfmaschine: "Trump Machine",
@@ -1038,7 +1038,7 @@ class UI {
 
         const badgeDefinitions = [
             { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), desc: this.getTranslation('badge_unbesiegbar_desc'), target: 5, current: agg.winSchwarzCount || 0 },
-            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), target: 1, current: agg.wonAllInListCount || 0 },
+            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), target: 5, current: agg.wonAllInListCount || 0 },
             { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), desc: this.getTranslation('badge_grandmeister_desc'), target: 10, current: agg.grand_wins },
             { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), desc: this.getTranslation('badge_null_ass_desc'), target: 10, current: agg.null_wins },
             { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), desc: this.getTranslation('badge_rollmops_desc'), target: 3, current: agg.rollmops_wins },
@@ -1256,7 +1256,7 @@ class UI {
 
         const badgeDefinitions = [
             { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), desc: this.getTranslation('badge_unbesiegbar_desc'), target: 5, current: aggregated.winSchwarzCount },
-            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), target: 1, current: aggregated.wonAllInListCount },
+            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), target: 5, current: aggregated.wonAllInListCount },
             { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), desc: this.getTranslation('badge_grandmeister_desc'), target: 10, current: aggregated.winGrandCount },
             { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), desc: this.getTranslation('badge_null_ass_desc'), target: 10, current: aggregated.winNullCount },
             { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), desc: this.getTranslation('badge_rollmops_desc'), target: 3, current: aggregated.winRollmopsCount },
@@ -2330,7 +2330,7 @@ class UI {
     _renderStatsBadgesIntoContainer(agg, container) {
         const badgeDefinitions = [
             { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), target: 5, current: agg.winSchwarzCount || 0 },
-            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), target: 1, current: agg.wonAllInListCount || 0 },
+            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), target: 5, current: agg.wonAllInListCount || 0 },
             { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), target: 10, current: agg.grand_wins || 0 },
             { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), target: 10, current: agg.null_wins || 0 },
             { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), target: 3, current: agg.rollmops_wins || 0 },
