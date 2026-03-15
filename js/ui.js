@@ -81,7 +81,7 @@ const TRANSLATIONS = {
         ouvert: "Ouvert",
         null_ouvert: "Null Ouvert",
         null_ouvert_hand: "Null Ouvert Hand",
-        grand_ouvert: "Grand Ouvert*",
+        grand_ouvert: "Grand Ouvert",
         original_skat: "Original Skat",
         discarded_cards: "Gedrückt",
         announce_schneider: "Schneider ansagen",
