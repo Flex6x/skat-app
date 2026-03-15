@@ -9,5 +9,3 @@
 - skat soll erst im richtigen moment verschwinden
 
 ## Bugs:
-
-- übersetzungssbugs
