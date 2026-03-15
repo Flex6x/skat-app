@@ -2190,7 +2190,7 @@ class UI {
                 <td>${index + 1}</td>
                 <td>User <small>(${entry.user_id.substring(0, 8)})</small></td>
                 <td>${entry.wins || 0}</td>
-                <td>${entry.games_played || 0}</td>
+                <td>${entry.lists_played || 0}</td>
             `;
             tableBody.appendChild(tr);
         });
@@ -2205,72 +2205,89 @@ class UI {
         const detailUserName = document.getElementById('detail-user-name');
         
         detailUserName.textContent = `User (${userId.substring(0, 8)})`;
-        modalBody.innerHTML = ''; // Clear previous
+        modalBody.innerHTML = ''; 
 
-        // Create a temporary container for rendering
         const detailContainer = document.createElement('div');
         detailContainer.className = 'user-detail-render-area';
         
-        // Clone relevant parts from original stats view to re-use structure
-        const overviewClone = document.getElementById('stats-overview').cloneNode(true);
-        const historyClone = document.getElementById('stats-history').cloneNode(true);
-        const badgesClone = document.getElementById('stats-badges').cloneNode(true);
-        
-        [overviewClone, historyClone, badgesClone].forEach(c => {
-            c.classList.remove('hidden');
-            c.id = 'modal-' + c.id; // Avoid ID conflicts
-            detailContainer.appendChild(c);
-        });
-
-        modalBody.appendChild(detailContainer);
-        modal.classList.remove('hidden');
-
-        // Render stats into the clones
-        // We need to temporarily swap the IDs or pass container context to renderers
-        // For simplicity, let's manually target the clones' internal IDs if they have any
-        
-        const dashboard = detailContainer.querySelector('#modal-stats-main-dashboard');
         const totalLists = data.aggregated.lists_played || 0;
         const ratio = totalLists > 0 ? Math.round(((data.aggregated.wins || 0) / totalLists) * 100) : 0;
         const streak = data.aggregated.best_streak || 0;
 
-        dashboard.innerHTML = `
-            <div class="stat-card">
-                <span class="stat-label">Total Lists</span>
-                <span class="stat-value">${totalLists}</span>
+        // Modern Overview Section
+        const overviewSection = document.createElement('div');
+        overviewSection.className = 'modal-section';
+        overviewSection.innerHTML = `
+            <h3 class="modal-section-title">📊 Übersicht</h3>
+            <div class="stats-dashboard">
+                <div class="stat-card primary">
+                    <span class="stat-label">Gesamtlisten</span>
+                    <span class="stat-value">${totalLists}</span>
+                </div>
+                <div class="stat-card primary">
+                    <span class="stat-label">Siegquote</span>
+                    <span class="stat-value">${ratio}%</span>
+                </div>
+                <div class="stat-card primary">
+                    <span class="stat-label">Beste Serie</span>
+                    <span class="stat-value">${streak}</span>
+                </div>
             </div>
-            <div class="stat-card">
-                <span class="stat-label">Win Ratio</span>
-                <span class="stat-value">${ratio}%</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Best Streak</span>
-                <span class="stat-value">${streak}</span>
+            
+            <div class="stats-dashboard secondary-stats" style="margin-top: 20px;">
+                <div class="stat-card mini">
+                    <span class="stat-label">Grand</span>
+                    <span class="stat-value">${data.aggregated.grand_wins || 0}</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">Null</span>
+                    <span class="stat-value">${data.aggregated.null_wins || 0}</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">Hand</span>
+                    <span class="stat-value">${data.aggregated.hand_wins || 0}</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">Schneider</span>
+                    <span class="stat-value">${data.aggregated.schneider_wins || 0}</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">Schwarz</span>
+                    <span class="stat-value">${data.aggregated.schwarz_wins || 0}</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">Ramsch</span>
+                    <span class="stat-value">${data.aggregated.ramsch_wins || 0}</span>
+                </div>
             </div>
         `;
+        detailContainer.appendChild(overviewSection);
 
-        // Fill secondary stats in clone
-        const map = {
-            'stat-total-grand': data.aggregated.grand_wins,
-            'stat-total-null': data.aggregated.null_wins,
-            'stat-total-ramsch': data.aggregated.ramsch_wins,
-            'stat-total-rollmops': data.aggregated.rollmops_wins,
-            'stat-total-bigbusch': data.aggregated.big_busch,
-            'stat-total-grand-ouvert': data.aggregated.grand_ouvert_wins,
-            'stat-total-null-ouvert': data.aggregated.null_ouvert_wins,
-            'stat-total-hand': data.aggregated.hand_wins,
-            'stat-total-schneider': data.aggregated.schneider_wins,
-            'stat-total-schwarz': data.aggregated.schwarz_wins
-        };
+        // History Section
+        const historySection = document.createElement('div');
+        historySection.className = 'modal-section';
+        historySection.innerHTML = `
+            <h3 class="modal-section-title" style="margin-top: 30px;">🕒 Spielverlauf</h3>
+            <div class="stats-table-full-container">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Gewinner</th>
+                            <th>Runden</th>
+                            <th>Regeln</th>
+                            <th>Aicore</th>
+                            <th>Aiden</th>
+                            <th>User</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-history-body"></tbody>
+                </table>
+            </div>
+        `;
+        detailContainer.appendChild(historySection);
 
-        for (const [id, val] of Object.entries(map)) {
-            const el = detailContainer.querySelector(`#${id}`);
-            if (el) el.innerText = val || 0;
-        }
-
-        // Render History Table into clone
-        const tableBody = detailContainer.querySelector('#stats-table-body');
-        tableBody.innerHTML = '';
+        const historyTableBody = historySection.querySelector('#modal-history-body');
         const historyData = data.history.map(h => ({
             date: h.date, rounds: h.rounds, ruleSet: h.rule_set, 
             scores: [h.score_bot2, h.score_bot1, h.score_player]
@@ -2284,20 +2301,30 @@ class UI {
             
             tr.innerHTML = `
                 <td>${list.date}</td>
-                <td style="font-weight: bold; color: ${userWon ? '#4caf50' : '#fff'}">${userWon ? 'User' : 'Others'}</td>
+                <td style="font-weight: bold; color: ${userWon ? '#4caf50' : '#fff'}">${userWon ? 'User' : 'Andere'}</td>
                 <td>${list.rounds}</td>
                 <td>${list.ruleSet}</td>
                 <td>${scores[0]}</td>
                 <td>${scores[1]}</td>
                 <td>${scores[2]}</td>
             `;
-            tableBody.appendChild(tr);
+            historyTableBody.appendChild(tr);
         });
 
-        // Render Badges into clone
-        const badgesGrid = detailContainer.querySelector('#badges-grid');
-        badgesGrid.innerHTML = '';
+        // Badges Section
+        const badgesSection = document.createElement('div');
+        badgesSection.className = 'modal-section';
+        badgesSection.innerHTML = `
+            <h3 class="modal-section-title" style="margin-top: 30px;">🏅 Badges</h3>
+            <div class="badges-grid" id="modal-badges-grid"></div>
+        `;
+        detailContainer.appendChild(badgesSection);
+
+        const badgesGrid = badgesSection.querySelector('#modal-badges-grid');
         this._renderStatsBadgesIntoContainer(data.aggregated, badgesGrid);
+
+        modalBody.appendChild(detailContainer);
+        modal.classList.remove('hidden');
     }
 
     _renderStatsBadgesIntoContainer(agg, container) {
