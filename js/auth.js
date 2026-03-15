@@ -4,11 +4,11 @@
 
 class Auth {
     constructor() {
-        // These should be replaced with actual Supabase credentials
-        this.supabaseUrl = window.SUPABASE_URL || 'YOUR_SUPABASE_URL';
-        this.supabaseKey = window.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+        // These are your actual Supabase credentials
+        this.supabaseUrl = window.SUPABASE_URL || 'https://wofiqfrnrwxwzsjyocxc.supabase.co';
+        this.supabaseKey = window.SUPABASE_ANON_KEY || 'sb_publishable_yX7fYLj-F6D6BCAL5g74Bw_UFqCvUMt';
         
-        if (this.supabaseUrl !== 'YOUR_SUPABASE_URL' && typeof supabase !== 'undefined') {
+        if (this.supabaseUrl && this.supabaseUrl !== 'YOUR_SUPABASE_URL' && typeof supabase !== 'undefined') {
             this.client = supabase.createClient(this.supabaseUrl, this.supabaseKey);
         } else {
             console.warn('Supabase client not initialized. Please provide SUPABASE_URL and SUPABASE_ANON_KEY.');
