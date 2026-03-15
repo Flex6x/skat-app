@@ -1047,7 +1047,8 @@ class UI {
             { id: 'trumpfmaschine', icon: '⚙️', title: this.getTranslation('badge_trumpfmaschine'), desc: this.getTranslation('badge_trumpfmaschine_desc'), target: 1, current: agg.trumpf_count >= 10 ? 1 : 0 },
             { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), desc: this.getTranslation('badge_anfaenger_desc'), target: 10, current: agg.games_played },
             { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), desc: this.getTranslation('badge_stammspieler_desc'), target: 50, current: agg.games_played },
-            { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: agg.games_played }
+            { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: agg.games_played },
+            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: agg.winGrandOhne4Count || 0 }
         ];
 
         badgeDefinitions.forEach(badge => {
@@ -2297,11 +2298,14 @@ class UI {
             const maxScore = Math.max(...scores);
             const userWon = scores[2] === maxScore;
             
+            // Fix: ensure null ruleSet shows as 'tournament' translated
+            const rulesLabel = this.getTranslation(list.ruleSet || 'tournament');
+            
             tr.innerHTML = `
                 <td>${list.date}</td>
                 <td style="font-weight: bold; color: ${userWon ? '#4caf50' : '#fff'}">${userWon ? 'User' : 'Andere'}</td>
                 <td>${list.rounds}</td>
-                <td>${list.ruleSet}</td>
+                <td>${rulesLabel}</td>
                 <td>${scores[0]}</td>
                 <td>${scores[1]}</td>
                 <td>${scores[2]}</td>
@@ -2326,23 +2330,33 @@ class UI {
 
     _renderStatsBadgesIntoContainer(agg, container) {
         const badgeDefinitions = [
-            { id: 'unbesiegbar', icon: '🛡️', title: 'Unbesiegbar', target: 5, current: agg.winSchwarzCount || 0 },
-            { id: 'seriensieger', icon: '🏆', title: 'Seriensieger', target: 1, current: agg.wonAllInListCount || 0 },
-            { id: 'grandmeister', icon: '👑', title: 'Grandmeister', target: 10, current: agg.grand_wins || 0 },
-            { id: 'null_ass', icon: '🃏', title: 'Null-Ass', target: 10, current: agg.null_wins || 0 },
-            { id: 'anfaenger', icon: '🌱', title: 'Anfänger', target: 10, current: agg.games_played || 0 },
-            { id: 'stammspieler', icon: '🌳', title: 'Stammspieler', target: 50, current: agg.games_played || 0 },
-            { id: 'veteran', icon: '🏅', title: 'Veteran', target: 200, current: agg.games_played || 0 }
+            { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), target: 5, current: agg.winSchwarzCount || 0 },
+            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), target: 1, current: agg.wonAllInListCount || 0 },
+            { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), target: 10, current: agg.grand_wins || 0 },
+            { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), target: 10, current: agg.null_wins || 0 },
+            { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), target: 3, current: agg.rollmops_wins || 0 },
+            { id: 'big_busch', icon: '🔥', title: this.getTranslation('badge_big_busch'), target: 1, current: agg.big_busch || (agg.maxGameValue >= 264 ? 1 : 0) },
+            { id: 'ramsch_koenig', icon: '🧹', title: this.getTranslation('badge_ramsch_koenig'), target: 10, current: agg.ramsch_wins || 0 },
+            { id: 'trumpfmaschine', icon: '⚙️', title: this.getTranslation('badge_trumpfmaschine'), target: 1, current: agg.trumpf_count >= 10 ? 1 : 0 },
+            { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), target: 10, current: agg.games_played || 0 },
+            { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), target: 50, current: agg.games_played || 0 },
+            { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), target: 200, current: agg.games_played || 0 },
+            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), target: 1, current: agg.winGrandOhne4Count || 0 }
         ];
 
         badgeDefinitions.forEach(badge => {
             const isUnlocked = badge.current >= badge.target;
             const item = document.createElement('div');
             item.className = `badge-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+            
+            const progressText = `${Math.min(badge.current, badge.target)} / ${badge.target}`;
+            
             item.innerHTML = `
                 <span class="badge-icon">${badge.icon}</span>
                 <span class="badge-title">${badge.title}</span>
-                <div class="badge-status">${isUnlocked ? 'Unlocked' : 'Locked'} (${badge.current}/${badge.target})</div>
+                <div class="badge-status-container" style="margin-top: 5px; width: 100%;">
+                    <span class="badge-progress" style="font-size: 0.7rem; color: ${isUnlocked ? '#4caf50' : '#888'}; font-weight: bold;">${progressText}</span>
+                </div>
             `;
             container.appendChild(item);
         });

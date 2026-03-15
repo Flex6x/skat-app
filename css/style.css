@@ -280,6 +280,12 @@ body {
 .stats-modal-content .stats-table-full-container {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.05);
+    width: 100%;
+}
+
+.stats-modal-content .stats-table {
+    width: 100%;
+    border-collapse: collapse;
 }
     height: calc(100vh - 80px);
     overflow-y: auto;
