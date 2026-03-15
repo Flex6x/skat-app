@@ -99,9 +99,12 @@ class Settings {
                 break;
             case 'showLiveScore':
             case 'soundEnabled':
-            case 'nickname':
             case 'language':
-                // Handled at runtime or by UI observer
+                break;
+            case 'nickname':
+                if (window.storageService) {
+                    window.storageService.updateNickname(value);
+                }
                 break;
         }
 

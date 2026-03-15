@@ -2168,32 +2168,51 @@ class UI {
         if (!tableBody) return;
         tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">Loading...</td></tr>';
 
-        const data = await window.storageService.getLeaderboard();
-        tableBody.innerHTML = '';
-
-        if (!data || data.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">No rankings available yet.</td></tr>';
-            return;
-        }
-
-        data.forEach((entry, index) => {
-            const tr = document.createElement('tr');
-            tr.style.cursor = 'pointer';
-            tr.onclick = () => this.showUserDetail(entry.user_id);
-            
-            // Highlight current user
-            if (window.auth && window.auth.user && entry.user_id === window.auth.user.id) {
-                tr.classList.add('current-user-row');
+        try {
+            // Wait for storageService to be available
+            let retries = 0;
+            while (!window.storageService && retries < 10) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+                retries++;
             }
 
-            tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td>User <small>(${entry.user_id.substring(0, 8)})</small></td>
-                <td>${entry.wins || 0}</td>
-                <td>${entry.lists_played || 0}</td>
-            `;
-            tableBody.appendChild(tr);
-        });
+            if (!window.storageService) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--error-color);">Service unavailable.</td></tr>';
+                return;
+            }
+
+            const data = await window.storageService.getLeaderboard();
+            tableBody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">No rankings available yet.</td></tr>';
+                return;
+            }
+
+            data.forEach((entry, index) => {
+                const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                tr.onclick = () => this.showUserDetail(entry.user_id);
+                
+                // Highlight current user
+                if (window.auth && window.auth.user && entry.user_id === window.auth.user.id) {
+                    tr.classList.add('current-user-row');
+                }
+
+                const displayName = entry.nickname || `User (${entry.user_id.substring(0, 8)})`;
+
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${displayName}</td>
+                    <td>${entry.wins || 0}</td>
+                    <td>${entry.lists_played || 0}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error('Leaderboard render error:', error);
+            tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--error-color);">Error loading rankings.</td></tr>';
+        }
     }
 
     async showUserDetail(userId) {
@@ -2204,7 +2223,8 @@ class UI {
         const modalBody = document.getElementById('modal-body-content');
         const detailUserName = document.getElementById('detail-user-name');
         
-        detailUserName.textContent = `User (${userId.substring(0, 8)})`;
+        const displayName = data.aggregated.nickname || `User (${userId.substring(0, 8)})`;
+        detailUserName.textContent = displayName;
         modalBody.innerHTML = ''; 
 
         const detailContainer = document.createElement('div');

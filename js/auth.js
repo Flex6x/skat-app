@@ -28,23 +28,29 @@ class StorageService {
     }
 
     async getLeaderboard() {
-        if (!this.auth.isLoggedIn()) return [];
-        // Fetch all stats joined with some profile info if available
-        // Assuming there might be a profiles table or we just use the stats table
-        const { data, error } = await this.auth.client
-            .from('stats')
-            .select('user_id, wins, lists_played, games_played')
-            .order('wins', { ascending: false });
-        
-        if (error) {
-            console.error('Error fetching leaderboard:', error);
+        if (!this.auth.client) return [];
+        try {
+            // Fetch with * to be safe if the nickname column is not present in all rows/schema
+            const { data, error } = await this.auth.client
+                .from('stats')
+                .select('*')
+                .order('wins', { ascending: false });
+            
+            if (error) {
+                console.error('Leaderboard error:', error);
+                // Fallback to minimal selection if * fails
+                const { data: fallbackData, error: fallbackError } = await this.auth.client
+                    .from('stats')
+                    .select('user_id, wins, lists_played');
+                if (fallbackError) return [];
+                return fallbackData;
+            }
+
+            return data || [];
+        } catch (err) {
+            console.error('getLeaderboard exception:', err);
             return [];
         }
-
-        // Fetch user metadata (emails/names) - Note: Supabase doesn't allow fetching all users from client easily
-        // We'll assume there's a 'profiles' table or we just show the user_id/email if we had it.
-        // For now, let's try to get what we can. 
-        return data;
     }
 
     async getUserStats(userId) {
@@ -57,6 +63,31 @@ class StorageService {
             return null;
         }
         return { aggregated, history };
+    }
+
+    async updateNickname(nickname) {
+        if (!this.auth.isLoggedIn() || !nickname) return;
+        console.log('Attempting to update nickname in cloud:', nickname);
+        try {
+            const updateData = {
+                user_id: this.auth.user.id,
+                nickname: nickname,
+                updated_at: new Date().toISOString()
+            };
+            
+            const { error } = await this.auth.client.from('stats').upsert(updateData, { onConflict: 'user_id' });
+            if (error) {
+                console.warn('Could not update nickname (maybe column missing?):', error.message);
+                if (error.message.includes('nickname')) {
+                    delete updateData.nickname;
+                    await this.auth.client.from('stats').upsert(updateData, { onConflict: 'user_id' });
+                }
+            } else {
+                console.log('Nickname successfully updated in cloud.');
+            }
+        } catch (err) {
+            console.error('updateNickname error:', err);
+        }
     }
 
     async _getFromCloud() {
@@ -79,8 +110,13 @@ class StorageService {
 
         const isWin = listResult.scores && listResult.scores[2] > listResult.scores[0] && listResult.scores[2] > listResult.scores[1];
         
+        // Try to get nickname from settings (both window.settings and window.appSettings might be used)
+        const settings = window.settings || window.appSettings;
+        const nickname = settings ? settings.current.nickname : null;
+
         const updated = {
             user_id: this.auth.user.id,
+            nickname: nickname || current.nickname,
             lists_played: (current.lists_played || 0) + 1,
             games_played: (current.games_played || 0) + (listResult.rounds || 0),
             wins: (current.wins || 0) + (isWin ? 1 : 0),
@@ -265,19 +301,53 @@ class Auth {
 
     async _init() {
         if (!this.client) return;
-        const { data: { session } } = await this.client.auth.getSession();
-        this.user = session?.user || null;
+        try {
+            const { data: { session } } = await this.client.auth.getSession();
+            this.user = session?.user || null;
+            if (this.user) {
+                this.syncNicknameFromCloud().catch(err => console.error('Initial sync error:', err));
+            }
+        } catch (err) {
+            console.error('Auth init error:', err);
+        }
+        
         this.updateUI();
         if (window.ui && typeof window.ui.refreshTransferButton === 'function') window.ui.refreshTransferButton();
 
-        this.client.auth.onAuthStateChange((event, session) => {
+        this.client.auth.onAuthStateChange(async (event, session) => {
             this.user = session?.user || null;
+            if (this.user) {
+                this.syncNicknameFromCloud().catch(err => console.error('Auth change sync error:', err));
+            }
             this.updateUI();
             if (window.ui) {
                 if (typeof window.ui.refreshTransferButton === 'function') window.ui.refreshTransferButton();
                 if (typeof window.ui.renderStats === 'function') window.ui.renderStats();
             }
         });
+    }
+
+    async syncNicknameFromCloud() {
+        if (!this.user) return;
+        try {
+            const stats = await this._getFromCloud();
+            if (stats && stats.nickname) {
+                // Update local settings if they exist
+                if (window.settings) {
+                    window.settings.set('nickname', stats.nickname);
+                } else if (window.appSettings) {
+                    window.appSettings.set('nickname', stats.nickname);
+                }
+            } else if (stats && !stats.nickname) {
+                // If logged in but no nickname in cloud, push local one
+                const localNickname = (window.settings || window.appSettings)?.current?.nickname;
+                if (localNickname && localNickname !== 'Du') {
+                    await this.updateNickname(localNickname);
+                }
+            }
+        } catch (err) {
+            console.error('Error in syncNicknameFromCloud:', err);
+        }
     }
 
     isLoggedIn() { return !!this.user; }
