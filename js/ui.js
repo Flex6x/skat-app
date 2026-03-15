@@ -102,6 +102,7 @@ const TRANSLATIONS = {
         hand_only_info: "* nur bei Handspiel möglich",
         new_game: "Neues Spiel",
         game_over: "Spiel beendet",
+        leaderboard: "Bestenliste",
         back_home_title: "Zurück zum Hauptmenü",
         show_list_title: "Spielliste anzeigen",
         show_reiztabelle_title: "Reizwerttabelle anzeigen",
@@ -1291,12 +1292,14 @@ class UI {
         const overviewEl = document.getElementById('stats-overview');
         const historyEl = document.getElementById('stats-history');
         const badgesEl = document.getElementById('stats-badges');
+        const leaderboardEl = document.getElementById('stats-leaderboard');
         const overviewBtn = document.querySelector('[data-tab="overview"]');
         const historyBtn = document.querySelector('[data-tab="history"]');
         const badgesBtn = document.querySelector('[data-tab="badges"]');
+        const leaderboardBtn = document.querySelector('[data-tab="leaderboard"]');
 
-        [overviewEl, historyEl, badgesEl].forEach(el => { if(el) el.classList.add('hidden'); });
-        [overviewBtn, historyBtn, badgesBtn].forEach(btn => { if(btn) btn.classList.remove('active'); });
+        [overviewEl, historyEl, badgesEl, leaderboardEl].forEach(el => { if(el) el.classList.add('hidden'); });
+        [overviewBtn, historyBtn, badgesBtn, leaderboardBtn].forEach(btn => { if(btn) btn.classList.remove('active'); });
 
         if (tabName === 'overview') {
             if (overviewEl) overviewEl.classList.remove('hidden');
@@ -1307,6 +1310,10 @@ class UI {
         } else if (tabName === 'badges') {
             if (badgesEl) badgesEl.classList.remove('hidden');
             if (badgesBtn) badgesBtn.classList.add('active');
+        } else if (tabName === 'leaderboard') {
+            if (leaderboardEl) leaderboardEl.classList.remove('hidden');
+            if (leaderboardBtn) leaderboardBtn.classList.add('active');
+            this.renderLeaderboard();
         }
     }
 
@@ -2154,5 +2161,75 @@ class UI {
     toggleReiztabelle() {
         if (!this.els.reiztabelleOverlay) return;
         this.els.reiztabelleOverlay.classList.toggle('hidden');
+    }
+
+    async renderLeaderboard() {
+        const tableBody = document.getElementById('leaderboard-table-body');
+        if (!tableBody) return;
+        tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">Loading...</td></tr>';
+
+        const data = await window.storageService.getLeaderboard();
+        tableBody.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">No rankings available yet.</td></tr>';
+            return;
+        }
+
+        data.forEach((entry, index) => {
+            const tr = document.createElement('tr');
+            tr.style.cursor = 'pointer';
+            tr.onclick = () => this.showUserDetail(entry.user_id);
+            
+            // Highlight current user
+            if (window.auth && window.auth.user && entry.user_id === window.auth.user.id) {
+                tr.classList.add('current-user-row');
+            }
+
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>User <small>(${entry.user_id.substring(0, 8)})</small></td>
+                <td>${entry.wins || 0}</td>
+                <td>${entry.games_played || 0}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    }
+
+    async showUserDetail(userId) {
+        const data = await window.storageService.getUserStats(userId);
+        if (!data) return;
+
+        // Hide leaderboard, show detail header
+        document.getElementById('stats-leaderboard').classList.add('hidden');
+        const detailHeader = document.getElementById('user-detail-header');
+        detailHeader.classList.remove('hidden');
+        document.getElementById('detail-user-name').textContent = `User (${userId.substring(0, 8)})`;
+
+        // Switch back to overview tab to show this user's stats
+        const overviewBtn = document.querySelector('[data-tab="overview"]');
+        const historyBtn = document.querySelector('[data-tab="history"]');
+        const badgesBtn = document.querySelector('[data-tab="badges"]');
+        const leaderboardBtn = document.querySelector('[data-tab="leaderboard"]');
+        
+        // Temporarily change how these render to use the fetched user data instead of current user
+        this._renderStatsOverviewFromCloud(data.aggregated, "User");
+        this._renderStatsBadgesFromCloud(data.aggregated);
+        this._renderStatsHistory(data.history.map(h => ({
+            date: h.date,
+            rounds: h.rounds,
+            ruleSet: h.rule_set,
+            scores: [h.score_bot2, h.score_bot1, h.score_player]
+        })), "User");
+
+        this.switchStatsTab('overview');
+    }
+
+    closeUserDetail() {
+        document.getElementById('user-detail-header').classList.add('hidden');
+        // Restore own stats
+        this.renderStats();
+        // Go back to leaderboard
+        this.switchStatsTab('leaderboard');
     }
 }

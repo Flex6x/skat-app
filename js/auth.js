@@ -27,6 +27,38 @@ class StorageService {
         }
     }
 
+    async getLeaderboard() {
+        if (!this.auth.isLoggedIn()) return [];
+        // Fetch all stats joined with some profile info if available
+        // Assuming there might be a profiles table or we just use the stats table
+        const { data, error } = await this.auth.client
+            .from('stats')
+            .select('user_id, wins, lists_played, games_played')
+            .order('wins', { ascending: false });
+        
+        if (error) {
+            console.error('Error fetching leaderboard:', error);
+            return [];
+        }
+
+        // Fetch user metadata (emails/names) - Note: Supabase doesn't allow fetching all users from client easily
+        // We'll assume there's a 'profiles' table or we just show the user_id/email if we had it.
+        // For now, let's try to get what we can. 
+        return data;
+    }
+
+    async getUserStats(userId) {
+        if (!this.auth.isLoggedIn()) return null;
+        const { data: aggregated, error: aggError } = await this.auth.client.from('stats').select('*').eq('user_id', userId).single();
+        const { data: history, error: histError } = await this.auth.client.from('history').select('*').eq('user_id', userId).order('id', { ascending: false });
+        
+        if (aggError || histError) {
+            console.error('Error fetching user detail stats:', aggError, histError);
+            return null;
+        }
+        return { aggregated, history };
+    }
+
     async _getFromCloud() {
         const { data, error } = await this.auth.client.from('stats').select('*').eq('user_id', this.auth.user.id).single();
         if (error && error.code !== 'PGRST116') console.error('Error fetching stats:', error);

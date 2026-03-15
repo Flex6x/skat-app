@@ -41,6 +41,14 @@
                 <button class="stats-tab-btn" data-tab="badges" onclick="ui.switchStatsTab('badges')">
                     <span data-i18n="badges">Badges</span>
                 </button>
+                <button class="stats-tab-btn" data-tab="leaderboard" onclick="ui.switchStatsTab('leaderboard')">
+                    <span data-i18n="leaderboard">Bestenliste</span>
+                </button>
+            </div>
+
+            <div id="user-detail-header" class="user-detail-info hidden">
+                <button class="btn mini-btn" onclick="ui.closeUserDetail()" style="margin-bottom: 10px;">&larr; <span data-i18n="back">Zurück</span></button>
+                <h2 id="detail-user-name">Username</h2>
             </div>
 
             <!-- Tab 1: Overview -->
@@ -127,6 +135,25 @@
             <div class="stats-badges hidden" id="stats-badges">
                 <div class="badges-grid" id="badges-grid">
                     <!-- Badges will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Tab 4: Leaderboard -->
+            <div class="stats-leaderboard hidden" id="stats-leaderboard">
+                <div class="stats-table-full-container">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rang</th>
+                                <th>User</th>
+                                <th>Gewonnene Listen</th>
+                                <th>Gesamtspiele</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-table-body">
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
