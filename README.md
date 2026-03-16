@@ -8,8 +8,6 @@
 
 - skat soll erst im richtigen moment verschwinden
 - bug reports abfangen
-- regeln verbessern
 - SEO Optimierung
-- Skat-König v0.2 
 
 ## Bugs:
