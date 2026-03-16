@@ -133,6 +133,7 @@ const TRANSLATIONS = {
         declarer_win: "gewinnt mit {pts} Augen!",
         null_win: "gewinnt das Null-Spiel!",
         null_lose: "verliert das Null-Spiel!",
+        claim_rest: "Der Rest ist meine",
         tut_step1: "Hier siehst du deine Karten. Du nutzt sie, um Stiche zu machen und zu entscheiden, ob du reizen möchtest.",
 
         tut_step2: "Dies ist das Reiz-Fenster. Wer am höchsten reizt, wird Alleinspieler und darf den Skat aufnehmen.",
@@ -151,7 +152,7 @@ const TRANSLATIONS = {
         badge_seriensieger_desc: "Gewinne 5-mal alle Spiele in einer Liste.",
         badge_grandmeister: "Grandmeister",
         badge_grandmeister_desc: "Gewinne 10 Grand-Spiele.",
-        badge_null_ass: "Null-Ass",
+        badge_null_ass: "Hippie",
         badge_null_ass_desc: "Gewinne 10 Null-Spiele.",
         badge_rollmops: "Rollmops",
         badge_rollmops_desc: "Gewinne 3-mal mit einem Rollmops-Blatt.",
@@ -341,6 +342,7 @@ const TRANSLATIONS = {
         declarer_win: "wins with {pts} points!",
         null_win: "wins the Null game!",
         null_lose: "loses the Null game!",
+        claim_rest: "The rest is mine",
         tut_step1: "Here you see your cards. You use them to play tricks and decide whether you want to bid.",
         tut_step2: "This is the bidding window. The highest bidder becomes the declarer and can take the Skat.",
         tut_step3: "As declarer, you choose the game type here (Suit, Grand, or Null).",
@@ -394,7 +396,7 @@ const TRANSLATIONS = {
         badge_seriensieger_desc: "Win all games within a single Liste.",
         badge_grandmeister: "Grand Master",
         badge_grandmeister_desc: "Win 10 Grand games.",
-        badge_null_ass: "Null Ace",
+        badge_null_ass: "Hippie",
         badge_null_ass_desc: "Successfully play Null 10 times.",
         badge_rollmops: "Rollmops",
         badge_rollmops_desc: "Win 3 games with a Rollmops hand.",
@@ -516,7 +518,8 @@ class UI {
             // Named refs for names
             playerNameInGame: document.querySelector('#player-area .player-info'),
             playerNameInStatsHead: document.getElementById('stats-player-name-head'),
-            playerNameInListHead: document.getElementById('player2-name-list')
+            playerNameInListHead: document.getElementById('player2-name-list'),
+            btnClaimRest: document.getElementById('btn-claim-rest')
         };
         
         this.bindGlobalEvents();
@@ -603,11 +606,48 @@ class UI {
         overlays.forEach(o => {
             if (o) o.classList.add('hidden');
         });
+
+        // Hide claim button
+        if (this.els.btnClaimRest) this.els.btnClaimRest.classList.add('hidden');
         
         // Also hide speech bubbles
         if (this.els.bot1Speech) this.els.bot1Speech.classList.add('hidden');
         if (this.els.bot2Speech) this.els.bot2Speech.classList.add('hidden');
         if (this.els.playerSpeech) this.els.playerSpeech.classList.add('hidden');
+    }
+
+    showClaimRestBtn(onClaim) {
+        if (!this.els.btnClaimRest) return;
+        this.els.btnClaimRest.classList.remove('hidden');
+        this.els.btnClaimRest.disabled = false;
+        this.els.btnClaimRest.onclick = () => {
+            onClaim();
+        };
+    }
+
+    hideClaimRestBtn() {
+        if (!this.els.btnClaimRest) return;
+        this.els.btnClaimRest.classList.add('hidden');
+    }
+
+    disableClaimRestBtn() {
+        if (!this.els.btnClaimRest) return;
+        this.els.btnClaimRest.disabled = true;
+    }
+
+    showBotSpeech(botId, text) {
+        const el = botId === 0 ? this.els.bot2Speech : this.els.bot1Speech;
+        if (el) {
+            el.textContent = text;
+            el.classList.remove('hidden');
+        }
+    }
+
+    hideBotSpeech(botId) {
+        const el = botId === 0 ? this.els.bot2Speech : this.els.bot1Speech;
+        if (el) {
+            el.classList.add('hidden');
+        }
     }
 
     handleHashNavigation() {

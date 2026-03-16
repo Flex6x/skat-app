@@ -74,6 +74,7 @@ class Game {
         this.aborted = false;
         this.lastTrick = null;
         this.inputLocked = false;
+        this.claimRejectedThisRound = false;
         
         this.ui.resetLiveScore();
         this.ui.resetTrumpUI();
@@ -622,6 +623,14 @@ class Game {
 
         if (currentPlayer.type === PLAYER_TYPES.HUMAN) {
             this.inputLocked = false;
+
+            // Show claim button if human is declarer and phase is PLAYING and tricks > 1 remaining
+            if (this.phase === PHASES.PLAYING && this.declarerIndex === 2 && this.trickCount < 9 && !this.claimRejectedThisRound) {
+                this.ui.showClaimRestBtn(() => this.claimRemainingTricks());
+            } else {
+                this.ui.hideClaimRestBtn();
+            }
+
             this.ui.enablePlayerMoves(validMoves, async (cardId) => {
                 if (this.inputLocked || this.turnIndex !== 2) return;
                 this.inputLocked = true;
@@ -647,6 +656,63 @@ class Game {
             );
             await this.playCard(this.turnIndex, selectedCard.id);
         }
+    }
+
+    async claimRemainingTricks() {
+        if (this.phase !== PHASES.PLAYING || this.declarerIndex !== 2 || this.claimRejectedThisRound) return;
+
+        this.ui.showMessage(this.ui.getTranslation('claim_rest') + '!');
+        this.ui.disableClaimRestBtn();
+        await this.delay(1000);
+
+        // Bots evaluate
+        let rejected = false;
+        let rejectingBotId = -1;
+
+        for (let i = 0; i < 2; i++) {
+            const botAi = this.aiControllers[i];
+            const canWin = botAi.canStillWinTrick(
+                this.players,
+                this.trumpMode,
+                this.declarerIndex,
+                this.currentTrick,
+                this.trickCount
+            );
+            if (canWin) {
+                rejected = true;
+                rejectingBotId = i;
+                break;
+            }
+        }
+
+        if (rejected) {
+            this.claimRejectedThisRound = true;
+            this.ui.showBotSpeech(rejectingBotId, "Nein.");
+            await this.delay(2000);
+            this.ui.hideBotSpeech(rejectingBotId);
+            this.ui.hideClaimRestBtn();
+        } else {
+            this.ui.showMessage("Bots akzeptieren – restliche Stiche gehen an den Alleinspieler.");
+            await this.delay(2000);
+            this.awardRemainingTricksToDeclarer();
+        }
+    }
+
+    awardRemainingTricksToDeclarer() {
+        // Collect all cards from hands
+        this.players.forEach(p => {
+            this.players[this.declarerIndex].tricks.push(...p.hand);
+            p.hand = [];
+        });
+
+        // Add skat if not already added (usually skat is handled at end of game)
+        // In Skat, the declarer gets the skat eyes regardless.
+        
+        this.trickCount = 10;
+        this.ui.renderAllHands(this.players);
+        this.ui.updateTrickPiles(this.players, this.declarerIndex, false);
+        this.updateLiveScore();
+        this.endGame(this.trumpMode === TRUMP_MODES.NULL ? true : null);
     }
 
     async playCard(playerId, cardId) {

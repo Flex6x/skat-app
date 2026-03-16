@@ -312,4 +312,76 @@ class AIController {
         }
         return false;
     }
+
+    canStillWinTrick(players, trumpMode, declarerId, currentTrick, trickCount) {
+        const myHand = players[this.id].hand;
+        const partnerId = this.getPartnerId(this.id, declarerId);
+        const partnerHand = players[partnerId].hand;
+        const declarerHand = players[declarerId].hand;
+
+        const botCards = [...myHand, ...partnerHand];
+
+        if (trumpMode === 'Null') {
+            // Null game logic: Can we force declarer to win a trick?
+            // Defenders win if they can play a card that is LOWER than the highest card declarer MUST play.
+            // Since bots see all cards, they check if for any suit they can force declarer to be highest.
+            for (const suit of Object.values(SUITS)) {
+                const decSuit = declarerHand.filter(c => c.suit === suit);
+                if (decSuit.length === 0) continue;
+                
+                const decHighestRank = decSuit.reduce((max, c) => NULL_RANK_POWER[c.rank] > NULL_RANK_POWER[max.rank] ? c : max).rank;
+                const botLowestInSuit = botCards
+                    .filter(c => c.suit === suit)
+                    .reduce((min, c) => min === null || NULL_RANK_POWER[c.rank] < NULL_RANK_POWER[min.rank] ? c : min, null);
+                
+                if (botLowestInSuit && NULL_RANK_POWER[botLowestInSuit.rank] < NULL_RANK_POWER[decHighestRank]) {
+                    return true; // We can potentially force him to win
+                }
+            }
+            return false;
+        }
+
+        // Suit / Grand game
+        // 1. Higher Trump?
+        const decTrumps = declarerHand.filter(c => this.isTrump(c, trumpMode));
+        const decHighestTrump = decTrumps.length > 0 ? this.getHighestCard(decTrumps, trumpMode) : null;
+        
+        const botTrumps = botCards.filter(c => this.isTrump(c, trumpMode));
+        if (botTrumps.length > 0) {
+            if (!decHighestTrump) return true; // We have trump, he doesn't
+            const botHighestTrump = this.getHighestCard(botTrumps, trumpMode);
+            // Use beatsCard to check if bot trump is higher
+            if (this.beatsCard(botHighestTrump, decHighestTrump, trumpMode, trumpMode)) return true;
+        }
+
+        // 2. High card in non-trump suit?
+        for (const suit of Object.values(SUITS)) {
+            if (suit === trumpMode) continue;
+            
+            const decInSuit = declarerHand.filter(c => c.suit === suit);
+            const botInSuit = botCards.filter(c => c.suit === suit);
+            
+            if (botInSuit.length > 0) {
+                if (decInSuit.length === 0) {
+                    // Declarer is void in this suit. He can only win if he has trumps.
+                    if (decTrumps.length === 0) return true; // Bot wins this suit!
+                } else {
+                    // Both have the suit.
+                    const decHighestInSuit = this.getHighestCard(decInSuit, 'non-trump');
+                    const botHighestInSuit = this.getHighestCard(botInSuit, 'non-trump');
+                    
+                    if (RANK_POWER[botHighestInSuit.rank] > RANK_POWER[decHighestInSuit.rank]) {
+                        // Bot has higher card. Declarer can only win by trumping.
+                        if (decTrumps.length === 0) return true; 
+                    }
+                }
+            }
+        }
+
+        // 3. General "Declarer cannot force all remaining tricks" 
+        // If declarer has fewer trumps than remaining tricks, and bots can avoid being forced to win.
+        // This is simplified to the checks above which cover most "Nein" cases realistically.
+        
+        return false;
+    }
 }
