@@ -7,7 +7,11 @@
 ## To Do:
 
 - skat soll erst im richtigen moment verschwinden
-- Username bei der Anmeldung hinterlegen, bei Leaderboard soll dieser Name angezeigt werden.
-- tutorial entfernen
+- tutorial entfernen,
+- rules.html schöner
+- Der Rest ist meine oder Rest schenken
+- Bei verlorenem spiel: doppelte Punktzahl minus
+- "Save Settings" Button -> erst dann sollen daten in cloud übertragen werden
+- lösch button
 
 ## Bugs:

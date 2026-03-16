@@ -148,6 +148,11 @@ body {
     border: none;
     backdrop-filter: none;
     margin-top: 0; /* Hero section can be centered */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 /* Leaderboard Table */
 .stats-table-full-container {
@@ -284,12 +289,6 @@ body {
 .stats-modal-content .stats-table {
     width: 100%;
     border-collapse: collapse;
-}
-    height: calc(100vh - 80px);
-    overflow-y: auto;
-    background: none;
-    backdrop-filter: none;
-    border: none;
 }
 
 .glow-text {
