@@ -134,6 +134,7 @@ const TRANSLATIONS = {
         null_win: "gewinnt das Null-Spiel!",
         null_lose: "verliert das Null-Spiel!",
         claim_rest: "Der Rest ist meine",
+        gift_rest: "Ich schenke den Rest",
         tut_step1: "Hier siehst du deine Karten. Du nutzt sie, um Stiche zu machen und zu entscheiden, ob du reizen möchtest.",
 
         tut_step2: "Dies ist das Reiz-Fenster. Wer am höchsten reizt, wird Alleinspieler und darf den Skat aufnehmen.",
@@ -343,6 +344,7 @@ const TRANSLATIONS = {
         null_win: "wins the Null game!",
         null_lose: "loses the Null game!",
         claim_rest: "The rest is mine",
+        gift_rest: "I give away the rest",
         tut_step1: "Here you see your cards. You use them to play tricks and decide whether you want to bid.",
         tut_step2: "This is the bidding window. The highest bidder becomes the declarer and can take the Skat.",
         tut_step3: "As declarer, you choose the game type here (Suit, Grand, or Null).",
@@ -519,7 +521,8 @@ class UI {
             playerNameInGame: document.querySelector('#player-area .player-info'),
             playerNameInStatsHead: document.getElementById('stats-player-name-head'),
             playerNameInListHead: document.getElementById('player2-name-list'),
-            btnClaimRest: document.getElementById('btn-claim-rest')
+            btnClaimRest: document.getElementById('btn-claim-rest'),
+            btnGiftRest: document.getElementById('btn-gift-rest')
         };
         
         this.bindGlobalEvents();
@@ -609,6 +612,7 @@ class UI {
 
         // Hide claim button
         if (this.els.btnClaimRest) this.els.btnClaimRest.classList.add('hidden');
+        if (this.els.btnGiftRest) this.els.btnGiftRest.classList.add('hidden');
         
         // Also hide speech bubbles
         if (this.els.bot1Speech) this.els.bot1Speech.classList.add('hidden');
@@ -633,6 +637,25 @@ class UI {
     disableClaimRestBtn() {
         if (!this.els.btnClaimRest) return;
         this.els.btnClaimRest.disabled = true;
+    }
+
+    showGiftRestBtn(onGift) {
+        if (!this.els.btnGiftRest) return;
+        this.els.btnGiftRest.classList.remove('hidden');
+        this.els.btnGiftRest.disabled = false;
+        this.els.btnGiftRest.onclick = () => {
+            onGift();
+        };
+    }
+
+    hideGiftRestBtn() {
+        if (!this.els.btnGiftRest) return;
+        this.els.btnGiftRest.classList.add('hidden');
+    }
+
+    disableGiftRestBtn() {
+        if (!this.els.btnGiftRest) return;
+        this.els.btnGiftRest.disabled = true;
     }
 
     showBotSpeech(botId, text) {
