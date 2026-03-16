@@ -135,6 +135,14 @@ const TRANSLATIONS = {
         null_lose: "verliert das Null-Spiel!",
         claim_rest: "Der Rest ist meine",
         gift_rest: "Ich schenke den Rest",
+        bug_report_title: "Bug melden",
+        bug_report: "Bug melden",
+        bug_report_subtitle: "Beschreibe kurz, was passiert ist (gerne mit Steps).",
+        bug_report_placeholder: "Was ist passiert? Schritte? Erwartet vs. tatsächlich?",
+        send: "Senden",
+        close: "Schließen",
+        bug_report_thanks: "Danke! Bug-Report wurde gesendet.",
+        bug_report_error: "Konnte Bug-Report nicht senden.",
         tut_step1: "Hier siehst du deine Karten. Du nutzt sie, um Stiche zu machen und zu entscheiden, ob du reizen möchtest.",
 
         tut_step2: "Dies ist das Reiz-Fenster. Wer am höchsten reizt, wird Alleinspieler und darf den Skat aufnehmen.",
@@ -345,6 +353,14 @@ const TRANSLATIONS = {
         null_lose: "loses the Null game!",
         claim_rest: "The rest is mine",
         gift_rest: "I give away the rest",
+        bug_report_title: "Report a bug",
+        bug_report: "Report a bug",
+        bug_report_subtitle: "Briefly describe what happened (steps help).",
+        bug_report_placeholder: "What happened? Steps? Expected vs actual?",
+        send: "Send",
+        close: "Close",
+        bug_report_thanks: "Thanks! Bug report sent.",
+        bug_report_error: "Could not send bug report.",
         tut_step1: "Here you see your cards. You use them to play tricks and decide whether you want to bid.",
         tut_step2: "This is the bidding window. The highest bidder becomes the declarer and can take the Skat.",
         tut_step3: "As declarer, you choose the game type here (Suit, Grand, or Null).",
@@ -593,6 +609,16 @@ class UI {
                 }
             };
         }
+
+        // Bug report button (menu)
+        const btnBugReport = document.getElementById('btn-bug-report');
+        if (btnBugReport) {
+            btnBugReport.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showBugReportModal();
+            };
+        }
     }
 
     resetAllOverlays() {
@@ -706,6 +732,93 @@ class UI {
     getTranslation(key) {
         const lang = (window.appSettings && window.appSettings.current.language) || 'de';
         return TRANSLATIONS[lang][key] || key;
+    }
+
+    showBugReportModal() {
+        const modalId = 'bug-report-modal-overlay';
+        if (document.getElementById(modalId)) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = modalId;
+        overlay.className = 'menu-overlay';
+        overlay.innerHTML = `
+            <div class="menu-content login-modal">
+                <button class="btn-close-modal" id="btn-close-bug-report">×</button>
+                <h2>${this.getTranslation('bug_report')}</h2>
+                <p class="subtitle" style="margin-bottom: 20px;">${this.getTranslation('bug_report_subtitle')}</p>
+                <textarea id="bug-report-text" class="nickname-input" rows="6" placeholder="${this.getTranslation('bug_report_placeholder')}" style="resize: vertical; min-height: 140px;"></textarea>
+                <input id="bug-report-contact" class="nickname-input" placeholder="Email (optional)" style="margin-top: 12px;" />
+                <button id="btn-send-bug-report" class="btn primary large-btn" style="width: 100%; margin-top: 18px;">${this.getTranslation('send')}</button>
+                <div id="bug-report-status" class="auth-status hidden" style="margin-top: 12px;"></div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        const close = () => {
+            if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        };
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) close();
+        });
+        const btnClose = document.getElementById('btn-close-bug-report');
+        if (btnClose) btnClose.onclick = close;
+
+        const statusEl = document.getElementById('bug-report-status');
+        const showStatus = (msg, isError = false) => {
+            if (!statusEl) return;
+            statusEl.innerText = msg;
+            statusEl.className = 'auth-status ' + (isError ? 'error' : 'success');
+            statusEl.classList.remove('hidden');
+        };
+
+        const btnSend = document.getElementById('btn-send-bug-report');
+        if (btnSend) {
+            btnSend.onclick = async () => {
+                const text = (document.getElementById('bug-report-text')?.value || '').trim();
+                const contact = (document.getElementById('bug-report-contact')?.value || '').trim();
+                if (!text) return showStatus(this.getTranslation('bug_report_error'), true);
+                btnSend.disabled = true;
+                const ok = await this.submitBugReport({ text, contact });
+                if (ok) {
+                    showStatus(this.getTranslation('bug_report_thanks'), false);
+                    setTimeout(close, 900);
+                } else {
+                    showStatus(this.getTranslation('bug_report_error'), true);
+                    btnSend.disabled = false;
+                }
+            };
+        }
+    }
+
+    async submitBugReport({ text, contact }) {
+        try {
+            const client = window.auth?.client;
+            if (!client) return false;
+
+            const settings = window.settings || window.appSettings;
+            const nickname = settings?.current?.nickname || null;
+            const userId = window.auth?.user?.id || null;
+
+            const payload = {
+                user_id: userId,
+                nickname,
+                contact: contact || null,
+                message: text,
+                page: window.location.pathname,
+                user_agent: navigator.userAgent,
+                created_at: new Date().toISOString()
+            };
+
+            const { error } = await client.from('bug_reports').insert(payload);
+            if (error) {
+                console.error('Bug report insert error:', error);
+                return false;
+            }
+            return true;
+        } catch (err) {
+            console.error('submitBugReport exception:', err);
+            return false;
+        }
     }
 
     updateLanguageUI() {
