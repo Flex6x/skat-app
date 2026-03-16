@@ -13,5 +13,6 @@
 - Bei verlorenem spiel: doppelte Punktzahl minus
 - "Save Settings" Button -> erst dann sollen daten in cloud übertragen werden
 - lösch button
+- reizwert direkt eingeben
 
 ## Bugs:

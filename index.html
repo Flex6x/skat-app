@@ -20,7 +20,6 @@
             </div>
             <nav class="header-right">
                 <button id="btn-show-rules" class="nav-link" data-i18n="rules" onclick="window.location.href='rules.html'">Regeln</button>
-                <button id="btn-show-tutorial" class="nav-link" data-i18n="tutorial" onclick="window.location.href='tutorial.html'">Tutorial</button>
                 <button id="btn-show-stats" class="nav-link" data-i18n="statistics" onclick="window.location.href='stats.html'">Statistics</button>
                 <button id="btn-show-settings" class="nav-link" data-i18n="settings" onclick="window.location.href='settings.html'">Settings</button>
             </nav>
@@ -44,20 +43,6 @@
             window.appSettings = new Settings();
             const ui = new UI();
             ui.updateLanguageUI();
-            
-            // Auto-start tutorial for first time users
-            const isFirstVisit = !localStorage.getItem('skat_tutorial_completed');
-            if (isFirstVisit) {
-                const msg = ui.getTranslation('tutorial') + "?";
-                setTimeout(() => {
-                    if (confirm(msg)) {
-                        window.location.href = 'tutorial.html';
-                    } else {
-                        localStorage.setItem('skat_tutorial_completed', 'true');
-                    }
-                }, 1000);
-            }
-
         });
     </script>
 </body>

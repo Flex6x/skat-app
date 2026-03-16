@@ -391,8 +391,9 @@ body {
     transform: translateX(16px);
 }
 
-/* === Settings View === */
-#settings-view {
+/* === Settings & Rules View === */
+#settings-view,
+#rules-view {
     width: 100vw;
     height: 100vh;
     max-width: none;
@@ -454,8 +455,9 @@ body {
     background: rgba(198, 40, 40, 0.05);
 }
 
-/* Light Theme Adjustments for Settings */
-[data-theme="light"] #settings-view {
+/* Light Theme Adjustments for Settings & Rules */
+[data-theme="light"] #settings-view,
+[data-theme="light"] #rules-view {
     background: #f0f9ff;
 }
 
@@ -598,6 +600,7 @@ body {
 
 .view-header {
     margin-bottom: 40px;
+    margin-top: 50px; /* Leave space for the sticky header menu */
     text-align: center;
 }
 
