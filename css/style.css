@@ -154,6 +154,22 @@ body {
     align-items: center;
     text-align: center;
 }
+
+.version-hint {
+    position: absolute;
+    bottom: 20px;
+    right: 25px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+    user-select: none;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+[data-theme="light"] .version-hint {
+    color: rgba(7, 89, 133, 0.4);
+}
 /* Leaderboard Table */
 .stats-table-full-container {
     width: 100%;
@@ -2991,39 +3007,51 @@ body {
 
 /* Rules Page Styles */
 .rules-container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 30px 20px;
     overflow-y: auto;
     max-height: calc(100vh - 120px);
 }
 
 .rules-section {
-    margin-bottom: 40px;
+    margin-bottom: 50px;
 }
 
 .rules-section h2 {
     color: var(--primary-color);
-    border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-    font-size: 1.8rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.rules-section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 20px;
 }
 
 .rule-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    margin-bottom: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    height: fit-content;
 }
 
 .rule-card:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .accordion-header {
-    padding: 20px;
+    padding: 24px;
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -3031,66 +3059,96 @@ body {
 }
 
 .rule-icon {
-    font-size: 1.5rem;
-    margin-right: 15px;
-    min-width: 30px;
+    font-size: 1.8rem;
+    margin-right: 20px;
+    min-width: 40px;
     text-align: center;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
 .accordion-header h3 {
     margin: 0;
     flex-grow: 1;
-    font-size: 1.2rem;
-    color: #eee;
+    font-size: 1.35rem;
+    color: #fff;
+    font-weight: 600;
 }
 
 .accordion-arrow {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     transition: transform 0.3s ease;
-    color: #888;
+    color: #aaa;
+    background: rgba(255,255,255,0.05);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
 }
 
 .rule-card.open .accordion-arrow {
     transform: rotate(180deg);
+    background: var(--primary-color);
+    color: #fff;
 }
 
 .rule-card.open {
-    border-color: var(--primary-color);
-    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(var(--primary-color-rgb, 63, 81, 181), 0.5);
+    background: rgba(255, 255, 255, 0.09);
 }
 
 .accordion-content {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease-out;
-    background: rgba(0, 0, 0, 0.2);
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
 }
 
 .accordion-content p {
-    padding: 0 20px 20px 65px;
+    padding: 10px 30px 30px 84px;
     margin: 0;
-    line-height: 1.6;
-    color: #ccc;
+    line-height: 1.7;
+    color: #ddd;
+    font-size: 1.05rem;
+}
+
+.accordion-content strong {
+    color: #fff;
+    font-weight: 600;
 }
 
 /* Responsive adjustments */
+@media (max-width: 900px) {
+    .rules-section-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 600px) {
     .rules-container {
-        padding: 10px;
-    }
-    
-    .rules-section h2 {
-        font-size: 1.4rem;
-    }
-    
-    .accordion-header {
         padding: 15px;
     }
     
+    .rules-section h2 {
+        font-size: 1.6rem;
+    }
+    
+    .accordion-header {
+        padding: 18px;
+    }
+    
     .accordion-content p {
-        padding: 0 15px 15px 15px;
+        padding: 10px 20px 25px 20px;
+        font-size: 1rem;
+    }
+
+    .rule-icon {
+        font-size: 1.5rem;
+        margin-right: 15px;
+        min-width: 30px;
     }
 }
 
