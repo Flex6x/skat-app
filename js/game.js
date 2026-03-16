@@ -950,7 +950,7 @@ class Game {
                 ? `${declarerName} ${this.ui.getTranslation('null_win')}`
                 : `${declarerName} ${this.ui.getTranslation('null_lose')}`;
         } else if (evaluation.overbid) {
-            resultMsg = `${declarerName} ${this.ui.getTranslation('overbid_msg').replace('{bid}', this.bidValue).replace('{val}', evaluation.gameValue)}`;
+            resultMsg = `${declarerName} ${this.ui.getTranslation('overbid_msg').replace('{bid}', this.bidValue).replace('{val}', evaluation.baseGameValue)}`;
         } else {
             resultMsg = won 
                 ? `${declarerName} ${this.ui.getTranslation('declarer_win').replace('{pts}', declarerPoints)}` 
