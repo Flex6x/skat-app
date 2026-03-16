@@ -7,5 +7,8 @@
 ## To Do:
 
 - skat soll erst im richtigen moment verschwinden
+- bug reports abfangen
+- regeln verbessern
+- SEO Optimierung
 
 ## Bugs:
