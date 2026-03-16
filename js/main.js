@@ -255,9 +255,13 @@ document.addEventListener('DOMContentLoaded', () => {
             wonAllInList: (humanGamesPlayed > 0 && humanGamesPlayed === humanGamesWon)
         };
 
-        let stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
-        stats.push(listResult);
-        localStorage.setItem("skatListStats", JSON.stringify(stats));
+        if (window.storageService) {
+            window.storageService.saveGameResult(listResult);
+        } else {
+            let stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
+            stats.push(listResult);
+            localStorage.setItem("skatListStats", JSON.stringify(stats));
+        }
     };
     
     // Setup Home Button (In-Game Menu Returning)

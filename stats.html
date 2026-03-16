@@ -4,20 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skat - Statistics</title>
+    <title>Skat-König - Statistics</title>
+    <link rel="icon" type="image/jpeg" href="media/logo.jpg">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-</head>
+    </head>
 
-<body>
+    <body>
+    <!-- Main Start Menu -->
     <div id="main-menu" class="menu-overlay">
         <header class="menu-header">
             <div class="header-left" id="btn-logo-home" style="cursor: pointer;" onclick="window.location.href='index.html'">
-                <div class="app-logo">S</div>
-                <span class="app-name">Skat</span>
+                <img src="media/logo.jpg" alt="Skat-König Logo" class="app-logo-img">
+                <span class="app-name">Skat-König</span>
             </div>
             <nav class="header-right">
-                <button id="btn-show-tutorial" class="nav-link" data-i18n="tutorial" onclick="window.location.href='tutorial.html'">Tutorial</button>
+                <button id="btn-show-rules" class="nav-link" data-i18n="rules" onclick="window.location.href='rules.html'">Regeln</button>
                 <button id="btn-show-stats" class="nav-link" data-i18n="statistics" onclick="window.location.href='stats.html'">Statistics</button>
                 <button id="btn-show-settings" class="nav-link" data-i18n="settings" onclick="window.location.href='settings.html'">Settings</button>
             </nav>
@@ -39,6 +41,14 @@
                 <button class="stats-tab-btn" data-tab="badges" onclick="ui.switchStatsTab('badges')">
                     <span data-i18n="badges">Badges</span>
                 </button>
+                <button class="stats-tab-btn" data-tab="leaderboard" onclick="ui.switchStatsTab('leaderboard')">
+                    <span data-i18n="leaderboard">Bestenliste</span>
+                </button>
+            </div>
+
+            <div id="user-detail-header" class="user-detail-info hidden">
+                <button class="btn mini-btn" onclick="ui.closeUserDetail()" style="margin-bottom: 10px;">&larr; <span data-i18n="back">Zurück</span></button>
+                <h2 id="detail-user-name">Username</h2>
             </div>
 
             <!-- Tab 1: Overview -->
@@ -128,10 +138,44 @@
                 </div>
             </div>
 
+            <!-- Tab 4: Leaderboard -->
+            <div class="stats-leaderboard hidden" id="stats-leaderboard">
+                <div class="stats-table-full-container">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rang</th>
+                                <th>User</th>
+                                <th>Gewonnene Listen</th>
+                                <th>Gesamtlisten</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-table-body">
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Stats Modal Popup -->
+    <div id="stats-modal" class="stats-modal-overlay hidden">
+        <div class="stats-modal-content">
+            <header class="modal-header">
+                <h2 id="detail-user-name">User Stats</h2>
+                <button class="btn-close-modal" onclick="ui.closeUserDetail()">×</button>
+            </header>
+            <div class="modal-body" id="modal-body-content">
+                <!-- User details (cloned overview/history/badges) will be rendered here -->
+            </div>
         </div>
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/auth.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/ui.js"></script>
     <script>

@@ -81,7 +81,7 @@ const TRANSLATIONS = {
         ouvert: "Ouvert",
         null_ouvert: "Null Ouvert",
         null_ouvert_hand: "Null Ouvert Hand",
-        grand_ouvert: "Grand Ouvert*",
+        grand_ouvert: "Grand Ouvert",
         original_skat: "Original Skat",
         discarded_cards: "Gedrückt",
         announce_schneider: "Schneider ansagen",
@@ -102,6 +102,7 @@ const TRANSLATIONS = {
         hand_only_info: "* nur bei Handspiel möglich",
         new_game: "Neues Spiel",
         game_over: "Spiel beendet",
+        leaderboard: "Bestenliste",
         back_home_title: "Zurück zum Hauptmenü",
         show_list_title: "Spielliste anzeigen",
         show_reiztabelle_title: "Reizwerttabelle anzeigen",
@@ -132,6 +133,16 @@ const TRANSLATIONS = {
         declarer_win: "gewinnt mit {pts} Augen!",
         null_win: "gewinnt das Null-Spiel!",
         null_lose: "verliert das Null-Spiel!",
+        claim_rest: "Der Rest ist meine",
+        gift_rest: "Ich schenke den Rest",
+        bug_report_title: "Bug melden",
+        bug_report: "Bug melden",
+        bug_report_subtitle: "Beschreibe kurz, was passiert ist (gerne mit Steps).",
+        bug_report_placeholder: "Was ist passiert? Schritte? Erwartet vs. tatsächlich?",
+        send: "Senden",
+        close: "Schließen",
+        bug_report_thanks: "Danke! Bug-Report wurde gesendet.",
+        bug_report_error: "Konnte Bug-Report nicht senden.",
         tut_step1: "Hier siehst du deine Karten. Du nutzt sie, um Stiche zu machen und zu entscheiden, ob du reizen möchtest.",
 
         tut_step2: "Dies ist das Reiz-Fenster. Wer am höchsten reizt, wird Alleinspieler und darf den Skat aufnehmen.",
@@ -147,15 +158,15 @@ const TRANSLATIONS = {
         badge_unbesiegbar: "Unbesiegbar",
         badge_unbesiegbar_desc: "Gewinne 5-mal Schwarz.",
         badge_seriensieger: "Seriensieger",
-        badge_seriensieger_desc: "Gewinne alle Spiele in einer Liste.",
+        badge_seriensieger_desc: "Gewinne 5-mal alle Spiele in einer Liste.",
         badge_grandmeister: "Grandmeister",
         badge_grandmeister_desc: "Gewinne 10 Grand-Spiele.",
-        badge_null_ass: "Null-Ass",
+        badge_null_ass: "Hippie",
         badge_null_ass_desc: "Gewinne 10 Null-Spiele.",
         badge_rollmops: "Rollmops",
         badge_rollmops_desc: "Gewinne 3-mal mit einem Rollmops-Blatt.",
         badge_big_busch: "Big Busch",
-        badge_big_busch_desc: "Erreiche einen Spielwert von 264 (Grand Ouvert).",
+        badge_big_busch_desc: "Erreiche einen Spielwert von 264.",
         badge_ramsch_koenig: "Ramsch König",
         badge_ramsch_koenig_desc: "Gewinne 10-mal Ramsch.",
         badge_trumpfmaschine: "Trumpfmaschine",
@@ -164,10 +175,59 @@ const TRANSLATIONS = {
         badge_anfaenger_desc: "Absolviere 10 Spiele.",
         badge_stammspieler: "Stammspieler",
         badge_stammspieler_desc: "Absolviere 50 Spiele.",
-        badge_veteran: "Skat Veteran",
+        badge_veteran: "Skat-König Veteran",
         badge_veteran_desc: "Absolviere 200 Spiele.",
         badge_ohne_4: "Ohne 4",
-        badge_ohne_4_desc: "Gewinne einen Grand \"ohne 4\"."
+        badge_ohne_4_desc: "Gewinne einen Grand \"ohne 4\".",
+        rules: "Regeln",
+        rules_title: "Skat Regeln",
+        rules_basics_title: "Grundregeln (Anfänger)",
+        rules_advanced_title: "Erweiterte Regeln (Fortgeschrittene)",
+        rules_goal_header: "Ziel des Spiels",
+        rules_goal_text: "Beim Skat spielt <strong>ein Spieler allein gegen zwei Gegenspieler</strong>.<br><br>Das Ziel des Alleinspielers ist es, <strong>mindestens 61 Augen</strong> aus den Stichen zu gewinnen.<br>Die beiden Gegenspieler versuchen gemeinsam, das zu verhindern.<br><br>Insgesamt gibt es <strong>120 Augen im Spiel</strong>.<br><br>Gewinnt der Alleinspieler → er bekommt Punkte.<br>Verliert er → werden ihm Punkte abgezogen.",
+        rules_players_header: "Anzahl der Spieler",
+        rules_players_text: "Skat wird mit <strong>3 Spielern</strong> gespielt.<br><br>* <strong>1 Alleinspieler</strong><br>* <strong>2 Gegenspieler</strong><br><br>Der Alleinspieler spielt gegen die beiden anderen Spieler zusammen.",
+        rules_deck_header: "Das deutsche Blatt",
+        rules_deck_text: "Das Spiel nutzt 32 Karten. Die vier Farben sind: Eichel (Kreuz), Grün (Pik), Rot (Herz) und Schellen (Karo).",
+        rules_values_header: "Kartenwerte (Augen)",
+        rules_values_text: "Jede Karte hat einen festen Punktwert.<br><br>Ass → 11<br>10 → 10<br>König → 4<br>Dame → 3<br>Unter → 2<br>9 / 8 / 7 → 0<br><br>Insgesamt gibt es <strong>120 Augen im Spiel</strong>.",
+        rules_flow_header: "Ablauf einer Runde",
+        rules_flow_text: "Eine Runde Skat läuft immer gleich ab:<br><br>1. Karten werden verteilt (10 Karten pro Spieler)<br>2. Zwei Karten bleiben verdeckt im <strong>Skat</strong><br>3. Spieler <strong>reizen</strong>, um den Alleinspieler zu bestimmen<br>4. Gewinner des Reizens wird <strong>Alleinspieler</strong><br>5. Der Alleinspieler nimmt optional den <strong>Skat</strong><br>6. Spiel wird angesagt<br>7. <strong>10 Stiche werden gespielt</strong><br>8. Augen werden gezählt",
+        rules_bidding_header: "Reizen (einfach)",
+        rules_bidding_text: "Beim Reizen wird entschieden, <strong>wer das Spiel spielt</strong>.<br><br>Zwei Spieler reizen gegeneinander und sagen dabei steigende <strong>Spielwerte</strong> an (z.B. 18, 20, 22 …).<br><br>Der Spieler mit dem <strong>höchsten Gebot</strong> wird Alleinspieler.<br><br>Der dritte Spieler ist zunächst Zuhörer und steigt später ins Reizen ein.",
+        rules_skat_header: "Skataufnahme",
+        rules_skat_text: "Der Alleinspieler darf die <strong>zwei Karten im Skat aufnehmen</strong>.<br><br>Danach muss er wieder <strong>zwei Karten verdeckt ablegen</strong>.<br><br>Diese Karten zählen am Ende <strong>zu seinen Stichen</strong>.<br><br>Alternativ kann er <strong>Handspiel</strong> ansagen und den Skat nicht aufnehmen.",
+        rules_trump_header: "Trumpf & Spielarten",
+        rules_trump_text: "Es gibt drei Hauptspielarten:<br><br><strong>Farbspiel</strong><br>Eine Farbe ist Trumpf. Zusätzlich sind alle <strong>Unter</strong> Trumpf.<br><br><strong>Grand</strong><br>Nur die <strong>Unter</strong> sind Trumpf.<br><br><strong>Null</strong><br>Es gibt <strong>keine Trümpfe</strong>. Ziel ist es, <strong>keinen Stich zu machen</strong>.",
+        rules_winning_header: "Gewinnen & Verlieren",
+        rules_winning_text: "Der Alleinspieler gewinnt, wenn er: <strong>61 Augen oder mehr</strong> erreicht.<br><br>Er verliert, wenn die Gegner zusammen <strong>60 oder mehr Augen</strong> bekommen.<br><br>Besondere Ergebnisse:<br><br>Schneider → Gegner unter 31 Augen<br>Schwarz → Gegner machen keinen Stich<br><br>Diese erhöhen den Spielwert.",
+        rules_suit_header: "Farbspiel, Grand, Null",
+        rules_suit_text: "<strong>Farbspiel</strong><br>Trumpf: <strong>Unter + eine Farbe</strong><br><br>Reihenfolge der Unter:<br><br>Unter Eichel<br>Unter Grün<br>Unter Rot<br>Unter Schellen<br><br><strong>Grand</strong><br>Nur die <strong>vier Unter</strong> sind Trumpf.<br><br><strong>Null</strong><br>Keine Trümpfe. Rangfolge der Karten:<br><br>Ass → König → Dame → Unter → 10 → 9 → 8 → 7",
+        rules_hand_header: "Handspiel",
+        rules_hand_text: "Beim <strong>Handspiel</strong> nimmt der Alleinspieler den Skat <strong>nicht auf</strong>.<br><br>Dadurch steigt der Spielwert.<br><br>Außerdem können zusätzliche Ansagen wie <strong>Schneider angesagt</strong> oder <strong>Schwarz angesagt</strong> möglich werden.",
+        rules_schneider_header: "Schneider & Schwarz",
+        rules_schneider_text: "<strong>Schneider</strong><br>Eine Partei hat <strong>weniger als 31 Augen</strong>.<br><br><strong>Schwarz</strong><br>Eine Partei hat <strong>keinen einzigen Stich</strong> gemacht.<br><br>Beide Ergebnisse erhöhen den Spielwert.",
+        rules_ouvert_header: "Ouvert",
+        rules_ouvert_text: "Beim <strong>Ouvert-Spiel</strong> legt der Alleinspieler seine Karten <strong>offen auf den Tisch</strong>.<br><br>Alle Spieler können seine Karten sehen.<br><br>Das Risiko ist deutlich höher, deshalb steigt auch der Spielwert stark.",
+        rules_spitzen_header: "Spitzen (Unter)",
+        rules_spitzen_text: "Die <strong>Unter bestimmen die Spitzen</strong>.<br><br>Reihenfolge:<br><br>Unter Eichel<br>Unter Grün<br>Unter Rot<br>Unter Schellen<br><br>Beispiele:<br><br>Mit Unter Eichel → <strong>Mit 1</strong><br>Mit Unter Eichel und Unter Grün → <strong>Mit 2</strong><br><br>Hat man den höchsten Unter nicht, zählt man <strong>Ohne</strong>.<br><br>Diese Zahl ist wichtig für die Spielwertberechnung.",
+        rules_calculation_header: "Spielwert Berechnung",
+        rules_calculation_text: "Der Spielwert berechnet sich so:<br><br><strong>Grundwert × Multiplikatoren</strong><br><br>Beispiel (Rot-Spiel):<br><br>Grundwert Rot = <strong>10</strong><br><br>Multiplikatoren können sein:<br><br>Mit / Ohne<br>Spiel<br>Hand<br>Schneider<br>Schwarz<br>Ouvert<br><br>Beispiel:<br><br>Mit 2, Spiel, Hand → 4 × 10 = <strong>40</strong>",
+        rules_ramsch_header: "Ramsch",
+        rules_ramsch_text: "Nur bei <strong>Kneipenregeln</strong>, wenn <strong>eingepasst wird / niemand gereizt hat</strong>.<br><br>Dann spielt niemand als Alleinspieler.<br><br>Alle Spieler spielen gegeneinander und versuchen <strong>möglichst wenige Augen zu sammeln</strong>.<br><br>Der Spieler mit den meisten Augen verliert den Ramsch.",
+        login: "Login",
+        logout: "Logout",
+        profile: "Profil",
+        view_stats: "Statistiken",
+        account_login: "Account Login",
+        login_subtitle: "Speichere deine Stats in der Cloud.",
+        import_stats_title: "Lokale Statistiken gefunden",
+        import_stats_desc: "Wir haben lokale Spielstatistiken auf diesem Gerät gefunden. Möchtest du sie in deinen Account importieren?",
+        transfer_stats: "Stats auf Acc übertragen",
+        transfer_success: "Statistiken erfolgreich übertragen!",
+        transfer_error: "Fehler beim Übertragen: ",
+        save_settings: "Speichern",
+        settings_saved: "Einstellungen gespeichert!"
     },
     en: {
         select_rounds: "Select Rounds",
@@ -291,12 +351,58 @@ const TRANSLATIONS = {
         declarer_win: "wins with {pts} points!",
         null_win: "wins the Null game!",
         null_lose: "loses the Null game!",
+        claim_rest: "The rest is mine",
+        gift_rest: "I give away the rest",
+        bug_report_title: "Report a bug",
+        bug_report: "Report a bug",
+        bug_report_subtitle: "Briefly describe what happened (steps help).",
+        bug_report_placeholder: "What happened? Steps? Expected vs actual?",
+        send: "Send",
+        close: "Close",
+        bug_report_thanks: "Thanks! Bug report sent.",
+        bug_report_error: "Could not send bug report.",
         tut_step1: "Here you see your cards. You use them to play tricks and decide whether you want to bid.",
         tut_step2: "This is the bidding window. The highest bidder becomes the declarer and can take the Skat.",
         tut_step3: "As declarer, you choose the game type here (Suit, Grand, or Null).",
         tut_step4: "Cards are played in the center of the table. The highest card wins the trick.",
         tut_step5: "Up here you'll find all important game info, including current points.",
         tut_step6: "Use the logo to return home. You can also find the game list and statistics here.",
+        rules: "Rules",
+        rules_title: "Skat Rules",
+        rules_basics_title: "Basic Rules (Beginners)",
+        rules_advanced_title: "Advanced Rules (Advanced)",
+        rules_goal_header: "Goal of the Game",
+        rules_goal_text: "Skat is a strategy game for 3 players. The declarer plays against the two other players (opponents) and tries to win more than half of the points (at least 61).",
+        rules_players_header: "Number of Players",
+        rules_players_text: "Played by three. 32 cards are distributed (each 10, plus 2 in the skat).",
+        rules_deck_header: "The Deck",
+        rules_deck_text: "The game uses 32 cards. The four suits are: Acorn (Clubs), Leaves (Spades), Hearts, and Bells (Diamonds).",
+        rules_values_header: "Card Values",
+        rules_values_text: "Cards have fixed point values: Ace (11), Ten (10), King (4), Queen (3), Jack (2). 9, 8 and 7 count 0 points. Total points: 120.",
+        rules_flow_header: "Round Flow",
+        rules_flow_text: "1. Dealing: Cards are dealt. 2. Bidding: The highest bidder becomes the declarer. 3. Skat: The declarer can take the skat (2 cards) and exchange cards. 4. Announcing: Trump is determined. 5. Play: 10 tricks are played.",
+        rules_bidding_header: "Bidding (Simple)",
+        rules_bidding_text: "Players offer values (e.g., 18, 20, 22). The highest bidder decides the game. You can only bid as high as your planned game is worth.",
+        rules_skat_header: "Taking the Skat",
+        rules_skat_text: "The declarer takes the two hidden cards (skat) and discards two cards of their choice. The points of the discarded cards count for the declarer at the end.",
+        rules_trump_header: "Trump & Game Types",
+        rules_trump_text: "Three main types: Suit game (one suit + 4 jacks are trump), Grand (only 4 jacks are trump), and Null (no trump, declarer must not take any trick).",
+        rules_winning_header: "Winning & Losing",
+        rules_winning_text: "Declarer wins if they reach at least 61 points (Null game: 0 tricks). If not reached or overbid, opponents win.",
+        rules_suit_header: "Suit, Grand, Null",
+        rules_suit_text: "In a suit game, a chosen suit is trump. In Grand, only Jacks are trump. In Null, the declarer wins only if they don't take a single trick.",
+        rules_hand_header: "Hand Game",
+        rules_hand_text: "If the declarer does not take the skat, they play 'Hand'. This increases the game value and allows further announcements like Schneider or Schwarz.",
+        rules_schneider_header: "Schneider & Schwarz",
+        rules_schneider_text: "Schneider: One party has 30 or fewer points. Schwarz: One party did not take a single trick. Can also be announced in Hand games.",
+        rules_ouvert_header: "Ouvert",
+        rules_ouvert_text: "Declarer puts their cards face up on the table. Only possible in Hand games. In Null Ouvert they must not take a trick, in Grand Ouvert they must take every trick.",
+        rules_spitzen_header: "Spitzen (Jacks)",
+        rules_spitzen_text: "The number of consecutive Jacks from the top (Acorn Jack downwards) determines the multiplier 'with' or 'without'.",
+        rules_calculation_header: "Game Value Calculation",
+        rules_calculation_text: "Formula: (Spitzen + Bonus) * Base Value. Base Values: Bells (9), Hearts (10), Leaves (11), Acorns (12), Grand (24).",
+        rules_ramsch_header: "Ramsch & Rollmops",
+        rules_ramsch_text: "If no one bids, Ramsch is often played: Everyone plays for themselves, goal is to get as few points as possible. Rollmops is a special form in Ramsch.",
         overview: "Overview",
         game_history: "Game History",
         badges: "Badges",
@@ -308,12 +414,12 @@ const TRANSLATIONS = {
         badge_seriensieger_desc: "Win all games within a single Liste.",
         badge_grandmeister: "Grand Master",
         badge_grandmeister_desc: "Win 10 Grand games.",
-        badge_null_ass: "Null Ace",
+        badge_null_ass: "Hippie",
         badge_null_ass_desc: "Successfully play Null 10 times.",
         badge_rollmops: "Rollmops",
         badge_rollmops_desc: "Win 3 games with a Rollmops hand.",
         badge_big_busch: "Big Busch",
-        badge_big_busch_desc: "Achieve a game value of at least 264 (Grand Ouvert).",
+        badge_big_busch_desc: "Achieve a game value of at least 264.",
         badge_ramsch_koenig: "Ramsch King",
         badge_ramsch_koenig_desc: "Win Ramsch 10 times.",
         badge_trumpfmaschine: "Trump Machine",
@@ -322,10 +428,23 @@ const TRANSLATIONS = {
         badge_anfaenger_desc: "Play 10 games.",
         badge_stammspieler: "Regular",
         badge_stammspieler_desc: "Play 50 games.",
-        badge_veteran: "Skat Veteran",
+        badge_veteran: "Skat-König Veteran",
         badge_veteran_desc: "Play 200 games.",
         badge_ohne_4: "Without 4",
-        badge_ohne_4_desc: "Win a Grand 'without 4'."
+        badge_ohne_4_desc: "Win a Grand 'without 4'.",
+        login: "Login",
+        logout: "Logout",
+        profile: "Profile",
+        view_stats: "Statistics",
+        account_login: "Account Login",
+        login_subtitle: "Save your stats in the cloud.",
+        import_stats_title: "Local statistics found",
+        import_stats_desc: "We found local game statistics on this device. Do you want to import them into your account?",
+        transfer_stats: "Transfer stats to account",
+        transfer_success: "Statistics successfully transferred!",
+        transfer_error: "Error during transfer: ",
+        save_settings: "Save",
+        settings_saved: "Settings saved!"
     }
 };
 
@@ -417,7 +536,9 @@ class UI {
             // Named refs for names
             playerNameInGame: document.querySelector('#player-area .player-info'),
             playerNameInStatsHead: document.getElementById('stats-player-name-head'),
-            playerNameInListHead: document.getElementById('player2-name-list')
+            playerNameInListHead: document.getElementById('player2-name-list'),
+            btnClaimRest: document.getElementById('btn-claim-rest'),
+            btnGiftRest: document.getElementById('btn-gift-rest')
         };
         
         this.bindGlobalEvents();
@@ -488,6 +609,16 @@ class UI {
                 }
             };
         }
+
+        // Bug report button (menu)
+        const btnBugReport = document.getElementById('btn-bug-report');
+        if (btnBugReport) {
+            btnBugReport.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showBugReportModal();
+            };
+        }
     }
 
     resetAllOverlays() {
@@ -504,11 +635,68 @@ class UI {
         overlays.forEach(o => {
             if (o) o.classList.add('hidden');
         });
+
+        // Hide claim button
+        if (this.els.btnClaimRest) this.els.btnClaimRest.classList.add('hidden');
+        if (this.els.btnGiftRest) this.els.btnGiftRest.classList.add('hidden');
         
         // Also hide speech bubbles
         if (this.els.bot1Speech) this.els.bot1Speech.classList.add('hidden');
         if (this.els.bot2Speech) this.els.bot2Speech.classList.add('hidden');
         if (this.els.playerSpeech) this.els.playerSpeech.classList.add('hidden');
+    }
+
+    showClaimRestBtn(onClaim) {
+        if (!this.els.btnClaimRest) return;
+        this.els.btnClaimRest.classList.remove('hidden');
+        this.els.btnClaimRest.disabled = false;
+        this.els.btnClaimRest.onclick = () => {
+            onClaim();
+        };
+    }
+
+    hideClaimRestBtn() {
+        if (!this.els.btnClaimRest) return;
+        this.els.btnClaimRest.classList.add('hidden');
+    }
+
+    disableClaimRestBtn() {
+        if (!this.els.btnClaimRest) return;
+        this.els.btnClaimRest.disabled = true;
+    }
+
+    showGiftRestBtn(onGift) {
+        if (!this.els.btnGiftRest) return;
+        this.els.btnGiftRest.classList.remove('hidden');
+        this.els.btnGiftRest.disabled = false;
+        this.els.btnGiftRest.onclick = () => {
+            onGift();
+        };
+    }
+
+    hideGiftRestBtn() {
+        if (!this.els.btnGiftRest) return;
+        this.els.btnGiftRest.classList.add('hidden');
+    }
+
+    disableGiftRestBtn() {
+        if (!this.els.btnGiftRest) return;
+        this.els.btnGiftRest.disabled = true;
+    }
+
+    showBotSpeech(botId, text) {
+        const el = botId === 0 ? this.els.bot2Speech : this.els.bot1Speech;
+        if (el) {
+            el.textContent = text;
+            el.classList.remove('hidden');
+        }
+    }
+
+    hideBotSpeech(botId) {
+        const el = botId === 0 ? this.els.bot2Speech : this.els.bot1Speech;
+        if (el) {
+            el.classList.add('hidden');
+        }
     }
 
     handleHashNavigation() {
@@ -546,6 +734,93 @@ class UI {
         return TRANSLATIONS[lang][key] || key;
     }
 
+    showBugReportModal() {
+        const modalId = 'bug-report-modal-overlay';
+        if (document.getElementById(modalId)) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = modalId;
+        overlay.className = 'menu-overlay';
+        overlay.innerHTML = `
+            <div class="menu-content login-modal">
+                <button class="btn-close-modal" id="btn-close-bug-report">×</button>
+                <h2>${this.getTranslation('bug_report')}</h2>
+                <p class="subtitle" style="margin-bottom: 20px;">${this.getTranslation('bug_report_subtitle')}</p>
+                <textarea id="bug-report-text" class="nickname-input" rows="6" placeholder="${this.getTranslation('bug_report_placeholder')}" style="resize: vertical; min-height: 140px;"></textarea>
+                <input id="bug-report-contact" class="nickname-input" placeholder="Email (optional)" style="margin-top: 12px;" />
+                <button id="btn-send-bug-report" class="btn primary large-btn" style="width: 100%; margin-top: 18px;">${this.getTranslation('send')}</button>
+                <div id="bug-report-status" class="auth-status hidden" style="margin-top: 12px;"></div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        const close = () => {
+            if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        };
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) close();
+        });
+        const btnClose = document.getElementById('btn-close-bug-report');
+        if (btnClose) btnClose.onclick = close;
+
+        const statusEl = document.getElementById('bug-report-status');
+        const showStatus = (msg, isError = false) => {
+            if (!statusEl) return;
+            statusEl.innerText = msg;
+            statusEl.className = 'auth-status ' + (isError ? 'error' : 'success');
+            statusEl.classList.remove('hidden');
+        };
+
+        const btnSend = document.getElementById('btn-send-bug-report');
+        if (btnSend) {
+            btnSend.onclick = async () => {
+                const text = (document.getElementById('bug-report-text')?.value || '').trim();
+                const contact = (document.getElementById('bug-report-contact')?.value || '').trim();
+                if (!text) return showStatus(this.getTranslation('bug_report_error'), true);
+                btnSend.disabled = true;
+                const ok = await this.submitBugReport({ text, contact });
+                if (ok) {
+                    showStatus(this.getTranslation('bug_report_thanks'), false);
+                    setTimeout(close, 900);
+                } else {
+                    showStatus(this.getTranslation('bug_report_error'), true);
+                    btnSend.disabled = false;
+                }
+            };
+        }
+    }
+
+    async submitBugReport({ text, contact }) {
+        try {
+            const client = window.auth?.client;
+            if (!client) return false;
+
+            const settings = window.settings || window.appSettings;
+            const nickname = settings?.current?.nickname || null;
+            const userId = window.auth?.user?.id || null;
+
+            const payload = {
+                user_id: userId,
+                nickname,
+                contact: contact || null,
+                message: text,
+                page: window.location.pathname,
+                user_agent: navigator.userAgent,
+                created_at: new Date().toISOString()
+            };
+
+            const { error } = await client.from('bug_reports').insert(payload);
+            if (error) {
+                console.error('Bug report insert error:', error);
+                return false;
+            }
+            return true;
+        } catch (err) {
+            console.error('submitBugReport exception:', err);
+            return false;
+        }
+    }
+
     updateLanguageUI() {
         const lang = (window.appSettings && window.appSettings.current.language) || 'de';
         const dict = TRANSLATIONS[lang];
@@ -553,7 +828,7 @@ class UI {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.dataset.i18n;
             if (dict[key]) {
-                el.textContent = dict[key];
+                el.innerHTML = dict[key];
             }
         });
 
@@ -820,6 +1095,39 @@ class UI {
                 settings.set('batterySaver', batterySaverChk.checked);
             });
         }
+
+        // Stats Transfer Logic
+        const transferBtn = document.getElementById('btn-transfer-stats');
+        if (transferBtn) {
+            const canMigrate = window.auth && window.auth.isLoggedIn() && window.storageService.hasLocalDataToMigrate();
+            if (canMigrate) {
+                transferBtn.classList.remove('hidden');
+            } else {
+                transferBtn.classList.add('hidden');
+            }
+
+            transferBtn.onclick = async () => {
+                const result = await window.storageService.migrateManual();
+                if (result.success) {
+                    this.showMessage(this.getTranslation('transfer_success'));
+                    transferBtn.classList.add('hidden');
+                } else {
+                    this.showMessage(this.getTranslation('transfer_error') + result.error);
+                }
+            };
+        }
+    }
+
+    refreshTransferButton() {
+        const transferBtn = document.getElementById('btn-transfer-stats');
+        if (transferBtn) {
+            const canMigrate = window.auth && window.auth.isLoggedIn() && window.storageService.hasLocalDataToMigrate();
+            if (canMigrate) {
+                transferBtn.classList.remove('hidden');
+            } else {
+                transferBtn.classList.add('hidden');
+            }
+        }
     }
 
     playSound(name) {
@@ -886,18 +1194,134 @@ class UI {
              this.els.lastTrickOverlay.classList.add('hidden');
         };
     }
-    renderStats() {
-        const stats = JSON.parse(localStorage.getItem("skatListStats")) || [];
+    async renderStats() {
+        let aggregatedFromCloud = null;
+        let historyArray = [];
+
+        if (window.storageService) {
+            const data = await window.storageService.getStats();
+            if (Array.isArray(data)) {
+                // Local Guest Path
+                historyArray = data;
+            } else if (data) {
+                // Cloud Path: data is { aggregated, history }
+                aggregatedFromCloud = data.aggregated;
+                historyArray = data.history || [];
+                
+                // For history rendering, we need to map cloud column names back to expected object format
+                historyArray = historyArray.map(h => ({
+                    date: h.date,
+                    rounds: h.rounds,
+                    ruleSet: h.rule_set,
+                    scores: [h.score_bot2, h.score_bot1, h.score_player]
+                }));
+            }
+        }
+
         const playerName = (window.appSettings && window.appSettings.current.nickname) || 'Du';
 
-        // Render all tabs
-        this._renderStatsOverview(stats, playerName);
-        this._renderStatsHistory(stats, playerName);
-        this._renderStatsBadges(stats);
+        // Render Overview & Badges
+        if (aggregatedFromCloud) {
+            this._renderStatsOverviewFromCloud(aggregatedFromCloud, playerName);
+            this._renderStatsBadgesFromCloud(aggregatedFromCloud);
+        } else {
+            this._renderStatsOverview(historyArray, playerName);
+            this._renderStatsBadges(historyArray);
+        }
+
+        // Render History (Works for both now)
+        this._renderStatsHistory(historyArray, playerName);
 
         // Show overview tab by default
         this.switchStatsTab('overview');
     }
+
+    _renderStatsOverviewFromCloud(agg, playerName) {
+        const mainDashboardEl = document.getElementById('stats-main-dashboard');
+        if (!mainDashboardEl) return;
+
+        const totalLists = agg.lists_played || 0;
+        const ratio = totalLists > 0 ? Math.round(((agg.wins || 0) / totalLists) * 100) : 0;
+        const streak = agg.best_streak || 0;
+
+        // Generate the primary cards (identical to local version)
+        mainDashboardEl.innerHTML = `
+            <div class="stat-card">
+                <span class="stat-label" data-i18n="total_lists">Total Lists</span>
+                <span class="stat-value">${totalLists}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label" data-i18n="win_ratio">Win Ratio</span>
+                <span class="stat-value">${ratio}%</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label" data-i18n="best_streak">Best Streak</span>
+                <span class="stat-value">${streak}</span>
+            </div>
+        `;
+
+        // Map secondary stats (existing elements in stats.html)
+        const map = {
+            'stat-total-grand': agg.grand_wins,
+            'stat-total-null': agg.null_wins,
+            'stat-total-ramsch': agg.ramsch_wins,
+            'stat-total-rollmops': agg.rollmops_wins,
+            'stat-total-bigbusch': agg.big_busch,
+            'stat-total-grand-ouvert': agg.grand_ouvert_wins,
+            'stat-total-null-ouvert': agg.null_ouvert_wins,
+            'stat-total-hand': agg.hand_wins,
+            'stat-total-schneider': agg.schneider_wins,
+            'stat-total-schwarz': agg.schwarz_wins
+        };
+
+        for (const [id, val] of Object.entries(map)) {
+            const el = document.getElementById(id);
+            if (el) el.innerText = val !== undefined ? val : 0;
+        }
+
+        // Re-apply translations for the newly created labels
+        this.updateLanguageUI();
+    }
+
+    _renderStatsBadgesFromCloud(agg) {
+        const grid = document.getElementById('badges-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        const badgeDefinitions = [
+            { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), desc: this.getTranslation('badge_unbesiegbar_desc'), target: 5, current: agg.winSchwarzCount || 0 },
+            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), target: 5, current: agg.wonAllInListCount || 0 },
+            { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), desc: this.getTranslation('badge_grandmeister_desc'), target: 10, current: agg.grand_wins },
+            { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), desc: this.getTranslation('badge_null_ass_desc'), target: 10, current: agg.null_wins },
+            { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), desc: this.getTranslation('badge_rollmops_desc'), target: 3, current: agg.rollmops_wins },
+            { id: 'big_busch', icon: '🔥', title: this.getTranslation('badge_big_busch'), desc: this.getTranslation('badge_big_busch_desc'), target: 1, current: agg.big_busch },
+            { id: 'ramsch_koenig', icon: '🧹', title: this.getTranslation('badge_ramsch_koenig'), desc: this.getTranslation('badge_ramsch_koenig_desc'), target: 10, current: agg.ramsch_wins },
+            { id: 'trumpfmaschine', icon: '⚙️', title: this.getTranslation('badge_trumpfmaschine'), desc: this.getTranslation('badge_trumpfmaschine_desc'), target: 1, current: agg.trumpf_count >= 10 ? 1 : 0 },
+            { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), desc: this.getTranslation('badge_anfaenger_desc'), target: 10, current: agg.games_played },
+            { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), desc: this.getTranslation('badge_stammspieler_desc'), target: 50, current: agg.games_played },
+            { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: agg.games_played },
+            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: agg.winGrandOhne4Count || 0 }
+        ];
+
+        badgeDefinitions.forEach(badge => {
+            const isUnlocked = badge.current >= badge.target;
+            const item = document.createElement('div');
+            item.className = `badge-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+            
+            const progressText = `${Math.min(badge.current, badge.target)} / ${badge.target}`;
+
+            item.innerHTML = `
+                <span class="badge-icon">${badge.icon}</span>
+                <span class="badge-title">${badge.title}</span>
+                <span class="badge-description">${badge.desc}</span>
+                <div class="badge-status-container" style="margin-top: 10px; width: 100%;">
+                    <span class="badge-progress" style="font-size: 0.8rem; color: ${isUnlocked ? '#4caf50' : '#888'}; font-weight: bold;">${progressText}</span>
+                </div>
+            `;
+            grid.appendChild(item);
+        });
+    }
+
 
     _renderStatsOverview(stats, playerName) {
         const mainDashboardEl = document.getElementById('stats-main-dashboard');
@@ -1084,7 +1508,7 @@ class UI {
 
         const badgeDefinitions = [
             { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), desc: this.getTranslation('badge_unbesiegbar_desc'), target: 5, current: aggregated.winSchwarzCount },
-            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), target: 1, current: aggregated.wonAllInListCount },
+            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), target: 5, current: aggregated.wonAllInListCount },
             { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), desc: this.getTranslation('badge_grandmeister_desc'), target: 10, current: aggregated.winGrandCount },
             { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), desc: this.getTranslation('badge_null_ass_desc'), target: 10, current: aggregated.winNullCount },
             { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), desc: this.getTranslation('badge_rollmops_desc'), target: 3, current: aggregated.winRollmopsCount },
@@ -1120,12 +1544,14 @@ class UI {
         const overviewEl = document.getElementById('stats-overview');
         const historyEl = document.getElementById('stats-history');
         const badgesEl = document.getElementById('stats-badges');
+        const leaderboardEl = document.getElementById('stats-leaderboard');
         const overviewBtn = document.querySelector('[data-tab="overview"]');
         const historyBtn = document.querySelector('[data-tab="history"]');
         const badgesBtn = document.querySelector('[data-tab="badges"]');
+        const leaderboardBtn = document.querySelector('[data-tab="leaderboard"]');
 
-        [overviewEl, historyEl, badgesEl].forEach(el => { if(el) el.classList.add('hidden'); });
-        [overviewBtn, historyBtn, badgesBtn].forEach(btn => { if(btn) btn.classList.remove('active'); });
+        [overviewEl, historyEl, badgesEl, leaderboardEl].forEach(el => { if(el) el.classList.add('hidden'); });
+        [overviewBtn, historyBtn, badgesBtn, leaderboardBtn].forEach(btn => { if(btn) btn.classList.remove('active'); });
 
         if (tabName === 'overview') {
             if (overviewEl) overviewEl.classList.remove('hidden');
@@ -1136,6 +1562,10 @@ class UI {
         } else if (tabName === 'badges') {
             if (badgesEl) badgesEl.classList.remove('hidden');
             if (badgesBtn) badgesBtn.classList.add('active');
+        } else if (tabName === 'leaderboard') {
+            if (leaderboardEl) leaderboardEl.classList.remove('hidden');
+            if (leaderboardBtn) leaderboardBtn.classList.add('active');
+            this.renderLeaderboard();
         }
     }
 
@@ -1206,7 +1636,7 @@ class UI {
         this.showAdvancedBiddingOverlay(nextBid, true, false, onBid, onPass);
     }
 
-    showAdvancedBiddingOverlay(targetBid, canBid, canHold, onActionBid, onActionPass) {
+    showAdvancedBiddingOverlay(targetBid, canBid, canHold, onActionBid, onActionPass, onCustomBid) {
         this.els.biddingOverlay.classList.remove('hidden');
         this.els.biddingStatus.textContent = canBid ? this.getTranslation('your_turn_bid') : this.getTranslation('you_must_answer');
         
@@ -1216,11 +1646,47 @@ class UI {
                 ${canHold ? `<button id="btn-hold" class="btn primary">${this.getTranslation('yes')} (${targetBid})</button>` : ''}
                 ${canBid ? `<button id="btn-bid" class="btn primary">${this.getTranslation('bid')} ${targetBid}</button>` : ''}
             </div>
+            ${canBid ? `
+            <div class="custom-bid-row">
+                <input type="number" id="custom-bid-input" class="custom-bid-input" placeholder="z.B. 36" min="18" max="264" />
+                <button id="btn-custom-bid" class="btn custom-bid-btn">Reizen</button>
+            </div>
+            <p id="custom-bid-error" class="custom-bid-error hidden"></p>
+            ` : ''}
         `;
         
         document.getElementById('btn-pass').onclick = onActionPass;
         if (canHold) document.getElementById('btn-hold').onclick = onActionBid;
-        if (canBid) document.getElementById('btn-bid').onclick = onActionBid;
+        if (canBid) {
+            document.getElementById('btn-bid').onclick = onActionBid;
+            
+            const customInput = document.getElementById('custom-bid-input');
+            const customBtn = document.getElementById('btn-custom-bid');
+            const customError = document.getElementById('custom-bid-error');
+            
+            const tryCustomBid = () => {
+                const val = parseInt(customInput.value);
+                if (isNaN(val)) {
+                    customError.textContent = 'Bitte eine Zahl eingeben.';
+                    customError.classList.remove('hidden');
+                    customInput.classList.add('shake');
+                    setTimeout(() => customInput.classList.remove('shake'), 400);
+                    return;
+                }
+                // Validation is done by the callback
+                if (onCustomBid) {
+                    onCustomBid(val, customError, customInput);
+                }
+            };
+
+            customBtn.onclick = tryCustomBid;
+            customInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    tryCustomBid();
+                }
+            });
+        }
     }
 
     hideBiddingOverlay() {
@@ -1983,5 +2449,228 @@ class UI {
     toggleReiztabelle() {
         if (!this.els.reiztabelleOverlay) return;
         this.els.reiztabelleOverlay.classList.toggle('hidden');
+    }
+
+    async renderLeaderboard() {
+        const tableBody = document.getElementById('leaderboard-table-body');
+        if (!tableBody) return;
+        tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">Loading...</td></tr>';
+
+        try {
+            // Wait for storageService to be available
+            let retries = 0;
+            while (!window.storageService && retries < 10) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+                retries++;
+            }
+
+            if (!window.storageService) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--error-color);">Service unavailable.</td></tr>';
+                return;
+            }
+
+            const data = await window.storageService.getLeaderboard();
+            tableBody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">No rankings available yet.</td></tr>';
+                return;
+            }
+
+            data.forEach((entry, index) => {
+                const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                tr.onclick = () => this.showUserDetail(entry.user_id);
+                
+                // Highlight current user
+                if (window.auth && window.auth.user && entry.user_id === window.auth.user.id) {
+                    tr.classList.add('current-user-row');
+                }
+
+                const displayName = entry.nickname || `User (${entry.user_id.substring(0, 8)})`;
+
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${displayName}</td>
+                    <td>${entry.wins || 0}</td>
+                    <td>${entry.lists_played || 0}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error('Leaderboard render error:', error);
+            tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--error-color);">Error loading rankings.</td></tr>';
+        }
+    }
+
+    async showUserDetail(userId) {
+        const data = await window.storageService.getUserStats(userId);
+        if (!data) return;
+
+        const modal = document.getElementById('stats-modal');
+        const modalBody = document.getElementById('modal-body-content');
+        const detailUserName = document.getElementById('detail-user-name');
+        
+        const displayName = data.aggregated.nickname || `User (${userId.substring(0, 8)})`;
+        detailUserName.textContent = displayName;
+        modalBody.innerHTML = ''; 
+
+        const detailContainer = document.createElement('div');
+        detailContainer.className = 'user-detail-render-area';
+        
+        const totalLists = data.aggregated.lists_played || 0;
+        const ratio = totalLists > 0 ? Math.round(((data.aggregated.wins || 0) / totalLists) * 100) : 0;
+        const streak = data.aggregated.best_streak || 0;
+
+        // Modern Overview Section (No Titles)
+        const overviewSection = document.createElement('div');
+        overviewSection.className = 'modal-section';
+        overviewSection.innerHTML = `
+            <div class="stats-dashboard">
+                <div class="stat-card primary">
+                    <span class="stat-label">📋 Gesamtlisten</span>
+                    <span class="stat-value">${totalLists}</span>
+                </div>
+                <div class="stat-card primary">
+                    <span class="stat-label">📈 Siegquote</span>
+                    <span class="stat-value">${ratio}%</span>
+                </div>
+                <div class="stat-card primary">
+                    <span class="stat-label">🔥 Beste Serie</span>
+                    <span class="stat-value">${streak}</span>
+                </div>
+            </div>
+            
+            <div class="stats-dashboard secondary-stats" style="margin-top: 20px;">
+                <div class="stat-card mini">
+                    <span class="stat-label">👑 Grand</span>
+                    <span class="stat-value">${data.aggregated.grand_wins || 0}</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">🃏 Null</span>
+                    <span class="stat-value">${data.aggregated.null_wins || 0}</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">✋ Hand</span>
+                    <span class="stat-value">${data.aggregated.hand_wins || 0}</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">👔 Schneider</span>
+                    <span class="stat-value">${data.aggregated.schneider_wins || 0}</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">⚫ Schwarz</span>
+                    <span class="stat-value">${data.aggregated.schwarz_wins || 0}</span>
+                </div>
+                <div class="stat-card mini">
+                    <span class="stat-label">🧹 Ramsch</span>
+                    <span class="stat-value">${data.aggregated.ramsch_wins || 0}</span>
+                </div>
+            </div>
+        `;
+        detailContainer.appendChild(overviewSection);
+
+        // History Section (No Titles)
+        const historySection = document.createElement('div');
+        historySection.className = 'modal-section';
+        historySection.innerHTML = `
+            <div class="stats-table-full-container">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Gewinner</th>
+                            <th>Runden</th>
+                            <th>Regeln</th>
+                            <th>Aicore</th>
+                            <th>Aiden</th>
+                            <th>User</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-history-body"></tbody>
+                </table>
+            </div>
+        `;
+        detailContainer.appendChild(historySection);
+
+        const historyTableBody = historySection.querySelector('#modal-history-body');
+        const historyData = data.history.map(h => ({
+            date: h.date, rounds: h.rounds, ruleSet: h.rule_set, 
+            scores: [h.score_bot2, h.score_bot1, h.score_player]
+        }));
+        
+        [...historyData].reverse().forEach(list => {
+            const tr = document.createElement('tr');
+            const scores = list.scores;
+            const maxScore = Math.max(...scores);
+            const userWon = scores[2] === maxScore;
+            
+            // Fix: ensure null ruleSet shows as 'tournament' translated
+            const rulesLabel = this.getTranslation(list.ruleSet || 'tournament');
+            
+            tr.innerHTML = `
+                <td>${list.date}</td>
+                <td style="font-weight: bold; color: ${userWon ? '#4caf50' : '#fff'}">${userWon ? 'User' : 'Andere'}</td>
+                <td>${list.rounds}</td>
+                <td>${rulesLabel}</td>
+                <td>${scores[0]}</td>
+                <td>${scores[1]}</td>
+                <td>${scores[2]}</td>
+            `;
+            historyTableBody.appendChild(tr);
+        });
+
+        // Badges Section (No Titles)
+        const badgesSection = document.createElement('div');
+        badgesSection.className = 'modal-section';
+        badgesSection.innerHTML = `
+            <div class="badges-grid" id="modal-badges-grid"></div>
+        `;
+        detailContainer.appendChild(badgesSection);
+
+        const badgesGrid = badgesSection.querySelector('#modal-badges-grid');
+        this._renderStatsBadgesIntoContainer(data.aggregated, badgesGrid);
+
+        modalBody.appendChild(detailContainer);
+        modal.classList.remove('hidden');
+    }
+
+    _renderStatsBadgesIntoContainer(agg, container) {
+        const badgeDefinitions = [
+            { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), target: 5, current: agg.winSchwarzCount || 0 },
+            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), target: 5, current: agg.wonAllInListCount || 0 },
+            { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), target: 10, current: agg.grand_wins || 0 },
+            { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), target: 10, current: agg.null_wins || 0 },
+            { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), target: 3, current: agg.rollmops_wins || 0 },
+            { id: 'big_busch', icon: '🔥', title: this.getTranslation('badge_big_busch'), target: 1, current: agg.big_busch || (agg.maxGameValue >= 264 ? 1 : 0) },
+            { id: 'ramsch_koenig', icon: '🧹', title: this.getTranslation('badge_ramsch_koenig'), target: 10, current: agg.ramsch_wins || 0 },
+            { id: 'trumpfmaschine', icon: '⚙️', title: this.getTranslation('badge_trumpfmaschine'), target: 1, current: agg.trumpf_count >= 10 ? 1 : 0 },
+            { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), target: 10, current: agg.games_played || 0 },
+            { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), target: 50, current: agg.games_played || 0 },
+            { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), target: 200, current: agg.games_played || 0 },
+            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), target: 1, current: agg.winGrandOhne4Count || 0 }
+        ];
+
+        badgeDefinitions.forEach(badge => {
+            const isUnlocked = badge.current >= badge.target;
+            const item = document.createElement('div');
+            item.className = `badge-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+            
+            const progressText = `${Math.min(badge.current, badge.target)} / ${badge.target}`;
+            
+            item.innerHTML = `
+                <span class="badge-icon">${badge.icon}</span>
+                <span class="badge-title">${badge.title}</span>
+                <div class="badge-status-container" style="margin-top: 5px; width: 100%;">
+                    <span class="badge-progress" style="font-size: 0.7rem; color: ${isUnlocked ? '#4caf50' : '#888'}; font-weight: bold;">${progressText}</span>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    closeUserDetail() {
+        const modal = document.getElementById('stats-modal');
+        if (modal) modal.classList.add('hidden');
     }
 }

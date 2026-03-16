@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skat - Play</title>
+    <title>Skat-König - Play</title>
+    <link rel="icon" type="image/jpeg" href="media/logo.jpg">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -12,7 +13,7 @@
 <body>
     <!-- Round Selection Overlay (shown before game starts) -->
     <div id="main-menu" class="menu-overlay hidden">
-        <div class="menu-content" id="round-selection-view">
+        <div class="menu-content hero-section" id="round-selection-view">
             <h2 data-i18n="select_rounds">Rundenanzahl wählen</h2>
             <p class="subtitle" data-i18n="how_many_games">Wie viele Spiele sollen absolviert werden?</p>
             <div class="round-options">
@@ -88,7 +89,7 @@
                                 <div class="extra-value">+1</div>
                             </div>
                             <div class="extra-box extra-grand-ouvert">
-                                <div class="extra-name" data-i18n="grand_ouvert">Grand Ouvert</div>
+                                <div class="extra-name" data-i18n="grand_ouvert">Grand Ouvert*</div>
                                 <div class="extra-value">+1</div>
                             </div>
                         </div>
@@ -316,11 +317,17 @@
         <div id="player-area" class="player-zone">
             <div class="player-info">Du</div>
             <div id="player-hand" class="cards-container player-cards"></div>
+            <div class="declarer-actions">
+                <button id="btn-claim-rest" class="btn claim-rest-btn hidden" data-i18n="claim_rest">Der Rest ist meine</button>
+                <button id="btn-gift-rest" class="btn claim-rest-btn hidden" data-i18n="gift_rest">Ich schenke den Rest</button>
+            </div>
             <div class="speech-bubble hidden"></div>
         </div>
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/auth.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/cards.js"></script>
     <script src="js/cardAnimations.js"></script>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skat-König - Regeln</title>
+    <link rel="icon" type="image/jpeg" href="media/logo.jpg">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="rules-page">
+    <div id="main-menu" class="menu-overlay">
+        <header class="menu-header">
+            <div class="header-left" id="btn-logo-home" style="cursor: pointer;" onclick="window.location.href='index.html'">
+                <img src="media/logo.jpg" alt="Skat-König Logo" class="app-logo-img">
+                <span class="app-name">Skat-König</span>
+            </div>
+            <nav class="header-right">
+                <button id="btn-show-rules" class="nav-link active" data-i18n="rules">Regeln</button>
+                <button id="btn-show-stats" class="nav-link" data-i18n="statistics" onclick="window.location.href='stats.html'">Statistics</button>
+                <button id="btn-show-settings" class="nav-link" data-i18n="settings" onclick="window.location.href='settings.html'">Settings</button>
+            </nav>
+        </header>
+
+        <div class="menu-content" id="rules-view">
+            <header class="view-header">
+                <h1 data-i18n="rules_title">Skat Regeln</h1>
+            </header>
+            
+            <div class="rules-section">
+                <h2 data-i18n="rules_basics_title">Grundregeln (Anfänger)</h2>
+                <div class="rules-section-grid">
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">🎯</span>
+                            <h3 data-i18n="rules_goal_header">Ziel des Spiels</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_goal_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">👥</span>
+                            <h3 data-i18n="rules_players_header">Anzahl der Spieler</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_players_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">🔢</span>
+                            <h3 data-i18n="rules_values_header">Kartenwerte</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_values_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">🔄</span>
+                            <h3 data-i18n="rules_flow_header">Ablauf einer Runde</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_flow_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">🗣</span>
+                            <h3 data-i18n="rules_bidding_header">Reizen (einfach)</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_bidding_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">📦</span>
+                            <h3 data-i18n="rules_skat_header">Skataufnahme</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_skat_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">♠</span>
+                            <h3 data-i18n="rules_trump_header">Trumpf & Spielarten</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_trump_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">🏆</span>
+                            <h3 data-i18n="rules_winning_header">Gewinnen & Verlieren</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_winning_text"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rules-section">
+                <h2 data-i18n="rules_advanced_title">Erweiterte Regeln (Fortgeschrittene)</h2>
+                <div class="rules-section-grid">
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">♦</span>
+                            <h3 data-i18n="rules_suit_header">Farbspiel, Grand, Null</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_suit_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">✋</span>
+                            <h3 data-i18n="rules_hand_header">Handspiel</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_hand_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">🔥</span>
+                            <h3 data-i18n="rules_schneider_header">Schneider & Schwarz</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_schneider_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">👁</span>
+                            <h3 data-i18n="rules_ouvert_header">Ouvert</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_ouvert_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">🔝</span>
+                            <h3 data-i18n="rules_spitzen_header">Spitzen (Buben)</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_spitzen_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">🧮</span>
+                            <h3 data-i18n="rules_calculation_header">Spielwert Berechnung</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_calculation_text"></p>
+                        </div>
+                    </div>
+
+                    <div class="rule-card accordion">
+                        <div class="accordion-header">
+                            <span class="rule-icon">⚠</span>
+                            <h3 data-i18n="rules_ramsch_header">Ramsch & Rollmops</h3>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p data-i18n="rules_ramsch_text"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 40px; text-align: center;">
+                <button class="btn secondary" data-i18n="back" onclick="window.location.href='index.html'">Zurück</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.appSettings = new Settings();
+            const ui = new UI();
+            ui.updateLanguageUI();
+
+            // Accordion Logic
+            const accordions = document.querySelectorAll('.accordion-header');
+            accordions.forEach(header => {
+                header.addEventListener('click', () => {
+                    const card = header.parentElement;
+                    const content = header.nextElementSibling;
+                    const isOpen = card.classList.contains('open');
+                    
+                    // Close all others
+                    document.querySelectorAll('.rule-card').forEach(c => {
+                        c.classList.remove('open');
+                        c.querySelector('.accordion-content').style.maxHeight = null;
+                    });
+
+                    if (!isOpen) {
+                        card.classList.add('open');
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

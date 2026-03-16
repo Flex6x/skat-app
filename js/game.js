@@ -74,6 +74,8 @@ class Game {
         this.aborted = false;
         this.lastTrick = null;
         this.inputLocked = false;
+        this.claimRejectedThisRound = false;
+        this.giftRejectedThisRound = false;
         
         this.ui.resetLiveScore();
         this.ui.resetTrumpUI();
@@ -109,6 +111,8 @@ class Game {
             announcedSchneider: this.announcedSchneider,
             announcedSchwarz: this.announcedSchwarz,
             isOuvert: this.isOuvert,
+            claimRejectedThisRound: this.claimRejectedThisRound,
+            giftRejectedThisRound: this.giftRejectedThisRound,
             phase: this.phase,
             forehandIndex: this.forehandIndex,
             turnIndex: this.turnIndex,
@@ -144,6 +148,8 @@ class Game {
         this.announcedSchneider = state.announcedSchneider;
         this.announcedSchwarz = state.announcedSchwarz;
         this.isOuvert = state.isOuvert || false;
+        this.claimRejectedThisRound = state.claimRejectedThisRound || false;
+        this.giftRejectedThisRound = state.giftRejectedThisRound || false;
         this.phase = state.phase;
         this.forehandIndex = state.forehandIndex;
         this.turnIndex = state.turnIndex;
@@ -622,6 +628,21 @@ class Game {
 
         if (currentPlayer.type === PLAYER_TYPES.HUMAN) {
             this.inputLocked = false;
+
+            // Show claim button if human is declarer and phase is PLAYING and tricks > 1 remaining
+            if (this.phase === PHASES.PLAYING && this.declarerIndex === 2 && this.trickCount < 9 && !this.claimRejectedThisRound) {
+                this.ui.showClaimRestBtn(() => this.claimRemainingTricks());
+            } else {
+                this.ui.hideClaimRestBtn();
+            }
+
+            // Show "gift rest" button if human is declarer and round allows it
+            if (this.phase === PHASES.PLAYING && this.declarerIndex === 2 && this.trickCount < 9 && !this.giftRejectedThisRound) {
+                this.ui.showGiftRestBtn(() => this.giftRemainingTricks());
+            } else {
+                this.ui.hideGiftRestBtn();
+            }
+
             this.ui.enablePlayerMoves(validMoves, async (cardId) => {
                 if (this.inputLocked || this.turnIndex !== 2) return;
                 this.inputLocked = true;
@@ -647,6 +668,145 @@ class Game {
             );
             await this.playCard(this.turnIndex, selectedCard.id);
         }
+    }
+
+    async claimRemainingTricks() {
+        if (this.phase !== PHASES.PLAYING || this.declarerIndex !== 2 || this.claimRejectedThisRound) return;
+
+        this.ui.showMessage(this.ui.getTranslation('claim_rest') + '!');
+        this.ui.disableClaimRestBtn();
+        await this.delay(1000);
+
+        // In Null (incl. Null Ouvert / Null Hand), claiming the rest is always accepted
+        if (this.trumpMode === TRUMP_MODES.NULL) {
+            this.ui.showMessage("Bots akzeptieren – restliche Stiche gehen an den Alleinspieler.");
+            await this.delay(1200);
+            this.awardRemainingTricksToDeclarer();
+            return;
+        }
+
+        // Bots evaluate
+        let rejected = false;
+        let rejectingBotId = -1;
+
+        for (let i = 0; i < 2; i++) {
+            const botAi = this.aiControllers[i];
+            const canWin = botAi.canStillWinTrick(
+                this.players,
+                this.trumpMode,
+                this.declarerIndex,
+                this.currentTrick,
+                this.trickCount
+            );
+            if (canWin) {
+                rejected = true;
+                rejectingBotId = i;
+                break;
+            }
+        }
+
+        if (rejected) {
+            this.claimRejectedThisRound = true;
+            this.ui.showBotSpeech(rejectingBotId, "Nein.");
+            await this.delay(2000);
+            this.ui.hideBotSpeech(rejectingBotId);
+            this.ui.hideClaimRestBtn();
+        } else {
+            this.ui.showMessage("Bots akzeptieren – restliche Stiche gehen an den Alleinspieler.");
+            await this.delay(2000);
+            this.awardRemainingTricksToDeclarer();
+        }
+    }
+
+    async giftRemainingTricks() {
+        if (this.phase !== PHASES.PLAYING || this.declarerIndex !== 2 || this.giftRejectedThisRound) return;
+
+        this.ui.showMessage(this.ui.getTranslation('gift_rest') + '!');
+        this.ui.disableGiftRestBtn();
+        await this.delay(1000);
+
+        // In normal games (everything except Null), opponents always accept (declarer only harms themselves)
+        if (this.trumpMode !== TRUMP_MODES.NULL) {
+            this.ui.showMessage("Bots akzeptieren – restliche Stiche gehen an die Gegner.");
+            await this.delay(1500);
+            this.awardRemainingTricksToDefenders();
+            return;
+        }
+
+        // Null game: bots check with full information whether they could "get under" and force declarer to win a trick.
+        let rejected = false;
+        let rejectingBotId = -1;
+        for (let i = 0; i < 2; i++) {
+            const botAi = this.aiControllers[i];
+            const canForceDeclarerWin = botAi.canStillWinTrick(
+                this.players,
+                this.trumpMode,
+                this.declarerIndex,
+                this.currentTrick,
+                this.trickCount
+            );
+            if (canForceDeclarerWin) {
+                rejected = true;
+                rejectingBotId = i;
+                break;
+            }
+        }
+
+        if (rejected) {
+            this.giftRejectedThisRound = true;
+            this.ui.showBotSpeech(rejectingBotId, "Nein.");
+            await this.delay(2000);
+            this.ui.hideBotSpeech(rejectingBotId);
+            this.ui.hideGiftRestBtn();
+            return;
+        }
+
+        // Accepted: declarer wins Null immediately
+        this.ui.showMessage("Bots akzeptieren – Null wird sofort beendet.");
+        await this.delay(1200);
+        this.finishGameImmediately(this.trumpMode === TRUMP_MODES.NULL ? true : null);
+    }
+
+    awardRemainingTricksToDefenders() {
+        // Move all remaining hand cards to defenders to make end-game points accurate
+        const targetDefenderId = this.declarerIndex === 0 ? 1 : 0;
+        this.players.forEach(p => {
+            this.players[targetDefenderId].tricks.push(...p.hand);
+            p.hand = [];
+        });
+
+        this.trickCount = 10;
+        this.ui.renderAllHands(this.players);
+        this.ui.updateTrickPiles(this.players, this.declarerIndex, false);
+        this.updateLiveScore();
+        this.endGame(false);
+    }
+
+    finishGameImmediately(wonOverride = null) {
+        // Clear hands so UI/state reflects the immediate end
+        this.players.forEach(p => { p.hand = []; });
+        this.trickCount = 10;
+        this.ui.renderAllHands(this.players);
+        this.ui.updateTrickPiles(this.players, this.declarerIndex, false);
+        this.updateLiveScore();
+        this.endGame(wonOverride);
+    }
+
+    awardRemainingTricksToDeclarer() {
+        // Collect all cards from hands
+        this.players.forEach(p => {
+            this.players[this.declarerIndex].tricks.push(...p.hand);
+            p.hand = [];
+        });
+
+        // Add skat if not already added (usually skat is handled at end of game)
+        // In Skat, the declarer gets the skat eyes regardless.
+        
+        this.trickCount = 10;
+        this.ui.renderAllHands(this.players);
+        this.ui.updateTrickPiles(this.players, this.declarerIndex, false);
+        this.updateLiveScore();
+        this.endGame(this.trumpMode === TRUMP_MODES.NULL ? true : null);
     }
 
     async playCard(playerId, cardId) {
@@ -884,7 +1044,7 @@ class Game {
                 ? `${declarerName} ${this.ui.getTranslation('null_win')}`
                 : `${declarerName} ${this.ui.getTranslation('null_lose')}`;
         } else if (evaluation.overbid) {
-            resultMsg = `${declarerName} ${this.ui.getTranslation('overbid_msg').replace('{bid}', this.bidValue).replace('{val}', evaluation.gameValue)}`;
+            resultMsg = `${declarerName} ${this.ui.getTranslation('overbid_msg').replace('{bid}', this.bidValue).replace('{val}', evaluation.baseGameValue)}`;
         } else {
             resultMsg = won 
                 ? `${declarerName} ${this.ui.getTranslation('declarer_win').replace('{pts}', declarerPoints)}` 

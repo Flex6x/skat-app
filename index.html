@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skat</title>
+    <title>Skat-König</title>
+    <link rel="icon" type="image/jpeg" href="media/logo.jpg">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -14,25 +15,29 @@
     <div id="main-menu" class="menu-overlay">
         <header class="menu-header">
             <div class="header-left" id="btn-logo-home" style="cursor: pointer;">
-                <div class="app-logo">S</div>
-                <span class="app-name">Skat</span>
+                <img src="media/logo.jpg" alt="Skat-König Logo" class="app-logo-img">
+                <span class="app-name">Skat-König</span>
             </div>
             <nav class="header-right">
-                <button id="btn-show-tutorial" class="nav-link" data-i18n="tutorial" onclick="window.location.href='tutorial.html'">Tutorial</button>
+                <button id="btn-show-rules" class="nav-link" data-i18n="rules" onclick="window.location.href='rules.html'">Regeln</button>
                 <button id="btn-show-stats" class="nav-link" data-i18n="statistics" onclick="window.location.href='stats.html'">Statistics</button>
                 <button id="btn-show-settings" class="nav-link" data-i18n="settings" onclick="window.location.href='settings.html'">Settings</button>
+                <button id="btn-bug-report" class="nav-link" data-i18n-title="bug_report_title" title="Bug melden">🐞</button>
             </nav>
         </header>
 
         <div class="menu-content hero-section" id="menu-primary">
-            <h1 class="glow-text">Skat</h1>
+            <h1 class="glow-text">Skat-König</h1>
             <div class="menu-buttons">
                 <button id="btn-start-game" class="btn primary play-now-btn" onclick="window.location.href='play.html'">Play Now</button>
             </div>
         </div>
+        <div class="version-hint">Skat-König v0.2</div>
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/auth.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/ui.js"></script>
     <script>
@@ -40,20 +45,6 @@
             window.appSettings = new Settings();
             const ui = new UI();
             ui.updateLanguageUI();
-            
-            // Auto-start tutorial for first time users
-            const isFirstVisit = !localStorage.getItem('skat_tutorial_completed');
-            if (isFirstVisit) {
-                const msg = ui.getTranslation('tutorial') + "?";
-                setTimeout(() => {
-                    if (confirm(msg)) {
-                        window.location.href = 'tutorial.html';
-                    } else {
-                        localStorage.setItem('skat_tutorial_completed', 'true');
-                    }
-                }, 1000);
-            }
-
         });
     </script>
 </body>

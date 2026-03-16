@@ -146,7 +146,8 @@ class GameValueEngine {
             }
 
             return {
-                gameValue,
+                baseGameValue: gameValue,
+                gameValue: won ? gameValue : gameValue * 2,
                 matadors: { count: 0, type: '-' },
                 multiplier: 0,
                 schneider: false,
@@ -239,7 +240,8 @@ class GameValueEngine {
         const details = `${parts.join(', ')} | ${currentMult} × ${baseValue} = ${gameValue}`;
 
         return {
-            gameValue,
+            baseGameValue: gameValue,
+            gameValue: won ? gameValue : gameValue * 2,
             matadors,
             multiplier: currentMult,
             schneider,
