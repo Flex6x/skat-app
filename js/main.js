@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 gameTypeCounts.anzahlRamsch++;
             } else {
-                const val = game.won ? game.value : -game.value;
+                const val = game.won ? game.value : -(game.value * 2);
                 totals[game.declarerId] += val;
                 
                 // ONLY count game type stats if the HUMAN player (id 2) was the declarer

@@ -146,14 +146,15 @@ class GameValueEngine {
             }
 
             return {
-                gameValue,
+                baseGameValue: gameValue,
+                gameValue: won ? gameValue : gameValue * 2,
                 matadors: { count: 0, type: '-' },
                 multiplier: 0,
                 schneider: false,
                 schwarz: false,
                 overbid,
                 won,
-                details: `${details} = ${gameValue}`,
+                details: `${details} = ${gameValue}${!won ? ' (✕ 2 beim Verlieren)' : ''}`,
                 handGame,
                 isOuvert
             };
@@ -236,10 +237,11 @@ class GameValueEngine {
         }
 
         const baseValue = this.BASE_VALUES[trumpMode];
-        const details = `${parts.join(', ')} | ${currentMult} × ${baseValue} = ${gameValue}`;
+        const details = `${parts.join(', ')} | ${currentMult} × ${baseValue} = ${gameValue}${!won ? ' (✕ 2 beim Verlieren)' : ''}`;
 
         return {
-            gameValue,
+            baseGameValue: gameValue,
+            gameValue: won ? gameValue : gameValue * 2,
             matadors,
             multiplier: currentMult,
             schneider,
