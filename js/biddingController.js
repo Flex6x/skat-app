@@ -84,12 +84,35 @@ class BiddingController {
             (this.currentBid === 0 ? 18 : this.engine.getNextBid(this.currentBid)) : 
             this.currentBid;
 
+        // Custom bid callback — only for the Sager (challenger), not for Hörer (holder)
+        const onCustomBid = isChallenger ? (val, errorEl, inputEl) => {
+            // Validate: must be a valid Skat bid value
+            if (!this.engine.isValidBid(val)) {
+                errorEl.textContent = `${val} ist kein gültiger Reizwert.`;
+                errorEl.classList.remove('hidden');
+                inputEl.classList.add('shake');
+                setTimeout(() => inputEl.classList.remove('shake'), 400);
+                return;
+            }
+            // Validate: must be higher than current bid
+            if (val <= this.currentBid) {
+                errorEl.textContent = `Muss höher als ${this.currentBid} sein.`;
+                errorEl.classList.remove('hidden');
+                inputEl.classList.add('shake');
+                setTimeout(() => inputEl.classList.remove('shake'), 400);
+                return;
+            }
+            // Valid custom bid — treat as a 'bid' action with the custom value
+            this.onAction('bid', val);
+        } : null;
+
         this.ui.showAdvancedBiddingOverlay(
             targetBid,
             isChallenger, // canBid (Reizen)
             !isChallenger && this.phase !== 3, // canHold (Ja)
             () => this.onAction(isChallenger ? 'bid' : 'hold', targetBid),
-            () => this.onAction('pass', null)
+            () => this.onAction('pass', null),
+            onCustomBid
         );
     }
 

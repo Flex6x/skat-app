@@ -154,7 +154,7 @@ class GameValueEngine {
                 schwarz: false,
                 overbid,
                 won,
-                details: `${details} = ${gameValue}${!won ? ' (✕ 2 beim Verlieren)' : ''}`,
+                details: `${details} = ${gameValue}`,
                 handGame,
                 isOuvert
             };
@@ -237,7 +237,7 @@ class GameValueEngine {
         }
 
         const baseValue = this.BASE_VALUES[trumpMode];
-        const details = `${parts.join(', ')} | ${currentMult} × ${baseValue} = ${gameValue}${!won ? ' (✕ 2 beim Verlieren)' : ''}`;
+        const details = `${parts.join(', ')} | ${currentMult} × ${baseValue} = ${gameValue}`;
 
         return {
             baseGameValue: gameValue,

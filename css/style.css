@@ -3067,3 +3067,136 @@ body {
         padding: 0 15px 15px 15px;
     }
 }
+
+/* === Custom Bid Input (Bidding Overlay) === */
+.custom-bid-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-bid-input {
+    width: 90px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.custom-bid-input:focus {
+    border-color: var(--accent-color);
+}
+
+.custom-bid-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.custom-bid-btn {
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+    border-radius: 10px !important;
+    background: rgba(63, 81, 181, 0.3) !important;
+    border: 1px solid rgba(63, 81, 181, 0.5) !important;
+    color: var(--accent-hover) !important;
+    transition: background 0.2s, transform 0.15s !important;
+}
+
+.custom-bid-btn:hover {
+    background: rgba(63, 81, 181, 0.5) !important;
+    transform: scale(1.05);
+}
+
+.custom-bid-error {
+    color: #ff5252;
+    font-size: 0.8rem;
+    text-align: center;
+    margin-top: 6px;
+}
+
+/* Shake animation for invalid input */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+}
+
+.shake {
+    animation: shake 0.35s ease;
+}
+
+/* Remove spinner arrows in number input */
+.custom-bid-input::-webkit-inner-spin-button,
+.custom-bid-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.custom-bid-input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Light theme */
+[data-theme="light"] .custom-bid-input {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #222;
+}
+[data-theme="light"] .custom-bid-input::placeholder {
+    color: rgba(0, 0, 0, 0.3);
+}
+
+/* === Settings Save Button Area === */
+.settings-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 30px;
+    padding-bottom: 40px;
+}
+
+.save-settings-btn {
+    min-width: 200px;
+    padding: 12px 40px !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 20px rgba(63, 81, 181, 0.35);
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+.save-settings-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(63, 81, 181, 0.5);
+}
+
+.save-settings-btn:active {
+    transform: translateY(0);
+}
+
+.settings-save-status {
+    color: #4caf50;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 5px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}

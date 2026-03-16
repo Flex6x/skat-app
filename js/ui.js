@@ -215,7 +215,9 @@ const TRANSLATIONS = {
         import_stats_desc: "Wir haben lokale Spielstatistiken auf diesem Gerät gefunden. Möchtest du sie in deinen Account importieren?",
         transfer_stats: "Stats auf Acc übertragen",
         transfer_success: "Statistiken erfolgreich übertragen!",
-        transfer_error: "Fehler beim Übertragen: "
+        transfer_error: "Fehler beim Übertragen: ",
+        save_settings: "Speichern",
+        settings_saved: "Einstellungen gespeichert!"
     },
     en: {
         select_rounds: "Select Rounds",
@@ -420,7 +422,9 @@ const TRANSLATIONS = {
         import_stats_desc: "We found local game statistics on this device. Do you want to import them into your account?",
         transfer_stats: "Transfer stats to account",
         transfer_success: "Statistics successfully transferred!",
-        transfer_error: "Error during transfer: "
+        transfer_error: "Error during transfer: ",
+        save_settings: "Save",
+        settings_saved: "Settings saved!"
     }
 };
 
@@ -1456,7 +1460,7 @@ class UI {
         this.showAdvancedBiddingOverlay(nextBid, true, false, onBid, onPass);
     }
 
-    showAdvancedBiddingOverlay(targetBid, canBid, canHold, onActionBid, onActionPass) {
+    showAdvancedBiddingOverlay(targetBid, canBid, canHold, onActionBid, onActionPass, onCustomBid) {
         this.els.biddingOverlay.classList.remove('hidden');
         this.els.biddingStatus.textContent = canBid ? this.getTranslation('your_turn_bid') : this.getTranslation('you_must_answer');
         
@@ -1466,11 +1470,47 @@ class UI {
                 ${canHold ? `<button id="btn-hold" class="btn primary">${this.getTranslation('yes')} (${targetBid})</button>` : ''}
                 ${canBid ? `<button id="btn-bid" class="btn primary">${this.getTranslation('bid')} ${targetBid}</button>` : ''}
             </div>
+            ${canBid ? `
+            <div class="custom-bid-row">
+                <input type="number" id="custom-bid-input" class="custom-bid-input" placeholder="z.B. 36" min="18" max="264" />
+                <button id="btn-custom-bid" class="btn custom-bid-btn">Reizen</button>
+            </div>
+            <p id="custom-bid-error" class="custom-bid-error hidden"></p>
+            ` : ''}
         `;
         
         document.getElementById('btn-pass').onclick = onActionPass;
         if (canHold) document.getElementById('btn-hold').onclick = onActionBid;
-        if (canBid) document.getElementById('btn-bid').onclick = onActionBid;
+        if (canBid) {
+            document.getElementById('btn-bid').onclick = onActionBid;
+            
+            const customInput = document.getElementById('custom-bid-input');
+            const customBtn = document.getElementById('btn-custom-bid');
+            const customError = document.getElementById('custom-bid-error');
+            
+            const tryCustomBid = () => {
+                const val = parseInt(customInput.value);
+                if (isNaN(val)) {
+                    customError.textContent = 'Bitte eine Zahl eingeben.';
+                    customError.classList.remove('hidden');
+                    customInput.classList.add('shake');
+                    setTimeout(() => customInput.classList.remove('shake'), 400);
+                    return;
+                }
+                // Validation is done by the callback
+                if (onCustomBid) {
+                    onCustomBid(val, customError, customInput);
+                }
+            };
+
+            customBtn.onclick = tryCustomBid;
+            customInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    tryCustomBid();
+                }
+            });
+        }
     }
 
     hideBiddingOverlay() {

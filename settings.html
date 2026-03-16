@@ -153,6 +153,12 @@
                 </div>
             </div>
 
+            <!-- Save / Back Buttons -->
+            <div class="settings-actions">
+                <button id="btn-save-settings" class="btn primary save-settings-btn" data-i18n="save_settings">Speichern</button>
+                <button class="btn secondary" data-i18n="back" onclick="window.location.href='index.html'">Zurück</button>
+                <p id="settings-save-status" class="settings-save-status hidden"></p>
+            </div>
         </div>
     </div>
 
@@ -165,8 +171,151 @@
         document.addEventListener('DOMContentLoaded', () => {
             window.appSettings = new Settings();
             window.ui = new UI();
-            window.ui.bindSettingsForm(window.appSettings);
             window.ui.updateLanguageUI();
+
+            const settings = window.appSettings;
+            const s = settings.current;
+
+            // Create a draft copy of settings (changes go here until Save)
+            const draft = { ...s };
+            // Remember original theme to revert if not saved
+            const originalTheme = s.theme;
+            const originalLanguage = s.language;
+
+            // --- Populate form from current settings ---
+            const nicknameInput = document.getElementById('input-nickname');
+            if (nicknameInput) nicknameInput.value = s.nickname;
+
+            const langChk = document.getElementById('chk-language');
+            if (langChk) langChk.checked = (s.language === 'en');
+
+            document.querySelectorAll('input[name="theme"]').forEach(r => {
+                r.checked = (r.value === s.theme);
+            });
+            document.querySelectorAll('input[name="ruleSet"]').forEach(r => {
+                r.checked = (r.value === s.ruleSet);
+            });
+            document.querySelectorAll('input[name="animSpeed"]').forEach(r => {
+                r.checked = (parseFloat(r.value) === s.animationSpeed);
+            });
+
+            const liveScoreChk = document.getElementById('chk-live-score');
+            if (liveScoreChk) liveScoreChk.checked = s.showLiveScore;
+            const soundChk = document.getElementById('chk-sound');
+            if (soundChk) soundChk.checked = s.soundEnabled;
+            const dragDropChk = document.getElementById('chk-drag-drop');
+            if (dragDropChk) dragDropChk.checked = s.dragDropEnabled;
+            const batterySaverChk = document.getElementById('chk-battery-saver');
+            if (batterySaverChk) batterySaverChk.checked = s.batterySaver;
+
+            // --- Bind form changes to draft (NOT to real settings) ---
+            if (nicknameInput) {
+                nicknameInput.oninput = () => { draft.nickname = nicknameInput.value || 'Du'; };
+            }
+            if (langChk) {
+                langChk.onchange = () => {
+                    draft.language = langChk.checked ? 'en' : 'de';
+                    // Preview language change live
+                    settings.current.language = draft.language;
+                    window.ui.updateLanguageUI();
+                };
+            }
+            document.querySelectorAll('input[name="theme"]').forEach(r => {
+                r.addEventListener('change', () => {
+                    draft.theme = r.value;
+                    // Preview theme change live
+                    settings.applyTheme(r.value);
+                });
+            });
+            document.querySelectorAll('input[name="ruleSet"]').forEach(r => {
+                r.addEventListener('change', () => { draft.ruleSet = r.value; });
+            });
+            document.querySelectorAll('input[name="animSpeed"]').forEach(r => {
+                r.addEventListener('change', () => { draft.animationSpeed = parseFloat(r.value); });
+            });
+            if (liveScoreChk) {
+                liveScoreChk.addEventListener('change', () => { draft.showLiveScore = liveScoreChk.checked; });
+            }
+            if (soundChk) {
+                soundChk.addEventListener('change', () => { draft.soundEnabled = soundChk.checked; });
+            }
+            if (dragDropChk) {
+                dragDropChk.addEventListener('change', () => { draft.dragDropEnabled = dragDropChk.checked; });
+            }
+            if (batterySaverChk) {
+                batterySaverChk.addEventListener('change', () => { draft.batterySaver = batterySaverChk.checked; });
+            }
+
+            // --- Save button: commit draft to real settings ---
+            const saveBtn = document.getElementById('btn-save-settings');
+            const saveStatus = document.getElementById('settings-save-status');
+            if (saveBtn) {
+                saveBtn.onclick = () => {
+                    // Apply all draft values to real settings
+                    Object.keys(draft).forEach(key => {
+                        settings.set(key, draft[key]);
+                    });
+                    settings.save();
+
+                    // Show success feedback
+                    if (saveStatus) {
+                        saveStatus.textContent = '✓ ' + (draft.language === 'en' ? 'Settings saved!' : 'Einstellungen gespeichert!');
+                        saveStatus.classList.remove('hidden');
+                        saveStatus.classList.add('fade-in');
+                        setTimeout(() => {
+                            saveStatus.classList.add('hidden');
+                            saveStatus.classList.remove('fade-in');
+                        }, 2500);
+                    }
+                };
+            }
+
+            // --- Delete Stats (independent of save) ---
+            const deleteBtn = document.getElementById('btn-delete-stats');
+            if (deleteBtn) {
+                deleteBtn.onclick = () => {
+                    const msg = draft.language === 'en'
+                        ? 'Do you really want to delete all statistics permanently?'
+                        : 'Willst du wirklich alle Statistiken unwiderruflich löschen?';
+                    if (window.confirm(msg)) {
+                        localStorage.removeItem("skatListStats");
+                        const doneMsg = draft.language === 'en' ? 'Statistics deleted.' : 'Statistiken gelöscht.';
+                        if (saveStatus) {
+                            saveStatus.textContent = doneMsg;
+                            saveStatus.classList.remove('hidden');
+                            setTimeout(() => saveStatus.classList.add('hidden'), 2500);
+                        }
+                    }
+                };
+            }
+
+            // --- Transfer Stats (independent of save) ---
+            const transferBtn = document.getElementById('btn-transfer-stats');
+            if (transferBtn) {
+                const canMigrate = window.auth && window.auth.isLoggedIn() && window.storageService && window.storageService.hasLocalDataToMigrate();
+                if (canMigrate) {
+                    transferBtn.classList.remove('hidden');
+                } else {
+                    transferBtn.classList.add('hidden');
+                }
+                transferBtn.onclick = async () => {
+                    const result = await window.storageService.migrateManual();
+                    if (result.success) {
+                        if (saveStatus) {
+                            saveStatus.textContent = draft.language === 'en' ? 'Statistics successfully transferred!' : 'Statistiken erfolgreich übertragen!';
+                            saveStatus.classList.remove('hidden');
+                            setTimeout(() => saveStatus.classList.add('hidden'), 2500);
+                        }
+                        transferBtn.classList.add('hidden');
+                    }
+                };
+            }
+
+            // --- Revert on navigation away (browser back, etc.) ---
+            window.addEventListener('beforeunload', () => {
+                // Revert theme and language if not saved
+                settings.applyTheme(settings.current.theme);
+            });
         });
     </script>
 </body>
