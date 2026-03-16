@@ -354,12 +354,16 @@ class Auth {
 
     async loginWithMagicLink(email) {
         if (!this.client) return { error: 'Client not initialized' };
-        const redirectOptions = window.location.protocol === 'file:' ? {} : { options: { emailRedirectTo: window.location.origin + window.location.pathname } };
+        const redirectOptions = window.location.protocol === 'file:' ? {} : { options: { emailRedirectTo: 'https://flex6x.github.io/skat-app/' } };
         return await this.client.auth.signInWithOtp({ email, ...redirectOptions });
     }
 
     async loginWithEmail(email, password) { return await this.client.auth.signInWithPassword({ email, password }); }
-    async signUp(email, password) { return await this.client.auth.signUp({ email, password }); }
+    async signUp(email, password) { 
+        if (!this.client) return { error: 'Client not initialized' };
+        const options = window.location.protocol === 'file:' ? {} : { emailRedirectTo: 'https://flex6x.github.io/skat-app/' };
+        return await this.client.auth.signUp({ email, password, options }); 
+    }
     async logout() { await this.client.auth.signOut(); window.location.reload(); }
 
     updateUI() {
