@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             winGrandCount++;
                             gameTypeCounts.anzahlGrandSpiele++;
                             // Grand Ouvert
-                            if (game.isOuvert) {
+                            if (game.handGame && game.isOuvert) {
                                 gameTypeCounts.anzahlGrandOuvert++;
                             }
                             // Ohne 4: check matadors
@@ -222,8 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             gameTypeCounts.anzahlSchneider++;
                         }
                         
-                        // Big Busch: Hand Grand
-                        if (game.handGame && game.trumpMode === 'Grand') {
+                        // Big Busch: ONLY for 264 (Grand Ouvert with 4, Hand)
+                        if (game.value === 264 && game.won) {
                             gameTypeCounts.anzahlBigBusch++;
                         }
                         

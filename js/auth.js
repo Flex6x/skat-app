@@ -333,7 +333,7 @@ class Auth {
     async syncNicknameFromCloud() {
         if (!this.user) return;
         try {
-            const stats = await this._getFromCloud();
+            const stats = await this.storage._getFromCloud();
             if (stats && stats.nickname) {
                 // Update local settings if they exist
                 if (window.settings) {
@@ -345,7 +345,7 @@ class Auth {
                 // If logged in but no nickname in cloud, push local one
                 const localNickname = (window.settings || window.appSettings)?.current?.nickname;
                 if (localNickname && localNickname !== 'Du') {
-                    await this.updateNickname(localNickname);
+                    await this.storage.updateNickname(localNickname);
                 }
             }
         } catch (err) {
