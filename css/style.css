@@ -1,4 +1,4 @@
-/* === Variables & Defaults === */
+﻿/* === Variables & Defaults === */
 :root {
     --bg-color: #121212;
     --table-color: #1a1a2e;
@@ -1394,7 +1394,7 @@ body {
     color: var(--color-eichel);
 }
 
-.suit-Grün {
+.suit-GrÃ¼n {
     color: var(--color-gruen);
 }
 
@@ -2435,7 +2435,7 @@ body {
 
 .reiztabelle .suit-Schellen { color: var(--color-schellen); }
 .reiztabelle .suit-Rot { color: var(--color-rot); }
-.reiztabelle .suit-Grün { color: var(--color-gruen); }
+.reiztabelle .suit-GrÃ¼n { color: var(--color-gruen); }
 .reiztabelle .suit-Eichel { color: var(--color-eichel); }
 .reiztabelle .suit-Grand { color: #fff; font-weight: 800; }
 
@@ -3283,4 +3283,265 @@ body {
 
 .fade-in {
     animation: fadeIn 0.3s ease;
+}
+
+ / *   = = =   S u r v e y   M o d a l   = = =   * / 
+ . s u r v e y - m o d a l - o v e r l a y   { 
+         p o s i t i o n :   f i x e d ; 
+         t o p :   0 ; 
+         l e f t :   0 ; 
+         w i d t h :   1 0 0 % ; 
+         h e i g h t :   1 0 0 % ; 
+         b a c k g r o u n d :   r g b a ( 0 ,   0 ,   0 ,   0 . 8 5 ) ; 
+         b a c k d r o p - f i l t e r :   b l u r ( 1 5 p x ) ; 
+         d i s p l a y :   f l e x ; 
+         j u s t i f y - c o n t e n t :   c e n t e r ; 
+         a l i g n - i t e m s :   c e n t e r ; 
+         z - i n d e x :   9 9 9 9 ; 
+ } 
+ 
+ . s u r v e y - m o d a l - c o n t e n t   { 
+         b a c k g r o u n d :   # 1 2 1 2 1 2 ; 
+         w i d t h :   9 0 % ; 
+         m a x - w i d t h :   5 5 0 p x ; 
+         p a d d i n g :   4 0 p x ; 
+         b o r d e r - r a d i u s :   2 4 p x ; 
+         b o r d e r :   1 p x   s o l i d   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 1 ) ; 
+         b o x - s h a d o w :   0   3 0 p x   6 0 p x   r g b a ( 0 , 0 , 0 , 0 . 8 ) ,   0   0   2 0 p x   r g b a ( 6 3 ,   8 1 ,   1 8 1 ,   0 . 2 ) ; 
+         t e x t - a l i g n :   l e f t ; 
+         d i s p l a y :   f l e x ; 
+         f l e x - d i r e c t i o n :   c o l u m n ; 
+         g a p :   2 5 p x ; 
+ } 
+ 
+ [ d a t a - t h e m e = \ 
+ 
+ l i g h t \ ]   . s u r v e y - m o d a l - c o n t e n t   { 
+         b a c k g r o u n d :   # f f f f f f ; 
+         b o r d e r - c o l o r :   # e 0 f 2 f e ; 
+         b o x - s h a d o w :   0   3 0 p x   6 0 p x   r g b a ( 7 ,   8 9 ,   1 3 3 ,   0 . 1 5 ) ; 
+ } 
+ 
+ . s u r v e y - h e a d e r   h 2   { 
+         f o n t - s i z e :   1 . 8 r e m ; 
+         c o l o r :   v a r ( - - a c c e n t - c o l o r ) ; 
+         m a r g i n - b o t t o m :   1 0 p x ; 
+ } 
+ 
+ . s u r v e y - q u e s t i o n   { 
+         b a c k g r o u n d :   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 0 3 ) ; 
+         p a d d i n g :   2 0 p x ; 
+         b o r d e r - r a d i u s :   1 6 p x ; 
+         b o r d e r :   1 p x   s o l i d   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 0 5 ) ; 
+ } 
+ 
+ [ d a t a - t h e m e = \ l i g h t \ ]   . s u r v e y - q u e s t i o n   { 
+         b a c k g r o u n d :   # f 8 f a f c ; 
+         b o r d e r - c o l o r :   # f 1 f 5 f 9 ; 
+ } 
+ 
+ . s u r v e y - q u e s t i o n   p   { 
+         f o n t - s i z e :   1 r e m ; 
+         l i n e - h e i g h t :   1 . 5 ; 
+         m a r g i n - b o t t o m :   1 5 p x ; 
+         c o l o r :   # e e e ; 
+ } 
+ 
+ [ d a t a - t h e m e = \ l i g h t \ ]   . s u r v e y - q u e s t i o n   p   { 
+         c o l o r :   # 3 3 4 1 5 5 ; 
+ } 
+ 
+ . s u r v e y - o p t i o n s   { 
+         d i s p l a y :   f l e x ; 
+         g a p :   2 0 p x ; 
+ } 
+ 
+ . s u r v e y - o p t i o n   { 
+         d i s p l a y :   f l e x ; 
+         a l i g n - i t e m s :   c e n t e r ; 
+         g a p :   1 0 p x ; 
+         c u r s o r :   p o i n t e r ; 
+         f o n t - w e i g h t :   6 0 0 ; 
+ } 
+ 
+ . s u r v e y - o p t i o n   i n p u t   { 
+         w i d t h :   2 0 p x ; 
+         h e i g h t :   2 0 p x ; 
+         c u r s o r :   p o i n t e r ; 
+         a c c e n t - c o l o r :   v a r ( - - a c c e n t - c o l o r ) ; 
+ } 
+ 
+ . s u r v e y - f o o t e r   { 
+         d i s p l a y :   f l e x ; 
+         j u s t i f y - c o n t e n t :   f l e x - e n d ; 
+         m a r g i n - t o p :   1 0 p x ; 
+ } 
+ 
+ . b t n - s u r v e y - s u b m i t   { 
+         p a d d i n g :   1 4 p x   3 0 p x ; 
+         f o n t - w e i g h t :   7 0 0 ; 
+         f o n t - s i z e :   1 . 1 r e m ; 
+         b o r d e r - r a d i u s :   1 2 p x ; 
+         w i d t h :   1 0 0 % ; 
+ }
+
+/* === Survey Modal === */
+.survey-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(30, 30, 45, 0.9), var(--bg-color));
+    backdrop-filter: blur(20px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.survey-modal-container {
+    background: rgba(30, 30, 45, 0.8);
+    backdrop-filter: blur(30px);
+    width: 90%;
+    max-width: 500px;
+    padding: 40px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 30px rgba(63, 81, 181, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+[data-theme=\"light\"] .survey-modal-container {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #e0f2fe;
+    box-shadow: 0 40px 100px rgba(7, 89, 133, 0.1);
+}
+
+.survey-header {
+    text-align: center;
+}
+
+.survey-header h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    background: linear-gradient(to bottom, #fff, var(--accent-hover));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme=\"light\"] .survey-header h2 {
+    background: linear-gradient(to bottom, var(--text-color), var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.survey-header p {
+    color: #aaa;
+    font-size: 0.95rem;
+}
+
+.survey-question-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 24px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.survey-question-box:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.survey-question-box p {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    margin-bottom: 18px;
+    color: #fff;
+    font-weight: 500;
+}
+
+[data-theme=\"light\"] .survey-question-box {
+    background: #f8fafc;
+    border-color: #f1f5f9;
+}
+
+[data-theme=\"light\"] .survey-question-box p {
+    color: var(--text-color);
+}
+
+.survey-radio-group {
+    display: flex;
+    gap: 12px;
+}
+
+.survey-radio-label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    color: #888;
+}
+
+.survey-radio-label:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.survey-radio-label input {
+    display: none;
+}
+
+.survey-radio-label:has(input:checked) {
+    background: var(--accent-color);
+    border-color: var(--accent-hover);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(63, 81, 181, 0.4);
+}
+
+.btn-survey-finish {
+    width: 100%;
+    padding: 18px !important;
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    border-radius: 50px !important;
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)) !important;
+    box-shadow: 0 10px 30px rgba(63, 81, 181, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.btn-survey-finish:hover:not(:disabled) {
+    transform: scale(1.02) translateY(-2px);
+    box-shadow: 0 15px 40px rgba(63, 81, 181, 0.6);
+}
+
+.btn-survey-finish:disabled {
+    opacity: 0.5;
+    filter: grayscale(0.5);
+    cursor: not-allowed;
+    transform: none !important;
+}
+.survey-hint {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.5) !important;
+    margin-top: -12px;
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+
+[data-theme=\"light\"] .survey-hint {
+    color: rgba(7, 89, 133, 0.6) !important;
 }

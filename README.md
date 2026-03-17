@@ -13,5 +13,10 @@ https://flex6x.github.io/skat-app/
 - skat soll erst im richtigen moment verschwinden
 - bug reports abfangen
 - SEO Optimierung
+- purer Ramsch mode
+- Auswahl der Karten mit Store.
+- anzahl der gespielten listen sollen mit spielverlauf matchen
+
+- Abstimmungen zu Ramsch und Store bis 15:00
 
 ## Bugs:
