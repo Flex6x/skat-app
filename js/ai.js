@@ -75,6 +75,18 @@ class AIController {
                 // LUSCHEN! Declarer wins, so give them as few points as possible
                 return this.getLowestPointCard(validMoves);
             }
+
+            // Case C: Tactical Stechen (Trumping) - Early game strategy
+            // If we can't follow suit but can trump, prefer using high point trumps (A, 10) 
+            // over valuable Jacks (Unters) to secure points early.
+            const isFollowingSuit = validMoves.every(c => this.getEffectiveSuit(c, trumpMode) === currentTrick.leadSuit);
+            if (!isFollowingSuit && winningCards.length > 0) {
+                const trumpAcesAndTens = winningCards.filter(c => (c.rank === 'A' || c.rank === '10') && this.isTrump(c, trumpMode));
+                if (trumpAcesAndTens.length > 0) {
+                    // Steal the points with a high card instead of wasting an Unter
+                    return this.getHighestPointCard(trumpAcesAndTens);
+                }
+            }
         }
 
         if (winningCards.length > 0) {
@@ -240,8 +252,29 @@ class AIController {
 
     chooseLeadCard(validMoves, trumpMode) {
         // Try to play highest non-trump
-        const nonTrumps = validMoves.filter(c => !this.isTrump(c, trumpMode));
+        let nonTrumps = validMoves.filter(c => !this.isTrump(c, trumpMode));
+        
         if (nonTrumps.length > 0) {
+            // TACTICAL IMPROVEMENT: Avoid leading a "blank 10" (a 10 without the Ace)
+            // leading a blank 10 often loses the 10 to the opponent's Ace.
+            const safeLeads = nonTrumps.filter(c => {
+                if (c.rank === '10') {
+                    // Check if we have the Ace of the same suit
+                    return nonTrumps.some(ace => ace.suit === c.suit && ace.rank === 'A');
+                }
+                return true;
+            });
+
+            if (safeLeads.length > 0) {
+                return this.getHighestCard(safeLeads, trumpMode);
+            }
+            
+            // If only blank 10s left, maybe prefer a lower card of that suit or another suit
+            const smallCards = nonTrumps.filter(c => c.rank !== '10' && c.rank !== 'A');
+            if (smallCards.length > 0) {
+                return this.getHighestCard(smallCards, trumpMode);
+            }
+
             return this.getHighestCard(nonTrumps, trumpMode);
         }
         // Else play lowest trump to pull trumps
