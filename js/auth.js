@@ -56,7 +56,7 @@ class StorageService {
     async getUserStats(userId) {
         if (!this.auth.isLoggedIn()) return null;
         const { data: aggregated, error: aggError } = await this.auth.client.from('stats').select('*').eq('user_id', userId).single();
-        const { data: history, error: histError } = await this.auth.client.from('history').select('*').eq('user_id', userId).order('id', { ascending: false });
+        const { data: history, error: histError } = await this.auth.client.from('history').select('*').eq('user_id', userId).order('id', { ascending: true });
         
         if (aggError || histError) {
             console.error('Error fetching user detail stats:', aggError, histError);
@@ -97,7 +97,7 @@ class StorageService {
     }
 
     async _getHistoryFromCloud() {
-        const { data, error } = await this.auth.client.from('history').select('*').eq('user_id', this.auth.user.id).order('id', { ascending: false });
+        const { data, error } = await this.auth.client.from('history').select('*').eq('user_id', this.auth.user.id).order('id', { ascending: true });
         if (error) console.error('Error fetching history:', error);
         return data || [];
     }
@@ -105,7 +105,8 @@ class StorageService {
     async _saveToCloud(listResult) {
         const current = await this._getFromCloud() || {
             games_played: 0, wins: 0, losses: 0, grand_wins: 0, null_wins: 0, ramsch_wins: 0, rollmops_wins: 0, big_busch: 0, trumpf_count: 0,
-            schneider_wins: 0, schwarz_wins: 0, hand_wins: 0, grand_ouvert_wins: 0, null_ouvert_wins: 0, best_streak: 0, lists_played: 0
+            schneider_wins: 0, schwarz_wins: 0, hand_wins: 0, grand_ouvert_wins: 0, null_ouvert_wins: 0, best_streak: 0, lists_played: 0,
+            won_all_in_list_count: 0, win_grand_ohne_4_wins: 0
         };
 
         const isWin = listResult.scores && listResult.scores[2] > listResult.scores[0] && listResult.scores[2] > listResult.scores[1];
@@ -132,6 +133,8 @@ class StorageService {
             hand_wins: (current.hand_wins || 0) + (listResult.anzahlHandspiele || 0),
             grand_ouvert_wins: (current.grand_ouvert_wins || 0) + (listResult.anzahlGrandOuvert || 0),
             null_ouvert_wins: (current.null_ouvert_wins || 0) + (listResult.anzahlNullOuvert || 0),
+            won_all_in_list_count: (current.won_all_in_list_count || 0) + (listResult.wonAllInList ? 1 : 0),
+            win_grand_ohne_4_wins: (current.win_grand_ohne_4_wins || 0) + (listResult.winGrandOhne4Count || 0),
             updated_at: new Date().toISOString()
         };
 
