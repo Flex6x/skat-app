@@ -838,8 +838,8 @@ body {
 }
 
 /* Individual Ramsch Piles */
-#pile-p0 { top: 20px; left: 30%; }
-#pile-p1 { top: 20px; right: 30%; }
+#pile-p0 { top: 20px; left: 10%; }
+#pile-p1 { top: 20px; right: 10%; }
 #pile-p2 { bottom: 20px; right: 20%; transform: none; }
 
 /* Skat Pile (Always near declarer) */
@@ -1166,6 +1166,11 @@ body {
     background: transparent;
     border: 2px solid var(--accent-color);
     color: #fff;
+    border-radius: 50px;
+    padding: 14px 40px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 15px;
 }
 
 .btn.btn-outline:hover:not(:disabled) {
