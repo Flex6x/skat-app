@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skat-König - Store</title>
+    <link rel="icon" type="image/jpeg" href="media/logo.jpg">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .store-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 60vh;
+        }
+        .coming-soon {
+            font-size: 2rem;
+            color: var(--accent-color);
+            margin-top: 20px;
+            font-weight: 700;
+        }
+        .glow-text {
+            font-size: 4rem !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-menu" class="menu-overlay">
+        <header class="menu-header">
+            <div class="header-left" id="btn-logo-home" style="cursor: pointer;" onclick="window.location.href='index.html'">
+                <img src="media/logo.jpg" alt="Skat-König Logo" class="app-logo-img">
+                <span class="app-name">Skat-König</span>
+            </div>
+            <nav class="header-right">
+                <button class="nav-link" onclick="window.location.href='index.html'">Hauptmenü</button>
+                <div id="auth-container"></div>
+            </nav>
+        </header>
+
+        <div class="menu-content">
+            <div class="store-content">
+                <h1 class="glow-text">König-Store</h1>
+                <p class="coming-soon">Coming Soon - Neue Kartendesigns & Tisch-Styles bald verfügbar!</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/settings.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.appSettings = new Settings();
+            // Auth init will handle Taler display via updateUI -> renderTalerGroup
+        });
+    </script>
+</body>
+</html>

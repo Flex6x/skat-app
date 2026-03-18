@@ -17,6 +17,8 @@ https://flex6x.github.io/skat-app/
 - Auswahl der Karten mit Store.
 - anzahl der gespielten listen sollen mit spielverlauf matchen
 - Entferne "Live Punkte"
+- "Rest meine/schenken" - Buttons nach jedem Spiel entfernen (bleiben beim Reizen)
+- alle Übersicht Stats bei Leaderboard anzeigen
 
 - Abstimmungen zu Ramsch und Store bis 15:00
 

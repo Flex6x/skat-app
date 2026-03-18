@@ -3400,3 +3400,116 @@ body {
          b o r d e r - r a d i u s :   1 2 p x ; 
          w i d t h :   1 0 0 % ; 
  }
+
+/* === König-Taler System === */
+.taler-group {
+    position: absolute;
+    top: 100px;
+    right: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1500;
+}
+
+.taler-btn-group {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.taler-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px 15px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    font-weight: 700;
+    color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+}
+
+.taler-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.btn-taler {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    color: #ffd700;
+    padding: 8px 15px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-taler:hover:not(:disabled) {
+    background: rgba(255, 215, 0, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+}
+
+.btn-taler:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #888;
+}
+
+/* Badge Reward Button */
+.btn-claim-reward {
+    margin-top: 10px;
+    width: 100%;
+    background: #ffd700;
+    color: #000;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-claim-reward:hover {
+    background: #ffec8b;
+    transform: scale(1.05);
+}
+
+.btn-claim-reward.claimed {
+    background: rgba(255, 255, 255, 0.1);
+    color: #666;
+    cursor: default;
+}
+
+
+/* Taler responsiveness and fix for overlap */
+@media (max-width: 768px) {
+    .taler-group {
+        top: 10px !important;
+        right: auto !important;
+        left: 50%;
+        transform: translateX(-50%);
+        flex-direction: row;
+        background: rgba(0,0,0,0.8);
+        padding: 5px 10px;
+        border-radius: 20px;
+        width: max-content;
+    }
+    .taler-btn-group {
+        gap: 5px;
+    }
+    .btn-taler {
+        padding: 4px 10px;
+        font-size: 0.7rem;
+    }
+}
+

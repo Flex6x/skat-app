@@ -57,12 +57,80 @@ class StorageService {
         if (!this.auth.isLoggedIn()) return null;
         const { data: aggregated, error: aggError } = await this.auth.client.from('stats').select('*').eq('user_id', userId).single();
         const { data: history, error: histError } = await this.auth.client.from('history').select('*').eq('user_id', userId).order('id', { ascending: true });
+        const { data: profile, error: profError } = await this.auth.client.from('profiles').select('*').eq('id', userId).single();
+        const { data: claimedBadges, error: claimError } = await this.auth.client.from('claimed_badges').select('badge_id').eq('user_id', userId);
         
         if (aggError || histError) {
             console.error('Error fetching user detail stats:', aggError, histError);
             return null;
         }
-        return { aggregated, history };
+        return { 
+            aggregated, 
+            history, 
+            profile: profile || { koenig_taler: 0, last_login_date: null },
+            claimedBadges: (claimedBadges || []).map(b => b.badge_id)
+        };
+    }
+
+    async getProfile() {
+        if (!this.auth.isLoggedIn()) return null;
+        const { data, error } = await this.auth.client.from('profiles').select('*').eq('id', this.auth.user.id).single();
+        if (error && error.code === 'PGRST116') {
+            // Profile doesn't exist yet, create it
+            const newProfile = { id: this.auth.user.id, koenig_taler: 0, last_login_date: null };
+            await this.auth.client.from('profiles').insert(newProfile);
+            return newProfile;
+        }
+        return data;
+    }
+
+    async claimDailyLogin() {
+        if (!this.auth.isLoggedIn()) return { success: false, error: 'Not logged in' };
+        const profile = await this.getProfile();
+        const today = new Date().toISOString().split('T')[0];
+        
+        if (profile.last_login_date === today) {
+            return { success: false, error: 'Already claimed today' };
+        }
+
+        const updatedTaler = (profile.koenig_taler || 0) + 20;
+        const { error } = await this.auth.client.from('profiles').update({
+            koenig_taler: updatedTaler,
+            last_login_date: today,
+            updated_at: new Date().toISOString()
+        }).eq('id', this.auth.user.id);
+
+        if (error) return { success: false, error: error.message };
+        return { success: true, newTaler: updatedTaler };
+    }
+
+    async claimBadgeReward(badgeId, amount) {
+        if (!this.auth.isLoggedIn()) return { success: false, error: 'Not logged in' };
+        
+        // 1. Add to claimed_badges
+        const { error: claimError } = await this.auth.client.from('claimed_badges').insert({
+            user_id: this.auth.user.id,
+            badge_id: badgeId
+        });
+        if (claimError) return { success: false, error: claimError.message };
+
+        // 2. Update taler in profiles
+        const profile = await this.getProfile();
+        const updatedTaler = (profile.koenig_taler || 0) + amount;
+        const { error: profError } = await this.auth.client.from('profiles').update({
+            koenig_taler: updatedTaler,
+            updated_at: new Date().toISOString()
+        }).eq('id', this.auth.user.id);
+
+        if (profError) return { success: false, error: profError.message };
+        return { success: true, newTaler: updatedTaler };
+    }
+
+    async getClaimedBadges() {
+        if (!this.auth.isLoggedIn()) return [];
+        const { data, error } = await this.auth.client.from('claimed_badges').select('badge_id').eq('user_id', this.auth.user.id);
+        if (error) return [];
+        return data.map(b => b.badge_id);
     }
 
     async updateNickname(nickname) {
@@ -402,10 +470,76 @@ class Auth {
             document.addEventListener('click', () => { if (dropdown) dropdown.classList.add('hidden'); });
             const logoutBtn = document.getElementById('btn-logout');
             if (logoutBtn) logoutBtn.onclick = () => this.logout();
+
+            this.renderTalerGroup();
         } else {
             authContainer.innerHTML = `<button class="nav-link login-btn" id="btn-open-login" data-i18n="login">Login</button>`;
             const loginBtn = document.getElementById('btn-open-login');
             if (loginBtn) loginBtn.onclick = () => this.showLoginModal();
+
+            const existingTalerGroup = document.getElementById('taler-group');
+            if (existingTalerGroup) existingTalerGroup.remove();
+        }
+    }
+
+    async renderTalerGroup() {
+        let group = document.getElementById('taler-group');
+        if (!group) {
+            group = document.createElement('div');
+            group.id = 'taler-group';
+            group.className = 'taler-group';
+            
+            // Append to main-menu if it exists, otherwise to body
+            const mainMenu = document.getElementById('main-menu');
+            if (mainMenu) {
+                mainMenu.appendChild(group);
+            } else {
+                document.body.appendChild(group);
+                // Adjust position if not in main-menu to avoid floating awkwardly
+                group.style.top = '80px'; 
+                group.style.right = '20px';
+            }
+        }
+
+        const profile = await this.getProfile();
+        if (!profile) return;
+        const today = new Date().toISOString().split('T')[0];
+        const canClaimDaily = profile.last_login_date !== today;
+
+        group.innerHTML = `
+            <div class="taler-display">
+                <img src="media/coin.png" class="taler-icon">
+                <span id="taler-balance-display">${profile.koenig_taler || 0}</span>
+            </div>
+            <div class="taler-btn-group">
+                <button id="btn-daily-login" class="btn-taler" ${canClaimDaily ? '' : 'disabled'}>
+                    ${canClaimDaily ? 'Daily Login (+20)' : 'Geadelt ✓'}
+                </button>
+                <button class="btn-taler" onclick="window.location.href='store.html'">
+                    Store
+                </button>
+            </div>
+        `;
+
+        const btnDaily = document.getElementById('btn-daily-login');
+        if (btnDaily && canClaimDaily) {
+            btnDaily.onclick = async (e) => {
+                e.stopPropagation();
+                btnDaily.disabled = true;
+                btnDaily.textContent = '...';
+                const res = await this.claimDailyLogin();
+                if (res.success) {
+                    this.renderTalerGroup();
+                    if (window.ui && typeof window.ui.showMessage === 'function') {
+                        window.ui.showMessage('+20 König-Taler!');
+                    } else {
+                        alert('+20 König-Taler!');
+                    }
+                } else {
+                    btnDaily.disabled = false;
+                    btnDaily.textContent = 'Error';
+                }
+            };
         }
     }
 

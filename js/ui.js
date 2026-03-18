@@ -1284,28 +1284,35 @@ class UI {
         this.updateLanguageUI();
     }
 
-    _renderStatsBadgesFromCloud(agg) {
+    async _renderStatsBadgesFromCloud(agg) {
         const grid = document.getElementById('badges-grid');
         if (!grid) return;
         grid.innerHTML = '';
 
+        const userId = window.auth?.user?.id;
+        let claimedBadges = [];
+        if (userId) {
+            claimedBadges = await window.storageService.getClaimedBadges();
+        }
+
         const badgeDefinitions = [
-            { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), desc: this.getTranslation('badge_unbesiegbar_desc'), target: 5, current: agg.schwarz_wins || 0 },
-            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), target: 5, current: agg.won_all_in_list_count || 0 },
-            { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), desc: this.getTranslation('badge_grandmeister_desc'), target: 10, current: agg.grand_wins || 0 },
-            { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), desc: this.getTranslation('badge_null_ass_desc'), target: 10, current: agg.null_wins || 0 },
-            { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), desc: this.getTranslation('badge_rollmops_desc'), target: 3, current: agg.rollmops_wins || 0 },
-            { id: 'big_busch', icon: '🔥', title: this.getTranslation('badge_big_busch'), desc: this.getTranslation('badge_big_busch_desc'), target: 1, current: agg.big_busch || 0 },
-            { id: 'ramsch_koenig', icon: '🧹', title: this.getTranslation('badge_ramsch_koenig'), desc: this.getTranslation('badge_ramsch_koenig_desc'), target: 10, current: agg.ramsch_wins || 0 },
-            { id: 'trumpfmaschine', icon: '⚙️', title: this.getTranslation('badge_trumpfmaschine'), desc: this.getTranslation('badge_trumpfmaschine_desc'), target: 1, current: agg.trumpf_count >= 10 ? 1 : 0 },
-            { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), desc: this.getTranslation('badge_anfaenger_desc'), target: 10, current: agg.games_played || 0 },
-            { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), desc: this.getTranslation('badge_stammspieler_desc'), target: 50, current: agg.games_played || 0 },
-            { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: agg.games_played || 0 },
-            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: agg.win_grand_ohne_4_wins || 0 }
+            { id: 'unbesiegbar', icon: '🛡️', title: this.getTranslation('badge_unbesiegbar'), desc: this.getTranslation('badge_unbesiegbar_desc'), target: 5, current: agg.schwarz_wins || 0, value: 200 },
+            { id: 'seriensieger', icon: '🏆', title: this.getTranslation('badge_seriensieger'), desc: this.getTranslation('badge_seriensieger_desc'), target: 5, current: agg.won_all_in_list_count || 0, value: 100 },
+            { id: 'grandmeister', icon: '👑', title: this.getTranslation('badge_grandmeister'), desc: this.getTranslation('badge_grandmeister_desc'), target: 10, current: agg.grand_wins || 0, value: 200 },
+            { id: 'null_ass', icon: '🃏', title: this.getTranslation('badge_null_ass'), desc: this.getTranslation('badge_null_ass_desc'), target: 10, current: agg.null_wins || 0, value: 100 },
+            { id: 'rollmops', icon: '🐟', title: this.getTranslation('badge_rollmops'), desc: this.getTranslation('badge_rollmops_desc'), target: 3, current: agg.rollmops_wins || 0, value: 200 },
+            { id: 'big_busch', icon: '🔥', title: this.getTranslation('badge_big_busch'), desc: this.getTranslation('badge_big_busch_desc'), target: 1, current: agg.big_busch || 0, value: 200 },
+            { id: 'ramsch_koenig', icon: '🧹', title: this.getTranslation('badge_ramsch_koenig'), desc: this.getTranslation('badge_ramsch_koenig_desc'), target: 10, current: agg.ramsch_wins || 0, value: 100 },
+            { id: 'trumpfmaschine', icon: '⚙️', title: this.getTranslation('badge_trumpfmaschine'), desc: this.getTranslation('badge_trumpfmaschine_desc'), target: 1, current: agg.trumpf_count >= 10 ? 1 : 0, value: 200 },
+            { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), desc: this.getTranslation('badge_anfaenger_desc'), target: 10, current: agg.games_played || 0, value: 100 },
+            { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), desc: this.getTranslation('badge_stammspieler_desc'), target: 50, current: agg.games_played || 0, value: 100 },
+            { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: agg.games_played || 0, value: 100 },
+            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: agg.win_grand_ohne_4_wins || 0, value: 200 }
         ];
 
         badgeDefinitions.forEach(badge => {
             const isUnlocked = badge.current >= badge.target;
+            const isClaimed = claimedBadges.includes(badge.id);
             const item = document.createElement('div');
             item.className = `badge-item ${isUnlocked ? 'unlocked' : 'locked'}`;
             
@@ -1317,9 +1324,32 @@ class UI {
                 <span class="badge-description">${badge.desc}</span>
                 <div class="badge-status-container" style="margin-top: 10px; width: 100%;">
                     <span class="badge-progress" style="font-size: 0.8rem; color: ${isUnlocked ? '#4caf50' : '#888'}; font-weight: bold;">${progressText}</span>
+                    ${(isUnlocked && window.auth?.isLoggedIn()) ? `
+                        <button class="btn-claim-reward ${isClaimed ? 'claimed' : ''}" id="btn-claim-${badge.id}" ${isClaimed ? 'disabled' : ''}>
+                            ${isClaimed ? 'Abgeholt ✓' : `Taler abholen (+${badge.value})`}
+                        </button>
+                    ` : ''}
                 </div>
             `;
             grid.appendChild(item);
+
+            const btnClaim = document.getElementById(`btn-claim-${badge.id}`);
+            if (btnClaim && !isClaimed) {
+                btnClaim.onclick = async () => {
+                    btnClaim.disabled = true;
+                    btnClaim.textContent = 'Lädt...';
+                    const res = await window.storageService.claimBadgeReward(badge.id, badge.value);
+                    if (res.success) {
+                        btnClaim.textContent = 'Abgeholt ✓';
+                        btnClaim.classList.add('claimed');
+                        if (window.auth) window.auth.renderTalerGroup();
+                    } else {
+                        btnClaim.disabled = false;
+                        btnClaim.textContent = 'Fehler';
+                        console.error('Claim error:', res.error);
+                    }
+                };
+            }
         });
     }
 
