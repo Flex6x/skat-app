@@ -16,7 +16,8 @@ https://flex6x.github.io/skat-app/
 - purer Ramsch mode
 - Auswahl der Karten mit Store.
 - anzahl der gespielten listen sollen mit spielverlauf matchen
+- Entferne "Live Punkte"
 
 - Abstimmungen zu Ramsch und Store bis 15:00
 
-## Bugs:
+## Bugs: 

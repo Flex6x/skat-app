@@ -1394,7 +1394,7 @@ body {
     color: var(--color-eichel);
 }
 
-.suit-GrÃ¼n {
+.suit-Grün {
     color: var(--color-gruen);
 }
 
@@ -2435,7 +2435,7 @@ body {
 
 .reiztabelle .suit-Schellen { color: var(--color-schellen); }
 .reiztabelle .suit-Rot { color: var(--color-rot); }
-.reiztabelle .suit-GrÃ¼n { color: var(--color-gruen); }
+.reiztabelle .suit-Grün { color: var(--color-gruen); }
 .reiztabelle .suit-Eichel { color: var(--color-eichel); }
 .reiztabelle .suit-Grand { color: #fff; font-weight: 800; }
 
@@ -3384,164 +3384,3 @@ body {
          b o r d e r - r a d i u s :   1 2 p x ; 
          w i d t h :   1 0 0 % ; 
  }
-
-/* === Survey Modal === */
-.survey-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at center, rgba(30, 30, 45, 0.9), var(--bg-color));
-    backdrop-filter: blur(20px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10000;
-}
-
-.survey-modal-container {
-    background: rgba(30, 30, 45, 0.8);
-    backdrop-filter: blur(30px);
-    width: 90%;
-    max-width: 500px;
-    padding: 40px;
-    border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 30px rgba(63, 81, 181, 0.2);
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
-[data-theme=\"light\"] .survey-modal-container {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: #e0f2fe;
-    box-shadow: 0 40px 100px rgba(7, 89, 133, 0.1);
-}
-
-.survey-header {
-    text-align: center;
-}
-
-.survey-header h2 {
-    font-size: 2rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 8px;
-    background: linear-gradient(to bottom, #fff, var(--accent-hover));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-[data-theme=\"light\"] .survey-header h2 {
-    background: linear-gradient(to bottom, var(--text-color), var(--accent-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.survey-header p {
-    color: #aaa;
-    font-size: 0.95rem;
-}
-
-.survey-question-box {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 24px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: transform 0.2s ease;
-}
-
-.survey-question-box:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.survey-question-box p {
-    font-size: 1.05rem;
-    line-height: 1.5;
-    margin-bottom: 18px;
-    color: #fff;
-    font-weight: 500;
-}
-
-[data-theme=\"light\"] .survey-question-box {
-    background: #f8fafc;
-    border-color: #f1f5f9;
-}
-
-[data-theme=\"light\"] .survey-question-box p {
-    color: var(--text-color);
-}
-
-.survey-radio-group {
-    display: flex;
-    gap: 12px;
-}
-
-.survey-radio-label {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    color: #888;
-}
-
-.survey-radio-label:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-
-.survey-radio-label input {
-    display: none;
-}
-
-.survey-radio-label:has(input:checked) {
-    background: var(--accent-color);
-    border-color: var(--accent-hover);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(63, 81, 181, 0.4);
-}
-
-.btn-survey-finish {
-    width: 100%;
-    padding: 18px !important;
-    font-size: 1.2rem !important;
-    font-weight: 700 !important;
-    border-radius: 50px !important;
-    background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)) !important;
-    box-shadow: 0 10px 30px rgba(63, 81, 181, 0.4);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-}
-
-.btn-survey-finish:hover:not(:disabled) {
-    transform: scale(1.02) translateY(-2px);
-    box-shadow: 0 15px 40px rgba(63, 81, 181, 0.6);
-}
-
-.btn-survey-finish:disabled {
-    opacity: 0.5;
-    filter: grayscale(0.5);
-    cursor: not-allowed;
-    transform: none !important;
-}
-.survey-hint {
-    font-size: 0.85rem;
-    font-weight: 300;
-    color: rgba(255, 255, 255, 0.5) !important;
-    margin-top: -12px;
-    margin-bottom: 15px;
-    line-height: 1.4;
-}
-
-[data-theme=\"light\"] .survey-hint {
-    color: rgba(7, 89, 133, 0.6) !important;
-}

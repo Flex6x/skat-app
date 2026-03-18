@@ -1,8 +1,8 @@
+/* AUẞER BETRIEB */
 /**
  * Skat Survey Manager
  * Handles showing the one-time survey and storing responses.
  */
-
 class SkatSurvey {
     constructor() {
         this.SURVEY_KEY = 'skat_survey_completed_v1';
