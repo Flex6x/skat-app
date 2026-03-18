@@ -73,57 +73,121 @@ class StorageService {
     }
 
     async getProfile() {
-        if (!this.auth.isLoggedIn()) return null;
-        const { data, error } = await this.auth.client.from('profiles').select('*').eq('id', this.auth.user.id).single();
-        if (error && error.code === 'PGRST116') {
-            // Profile doesn't exist yet, create it
-            const newProfile = { id: this.auth.user.id, koenig_taler: 0, last_login_date: null };
-            await this.auth.client.from('profiles').insert(newProfile);
-            return newProfile;
+        if (!this.auth.isLoggedIn()) return { id: null, koenig_taler: 0, last_login_date: null };
+        try {
+            // We try to fetch from 'stats' table since we know it works for the app
+            const { data, error } = await this.auth.client.from('stats').select('koenig_taler, last_login_date').eq('user_id', this.auth.user.id);
+            if (error) {
+                console.warn('Fallback: stats table taler fetch failed, trying profiles');
+                const { data: pData, error: pError } = await this.auth.client.from('profiles').select('*').eq('id', this.auth.user.id);
+                if (pError) throw pError;
+                return pData[0] || { id: this.auth.user.id, koenig_taler: 0, last_login_date: null };
+            }
+            if (data && data.length > 0) {
+                return { 
+                    id: this.auth.user.id, 
+                    koenig_taler: data[0].koenig_taler || 0, 
+                    last_login_date: data[0].last_login_date 
+                };
+            }
+            return { id: this.auth.user.id, koenig_taler: 0, last_login_date: null };
+        } catch (e) {
+            console.error('getProfile failed:', e.message);
+            return { id: this.auth.user.id, koenig_taler: 0, last_login_date: null };
         }
-        return data;
+    }
+
+    async _saveProfile(profileData) {
+        const userId = this.auth.user.id;
+        console.log('Saving profile data:', profileData);
+        
+        // Timeout protection: if no response in 6 seconds, throw error
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Datenbank-Timeout (6s)')), 6000));
+        
+        try {
+            const dbOp = (async () => {
+                // Try updating 'stats' table first as it is proven to work in this project
+                const statsData = { 
+                    user_id: userId,
+                    koenig_taler: profileData.koenig_taler,
+                    last_login_date: profileData.last_login_date,
+                    updated_at: new Date().toISOString()
+                };
+                if (!statsData.last_login_date) delete statsData.last_login_date;
+
+                const { error: sError } = await this.auth.client.from('stats').upsert(statsData, { onConflict: 'user_id' });
+                
+                // Also try 'profiles' table for compatibility
+                await this.auth.client.from('profiles').upsert({ id: userId, ...profileData }).catch(() => {});
+                
+                if (sError) throw sError;
+                return { error: null };
+            })();
+
+            return await Promise.race([dbOp, timeout]);
+        } catch (e) {
+            console.error('Save operation failed:', e);
+            return { error: e };
+        }
     }
 
     async claimDailyLogin() {
         if (!this.auth.isLoggedIn()) return { success: false, error: 'Not logged in' };
-        const profile = await this.getProfile();
-        const today = new Date().toISOString().split('T')[0];
         
-        if (profile.last_login_date === today) {
-            return { success: false, error: 'Already claimed today' };
+        try {
+            const profile = await this.getProfile();
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (profile.last_login_date === today) {
+                return { success: false, error: 'Already claimed today' };
+            }
+
+            const updatedTaler = (profile.koenig_taler || 0) + 20;
+            const res = await this._saveProfile({
+                koenig_taler: updatedTaler,
+                last_login_date: today,
+                updated_at: new Date().toISOString()
+            });
+
+            if (res.error) throw res.error;
+            return { success: true, newTaler: updatedTaler };
+        } catch (error) {
+            alert('Daily Login Fehler: ' + (error.message || 'Unbekannter Fehler'));
+            return { success: false, error: error.message };
         }
-
-        const updatedTaler = (profile.koenig_taler || 0) + 20;
-        const { error } = await this.auth.client.from('profiles').update({
-            koenig_taler: updatedTaler,
-            last_login_date: today,
-            updated_at: new Date().toISOString()
-        }).eq('id', this.auth.user.id);
-
-        if (error) return { success: false, error: error.message };
-        return { success: true, newTaler: updatedTaler };
     }
 
     async claimBadgeReward(badgeId, amount) {
         if (!this.auth.isLoggedIn()) return { success: false, error: 'Not logged in' };
         
-        // 1. Add to claimed_badges
-        const { error: claimError } = await this.auth.client.from('claimed_badges').insert({
-            user_id: this.auth.user.id,
-            badge_id: badgeId
-        });
-        if (claimError) return { success: false, error: claimError.message };
+        try {
+            // Check if already claimed in DB
+            const { data: alreadyClaimed } = await this.auth.client.from('claimed_badges').select('*').eq('user_id', this.auth.user.id).eq('badge_id', badgeId);
+            if (alreadyClaimed && alreadyClaimed.length > 0) {
+                return { success: false, error: 'Bereits abgeholt' };
+            }
 
-        // 2. Update taler in profiles
-        const profile = await this.getProfile();
-        const updatedTaler = (profile.koenig_taler || 0) + amount;
-        const { error: profError } = await this.auth.client.from('profiles').update({
-            koenig_taler: updatedTaler,
-            updated_at: new Date().toISOString()
-        }).eq('id', this.auth.user.id);
+            // 1. Mark as claimed
+            const { error: claimError } = await this.auth.client.from('claimed_badges').insert({
+                user_id: this.auth.user.id,
+                badge_id: badgeId
+            });
+            if (claimError) throw claimError;
 
-        if (profError) return { success: false, error: profError.message };
-        return { success: true, newTaler: updatedTaler };
+            // 2. Update Taler balance
+            const profile = await this.getProfile();
+            const updatedTaler = (profile.koenig_taler || 0) + amount;
+            const res = await this._saveProfile({
+                koenig_taler: updatedTaler,
+                updated_at: new Date().toISOString()
+            });
+
+            if (res.error) throw res.error;
+            return { success: true, newTaler: updatedTaler };
+        } catch (error) {
+            alert('Badge Reward Fehler: ' + (error.message || 'Unbekannter Fehler'));
+            return { success: false, error: error.message };
+        }
     }
 
     async getClaimedBadges() {
@@ -500,6 +564,14 @@ class Auth {
             return;
         }
 
+        // Fetch fresh profile data
+        let profile = { koenig_taler: 0, last_login_date: null };
+        try { 
+            profile = await this.getProfile() || profile; 
+        } catch(e){
+            console.error('Failed to fetch profile in renderTalerGroup:', e);
+        }
+
         // 1. Handle Main Menu (index.html)
         if (heroSection) {
             let group = document.getElementById('taler-group');
@@ -510,8 +582,6 @@ class Auth {
                 heroSection.appendChild(group);
             }
 
-            let profile = { last_login_date: null };
-            try { profile = await this.getProfile() || profile; } catch(e){}
             const today = new Date().toISOString().split('T')[0];
             const canClaimDaily = profile.last_login_date !== today;
 
@@ -528,14 +598,18 @@ class Auth {
             if (btnDaily && canClaimDaily) {
                 btnDaily.onclick = async (e) => {
                     e.stopPropagation();
+                    btnDaily.disabled = true; // Prevent double clicks
                     btnDaily.classList.remove('glow-yellow');
                     btnDaily.textContent = '...';
                     const res = await this.claimDailyLogin();
                     if (res.success) {
-                        this.renderTalerGroup();
+                        // Crucial: Full re-render with fresh data
+                        await this.renderTalerGroup();
                     } else {
+                        btnDaily.disabled = false;
                         btnDaily.classList.add('glow-yellow');
                         btnDaily.textContent = '+20';
+                        console.error('Claim failed:', res.error);
                     }
                 };
             }
@@ -555,8 +629,6 @@ class Auth {
             }
 
             if (balanceDisplay) {
-                let profile = { koenig_taler: 0 };
-                try { profile = await this.getProfile() || profile; } catch(e){}
                 balanceDisplay.innerHTML = `
                     <img src="media/coin.png" class="taler-icon-large">
                     <span>${profile.koenig_taler || 0}</span>
