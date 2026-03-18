@@ -224,6 +224,7 @@ const TRANSLATIONS = {
         import_stats_title: "Lokale Statistiken gefunden",
         import_stats_desc: "Wir haben lokale Spielstatistiken auf diesem Gerät gefunden. Möchtest du sie in deinen Account importieren?",
         transfer_stats: "Stats auf Acc übertragen",
+        transfer_confirm_msg: "Warnung: Bestehende Account-Statistiken werden durch deine lokalen Daten überschrieben. Willst du wirklich fortfahren?",
         transfer_success: "Statistiken erfolgreich übertragen!",
         transfer_error: "Fehler beim Übertragen: ",
         save_settings: "Speichern",
@@ -441,6 +442,7 @@ const TRANSLATIONS = {
         import_stats_title: "Local statistics found",
         import_stats_desc: "We found local game statistics on this device. Do you want to import them into your account?",
         transfer_stats: "Transfer stats to account",
+        transfer_confirm_msg: "Warning: Existing account statistics will be overwritten by your local data. Do you really want to proceed?",
         transfer_success: "Statistics successfully transferred!",
         transfer_error: "Error during transfer: ",
         save_settings: "Save",
@@ -1099,21 +1101,28 @@ class UI {
 
         // Stats Transfer Logic
         const transferBtn = document.getElementById('btn-transfer-stats');
+        const dataCard = document.getElementById('data-settings-card');
         if (transferBtn) {
-            const canMigrate = window.auth && window.auth.isLoggedIn() && window.storageService.hasLocalDataToMigrate();
+            const canMigrate = window.auth && window.auth.isLoggedIn() && window.storageService && window.storageService.hasLocalDataToMigrate();
             if (canMigrate) {
                 transferBtn.classList.remove('hidden');
+                if (dataCard) dataCard.classList.remove('hidden');
             } else {
                 transferBtn.classList.add('hidden');
+                if (dataCard) dataCard.classList.add('hidden');
             }
 
             transferBtn.onclick = async () => {
-                const result = await window.storageService.migrateManual();
-                if (result.success) {
-                    this.showMessage(this.getTranslation('transfer_success'));
-                    transferBtn.classList.add('hidden');
-                } else {
-                    this.showMessage(this.getTranslation('transfer_error') + result.error);
+                const msg = this.getTranslation('transfer_confirm_msg');
+                if (window.confirm(msg)) {
+                    const result = await window.storageService.migrateManual();
+                    if (result.success) {
+                        this.showMessage(this.getTranslation('transfer_success'));
+                        transferBtn.classList.add('hidden');
+                        if (dataCard) dataCard.classList.add('hidden');
+                    } else {
+                        this.showMessage(this.getTranslation('transfer_error') + result.error);
+                    }
                 }
             };
         }
@@ -1121,12 +1130,15 @@ class UI {
 
     refreshTransferButton() {
         const transferBtn = document.getElementById('btn-transfer-stats');
+        const dataCard = document.getElementById('data-settings-card');
         if (transferBtn) {
-            const canMigrate = window.auth && window.auth.isLoggedIn() && window.storageService.hasLocalDataToMigrate();
+            const canMigrate = window.auth && window.auth.isLoggedIn() && window.storageService && window.storageService.hasLocalDataToMigrate();
             if (canMigrate) {
                 transferBtn.classList.remove('hidden');
+                if (dataCard) dataCard.classList.remove('hidden');
             } else {
                 transferBtn.classList.add('hidden');
+                if (dataCard) dataCard.classList.add('hidden');
             }
         }
     }

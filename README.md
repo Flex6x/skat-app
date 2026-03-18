@@ -11,13 +11,12 @@ https://flex6x.github.io/skat-app/
 ## To Do:
 
 - skat soll erst im richtigen moment verschwinden
-- bug reports abfangen
 - SEO Optimierung
-- purer Ramsch mode
 - Auswahl der Karten mit Store.
-- anzahl der gespielten listen sollen mit spielverlauf matchen
-- Entferne "Live Punkte"
+- Entferne "verschiedene schnelligkeits stufen von animationen"
+- Acc löschen + PW Reset
+- badges reihenfolge ändern
 
-- Abstimmungen zu Ramsch und Store bis 15:00
+- bitte schaue nochmal drüber, dass wenn man daten auf einen acc übertragen will, dass da eine warnung und bestätigungsnachricht kommt (dass dann die daten des accounts überschrieben werden.) Da wir jetzt das feld "stats löschen" entfernt haben, ist der Bereich data leer. Dieser soll auch nicht angezeigt werden wenn nix drin steht (soll nur da sein, wenn das feld "stats auf acc übertragen" da ist.)
 
 ## Bugs: 
