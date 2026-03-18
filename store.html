@@ -7,25 +7,6 @@
     <link rel="icon" type="image/jpeg" href="media/logo.jpg">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        .store-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            height: 60vh;
-        }
-        .coming-soon {
-            font-size: 2rem;
-            color: var(--accent-color);
-            margin-top: 20px;
-            font-weight: 700;
-        }
-        .glow-text {
-            font-size: 4rem !important;
-        }
-    </style>
 </head>
 <body>
     <div id="main-menu" class="menu-overlay">
@@ -40,10 +21,17 @@
             </nav>
         </header>
 
-        <div class="menu-content">
-            <div class="store-content">
-                <h1 class="glow-text">König-Store</h1>
-                <p class="coming-soon">Coming Soon - Neue Kartendesigns & Tisch-Styles bald verfügbar!</p>
+        <div class="menu-content hero-section">
+            <h1 class="glow-text">König-Store</h1>
+            <p class="subtitle" style="margin-top: -30px; margin-bottom: 20px;">Coming Soon - Neue Kartendesigns & Tisch-Styles bald verfügbar!</p>
+            
+            <div class="store-grid">
+                <div class="store-item-placeholder"></div>
+                <div class="store-item-placeholder"></div>
+                <div class="store-item-placeholder"></div>
+                <div class="store-item-placeholder"></div>
+                <div class="store-item-placeholder"></div>
+                <div class="store-item-placeholder"></div>
             </div>
         </div>
     </div>
@@ -54,7 +42,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             window.appSettings = new Settings();
-            // Auth init will handle Taler display via updateUI -> renderTalerGroup
+            // Auth init will handle balance display and login logic
         });
     </script>
 </body>

@@ -3540,3 +3540,87 @@ body {
     }
 }
 
+
+/* === König-Taler V2 === */
+.taler-main-menu-btns {
+    position: absolute;
+    top: 150px;
+    right: 50px;
+    display: flex;
+    gap: 15px;
+    z-index: 100;
+}
+
+.glow-yellow {
+    color: #000 !important;
+    background: #ffd700 !important;
+    border-color: #fff !important;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    animation: pulse-glow 2s infinite;
+    font-weight: 800;
+}
+
+@keyframes pulse-glow {
+    0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+    50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
+    100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+}
+
+.floating-btn.claimed {
+    opacity: 0.6;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #888 !important;
+    cursor: default;
+}
+
+/* Store Specifics */
+.store-balance-large {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #ffd700;
+    margin-right: 20px;
+}
+
+.taler-icon-large {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+.store-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 40px;
+}
+
+.store-item-placeholder {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    height: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.store-item-placeholder:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+.store-item-placeholder::after {
+    content: "Design Slot";
+    color: #444;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+

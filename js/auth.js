@@ -481,74 +481,78 @@ class Auth {
     }
 
     async renderTalerGroup() {
-        // Target specifically the hero section in index.html if possible
-        let group = document.getElementById('taler-group');
+        const isStorePage = window.location.pathname.includes('store.html');
         const heroSection = document.getElementById('menu-primary');
         const mainMenu = document.getElementById('main-menu');
         
         if (!this.isLoggedIn()) {
-            if (group) group.remove();
+            const existing = document.getElementById('taler-group');
+            if (existing) existing.remove();
             return;
         }
 
-        if (!group) {
-            group = document.createElement('div');
-            group.id = 'taler-group';
-            group.className = 'taler-group';
-            
-            if (heroSection) {
+        // 1. Handle Main Menu (index.html)
+        if (heroSection) {
+            let group = document.getElementById('taler-group');
+            if (!group) {
+                group = document.createElement('div');
+                group.id = 'taler-group';
+                group.className = 'taler-main-menu-btns';
                 heroSection.appendChild(group);
-            } else if (mainMenu) {
-                mainMenu.appendChild(group);
-            } else {
-                document.body.appendChild(group);
+            }
+
+            let profile = { last_login_date: null };
+            try { profile = await this.getProfile() || profile; } catch(e){}
+            const today = new Date().toISOString().split('T')[0];
+            const canClaimDaily = profile.last_login_date !== today;
+
+            group.innerHTML = `
+                <button id="btn-daily-login" class="floating-btn ${canClaimDaily ? 'glow-yellow' : 'claimed'}" title="Täglicher Bonus">
+                    ${canClaimDaily ? '+20' : '✓'}
+                </button>
+                <button class="floating-btn" onclick="window.location.href='store.html'" title="Store">
+                    🏪
+                </button>
+            `;
+
+            const btnDaily = document.getElementById('btn-daily-login');
+            if (btnDaily && canClaimDaily) {
+                btnDaily.onclick = async (e) => {
+                    e.stopPropagation();
+                    btnDaily.classList.remove('glow-yellow');
+                    btnDaily.textContent = '...';
+                    const res = await this.claimDailyLogin();
+                    if (res.success) {
+                        this.renderTalerGroup();
+                    } else {
+                        btnDaily.classList.add('glow-yellow');
+                        btnDaily.textContent = '+20';
+                    }
+                };
             }
         }
 
-        // Fallback profile if DB is not ready
-        let profile = { koenig_taler: 0, last_login_date: null };
-        try {
-            const dbProfile = await this.getProfile();
-            if (dbProfile) profile = dbProfile;
-        } catch (e) {
-            console.error("Failed to fetch profile", e);
-        }
-
-        const today = new Date().toISOString().split('T')[0];
-        const canClaimDaily = profile.last_login_date !== today;
-
-        group.innerHTML = `
-            <div class="taler-display">
-                <img src="media/coin.png" class="taler-icon">
-                <span id="taler-balance-display">${profile.koenig_taler || 0}</span>
-            </div>
-            <div class="taler-btn-group">
-                <button id="btn-daily-login" class="btn-taler" ${canClaimDaily ? '' : 'disabled'}>
-                    ${canClaimDaily ? 'Daily Login (+20)' : 'Geadelt ✓'}
-                </button>
-                <button class="btn-taler" onclick="window.location.href='store.html'">
-                    Store
-                </button>
-            </div>
-        `;
-
-        const btnDaily = document.getElementById('btn-daily-login');
-        if (btnDaily && canClaimDaily) {
-            btnDaily.onclick = async (e) => {
-                e.stopPropagation();
-                btnDaily.disabled = true;
-                btnDaily.textContent = '...';
-                const res = await this.claimDailyLogin();
-                if (res.success) {
-                    this.renderTalerGroup();
-                    if (window.ui && typeof window.ui.showMessage === 'function') {
-                        window.ui.showMessage('+20 König-Taler!');
-                    }
-                } else {
-                    btnDaily.disabled = false;
-                    btnDaily.textContent = 'Error';
+        // 2. Handle Store Balance (store.html)
+        if (isStorePage) {
+            let balanceDisplay = document.getElementById('store-balance-header');
+            if (!balanceDisplay) {
+                const headerRight = document.querySelector('.header-right');
+                if (headerRight) {
+                    balanceDisplay = document.createElement('div');
+                    balanceDisplay.id = 'store-balance-header';
+                    balanceDisplay.className = 'store-balance-large';
+                    headerRight.prepend(balanceDisplay);
                 }
-            };
+            }
+
+            if (balanceDisplay) {
+                let profile = { koenig_taler: 0 };
+                try { profile = await this.getProfile() || profile; } catch(e){}
+                balanceDisplay.innerHTML = `
+                    <img src="media/coin.png" class="taler-icon-large">
+                    <span>${profile.koenig_taler || 0}</span>
+                `;
+            }
         }
     }
 
