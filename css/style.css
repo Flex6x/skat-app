@@ -3513,3 +3513,30 @@ body {
     }
 }
 
+
+/* Explicit positioning for Main Menu Taler Group */
+#menu-primary .taler-group {
+    position: absolute;
+    top: 150px;
+    right: 50px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 15px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    backdrop-filter: blur(5px);
+}
+
+#menu-primary .glow-text {
+    margin-bottom: 80px; /* Space for taler group if needed */
+}
+
+@media (max-width: 768px) {
+    #menu-primary .taler-group {
+        position: static;
+        margin: 20px auto;
+        transform: none;
+        top: auto;
+        right: auto;
+    }
+}
+

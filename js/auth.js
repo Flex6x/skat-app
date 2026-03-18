@@ -470,39 +470,50 @@ class Auth {
             document.addEventListener('click', () => { if (dropdown) dropdown.classList.add('hidden'); });
             const logoutBtn = document.getElementById('btn-logout');
             if (logoutBtn) logoutBtn.onclick = () => this.logout();
-
-            this.renderTalerGroup();
         } else {
             authContainer.innerHTML = `<button class="nav-link login-btn" id="btn-open-login" data-i18n="login">Login</button>`;
             const loginBtn = document.getElementById('btn-open-login');
             if (loginBtn) loginBtn.onclick = () => this.showLoginModal();
-
-            const existingTalerGroup = document.getElementById('taler-group');
-            if (existingTalerGroup) existingTalerGroup.remove();
         }
+
+        // Always call renderTalerGroup, it will handle the logged-in check internally
+        this.renderTalerGroup();
     }
 
     async renderTalerGroup() {
+        // Target specifically the hero section in index.html if possible
         let group = document.getElementById('taler-group');
+        const heroSection = document.getElementById('menu-primary');
+        const mainMenu = document.getElementById('main-menu');
+        
+        if (!this.isLoggedIn()) {
+            if (group) group.remove();
+            return;
+        }
+
         if (!group) {
             group = document.createElement('div');
             group.id = 'taler-group';
             group.className = 'taler-group';
             
-            // Append to main-menu if it exists, otherwise to body
-            const mainMenu = document.getElementById('main-menu');
-            if (mainMenu) {
+            if (heroSection) {
+                heroSection.appendChild(group);
+            } else if (mainMenu) {
                 mainMenu.appendChild(group);
             } else {
                 document.body.appendChild(group);
-                // Adjust position if not in main-menu to avoid floating awkwardly
-                group.style.top = '80px'; 
-                group.style.right = '20px';
             }
         }
 
-        const profile = await this.getProfile();
-        if (!profile) return;
+        // Fallback profile if DB is not ready
+        let profile = { koenig_taler: 0, last_login_date: null };
+        try {
+            const dbProfile = await this.getProfile();
+            if (dbProfile) profile = dbProfile;
+        } catch (e) {
+            console.error("Failed to fetch profile", e);
+        }
+
         const today = new Date().toISOString().split('T')[0];
         const canClaimDaily = profile.last_login_date !== today;
 
@@ -532,8 +543,6 @@ class Auth {
                     this.renderTalerGroup();
                     if (window.ui && typeof window.ui.showMessage === 'function') {
                         window.ui.showMessage('+20 König-Taler!');
-                    } else {
-                        alert('+20 König-Taler!');
                     }
                 } else {
                     btnDaily.disabled = false;
