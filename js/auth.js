@@ -485,6 +485,15 @@ class Auth {
         const heroSection = document.getElementById('menu-primary');
         const mainMenu = document.getElementById('main-menu');
         
+        // Handle Store Page - Access Check
+        if (isStorePage && !this.isLoggedIn()) {
+            const container = document.querySelector('.store-container');
+            if (container) {
+                container.innerHTML = `<div class="not-logged-in-msg">Nur für eingeloggte Nutzer.</div>`;
+            }
+            return;
+        }
+
         if (!this.isLoggedIn()) {
             const existing = document.getElementById('taler-group');
             if (existing) existing.remove();

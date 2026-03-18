@@ -3541,29 +3541,50 @@ body {
 }
 
 
-/* === König-Taler V2 === */
+/* === König-Taler V2 Refined === */
 .taler-main-menu-btns {
     position: absolute;
-    top: 150px;
-    right: 50px;
+    top: 140px;
+    right: 60px;
     display: flex;
     gap: 15px;
     z-index: 100;
 }
 
 .glow-yellow {
-    color: #000 !important;
-    background: #ffd700 !important;
-    border-color: #fff !important;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
-    animation: pulse-glow 2s infinite;
-    font-weight: 800;
+    color: #43381c !important; /* Soft dark gold instead of pure black */
+    background: linear-gradient(135deg, #ffd700, #ffec8b) !important;
+    border-color: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    animation: pulse-glow-soft 2.5s infinite ease-in-out;
+    font-weight: 700;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-@keyframes pulse-glow {
-    0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-    50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
-    100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+@keyframes pulse-glow-soft {
+    0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+    50% { transform: scale(1.08); box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+    100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+}
+
+/* Store Separation & Content */
+.store-container {
+    margin-top: 100px; /* Clear distance from headline */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 300px;
+}
+
+.not-logged-in-msg {
+    font-size: 1.5rem;
+    color: #888;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 30px 60px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 50px;
 }
 
 .floating-btn.claimed {

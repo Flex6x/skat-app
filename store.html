@@ -23,15 +23,12 @@
 
         <div class="menu-content hero-section">
             <h1 class="glow-text">König-Store</h1>
-            <p class="subtitle" style="margin-top: -30px; margin-bottom: 20px;">Coming Soon - Neue Kartendesigns & Tisch-Styles bald verfügbar!</p>
             
-            <div class="store-grid">
-                <div class="store-item-placeholder"></div>
-                <div class="store-item-placeholder"></div>
-                <div class="store-item-placeholder"></div>
-                <div class="store-item-placeholder"></div>
-                <div class="store-item-placeholder"></div>
-                <div class="store-item-placeholder"></div>
+            <div class="store-container">
+                <p class="subtitle" style="margin-top: 0; margin-bottom: 40px;">Coming Soon - Neue Kartendesigns & Tisch-Styles bald verfügbar!</p>
+                
+                <!-- If the user is logged in, auth.js will render more content here in the future. 
+                     For now, we have the access check and the store container. -->
             </div>
         </div>
     </div>
@@ -42,7 +39,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             window.appSettings = new Settings();
-            // Auth init will handle balance display and login logic
         });
     </script>
 </body>
