@@ -33,6 +33,7 @@ class Game {
         this.aiControllers = aiControllers; // Array of AI instances
         this.settings = settings;
         this.dealerIndex = Math.floor(Math.random() * 3); // Randomly choose first dealer
+        this.isRamschMode = false;
         
         this.reset();
     }
@@ -40,6 +41,10 @@ class Game {
     reset() {
         this.deck = new Deck();
         const playerName = (this.settings && this.settings.current.nickname) || 'Du';
+        
+        // Keep isRamschMode if set from outside
+        const wasRamsch = this.isRamschMode;
+
         this.players = [
             { id: 0, type: PLAYER_TYPES.BOT, name: 'Aicore', hand: [], score: 0, tricks: [] },
             { id: 1, type: PLAYER_TYPES.BOT, name: 'Aiden', hand: [], score: 0, tricks: [] },
@@ -52,6 +57,7 @@ class Game {
         this.announcedSchneider = false;
         this.announcedSchwarz = false;
         this.isOuvert = false;
+        this.isRamschMode = wasRamsch;
         
         this.phase = PHASES.DEALING;
         // Compute roles relative to dealer
@@ -298,8 +304,13 @@ class Game {
         // Sort hands AFTER animation
         this.players.forEach(p => this.sortHand(p.hand));
 
-        // Re-render all hands in their sorted state
+        // Resort and Re-render all hands in their sorted state
         this.ui.renderAllHands(this.players);
+
+        if (this.isRamschMode) {
+            this.startRamsch();
+            return;
+        }
 
         this.phase = PHASES.BIDDING;
         this.saveGameState();
@@ -938,6 +949,7 @@ class Game {
             this.onGameEnd({
                 isRamsch: true,
                 loserIndices: loserIndices,
+                individualScores: playerPoints,
                 trumpMode: this.trumpMode,
                 handGame: this.handGame,
                 announcedSchneider: this.announcedSchneider,

@@ -26,6 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.game = new Game(ui, aiControllers, window.appSettings);
     const game = window.game;
     
+    // Check for Ramsch Mode in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const isRamschMode = urlParams.get('mode') === 'ramsch';
+    if (isRamschMode) {
+        game.isRamschMode = true;
+    }
+    
     let sessionRounds = 0;
     let completedRounds = 0;
     let gameHistory = [];
@@ -34,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const state = {
             sessionRounds,
             completedRounds,
-            gameHistory
+            gameHistory,
+            isRamschMode
         };
         localStorage.setItem('skatSessionState', JSON.stringify(state));
     };
@@ -51,6 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionRounds = session.sessionRounds;
             completedRounds = session.completedRounds;
             gameHistory = session.gameHistory;
+            if (session.isRamschMode) {
+                game.isRamschMode = true;
+            }
             
             ui.hideMainMenu();
             ui.updateScoreboard(gameHistory);
@@ -87,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     gameHistory.push({
                         isRamsch: true,
                         loserIndices: result.loserIndices,
+                        individualScores: result.individualScores,
                         trumpMode: result.trumpMode,
                         handGame: result.handGame,
                         schneider: result.schneider,
@@ -141,6 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const saveListToStats = (history) => {
+        // Skip global stats for standalone Ramsch Mode
+        if (isRamschMode) return;
+
         let totals = [0, 0, 0];
         
         // For badge tracking across the list

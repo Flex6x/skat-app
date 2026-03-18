@@ -1162,6 +1162,17 @@ body {
     box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
 }
 
+.btn.btn-outline {
+    background: transparent;
+    border: 2px solid var(--accent-color);
+    color: #fff;
+}
+
+.btn.btn-outline:hover:not(:disabled) {
+    background: var(--accent-color);
+    color: #fff;
+}
+
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;

@@ -918,10 +918,11 @@ class UI {
                     td.textContent = '0';
                     td.style.color = '#666';
                 } else if (game.isRamsch) {
-                    const isLoser = game.loserIndices.includes(i);
-                    td.textContent = isLoser ? '-25' : '0';
-                    td.className = isLoser ? 'score-neg' : '';
-                    if (isLoser) totals[i] -= 25;
+                    // Ramsch mode in gameHistory can store individual scores
+                    const val = game.individualScores ? -game.individualScores[i] : (game.loserIndices.includes(i) ? -25 : 0);
+                    td.textContent = val;
+                    td.className = val < 0 ? 'score-neg' : 'score-pos';
+                    totals[i] += val;
                 } else if (game.declarerId === i) {
                     const val = game.won ? game.value : -game.value;
                     td.textContent = val;
@@ -2076,7 +2077,14 @@ class UI {
 
     setDeclarer(name, bidValue, declarerIndex = -1) {
         const displayName = name === 'Du' ? ((window.appSettings && window.appSettings.current.nickname) || 'Du') : name;
-        this.els.currentDeclarer.textContent = `${this.getTranslation('declarer')}: ${displayName}`;
+        
+        if (declarerIndex === -1 && name === 'Ramsch') {
+            const modeLabel = (window.appSettings && window.appSettings.current.language === 'en') ? 'Mode' : 'Modus';
+            this.els.currentDeclarer.textContent = `${modeLabel}: ${displayName}`;
+        } else {
+            this.els.currentDeclarer.textContent = `${this.getTranslation('declarer')}: ${displayName}`;
+        }
+
         if (bidValue) {
             this.els.currentBid.textContent = `${this.getTranslation('bid_value')}: ${bidValue}`;
         } else {
