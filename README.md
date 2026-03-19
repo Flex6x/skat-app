@@ -13,12 +13,11 @@ https://flex6x.github.io/skat-app/
 - skat soll erst im richtigen moment verschwinden
 - bug reports abfangen
 - SEO Optimierung
-- purer Ramsch mode
-- Auswahl der Karten mit Store.
 - anzahl der gespielten listen sollen mit spielverlauf matchen
-- Entferne "Live Punkte"
 - "Rest meine/schenken" - Buttons nach jedem Spiel entfernen (bleiben beim Reizen)
 - alle Übersicht Stats bei Leaderboard anzeigen
+- bug button aus der headline raus
+- listen zusammenfassung nach jeder liste (auch bei ramsch)
 
 - Abstimmungen zu Ramsch und Store bis 15:00
 

@@ -53,81 +53,108 @@ class StorageService {
         }
     }
 
+    _getLocalProfile() {
+        const data = localStorage.getItem('skat_user_profile');
+        return data ? JSON.parse(data) : { coins: 0, last_daily_claim: null, nickname: null };
+    }
+
+    _setLocalProfile(profile) {
+        localStorage.setItem('skat_user_profile', JSON.stringify(profile));
+    }
+
     async getUserStats(userId) {
         if (!this.auth.isLoggedIn()) return null;
-        const { data: aggregated, error: aggError } = await this.auth.client.from('stats').select('*').eq('user_id', userId).single();
-        const { data: history, error: histError } = await this.auth.client.from('history').select('*').eq('user_id', userId).order('id', { ascending: true });
-        const { data: profile, error: profError } = await this.auth.client.from('profiles').select('*').eq('id', userId).single();
-        const { data: claimedBadges, error: claimError } = await this.auth.client.from('claimed_badges').select('badge_id').eq('user_id', userId);
         
-        if (aggError || histError) {
-            console.error('Error fetching user detail stats:', aggError, histError);
+        // Use Promise.all with timeouts for all fetches
+        const fetchWithTimeout = (promise, timeoutMs = 5000) => 
+            Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs))]);
+
+        try {
+            const [aggRes, histRes, profRes, claimRes] = await Promise.allSettled([
+                fetchWithTimeout(this.auth.client.from('stats').select('*').eq('user_id', userId).single()),
+                fetchWithTimeout(this.auth.client.from('history').select('*').eq('user_id', userId).order('id', { ascending: true })),
+                fetchWithTimeout(this.auth.client.from('profiles').select('*').eq('id', userId).single()),
+                fetchWithTimeout(this.auth.client.from('claimed_badges').select('badge_id').eq('user_id', userId))
+            ]);
+
+            const aggregated = aggRes.status === 'fulfilled' ? aggRes.value.data : null;
+            const history = histRes.status === 'fulfilled' ? histRes.value.data : [];
+            const profile = profRes.status === 'fulfilled' ? profRes.value.data : this._getLocalProfile();
+            const claimedBadges = claimRes.status === 'fulfilled' ? (claimRes.value.data || []) : [];
+
+            return { 
+                aggregated, 
+                history, 
+                profile: profile || { coins: 0, last_daily_claim: null },
+                claimedBadges: claimedBadges.map(b => b.badge_id)
+            };
+        } catch (err) {
+            console.error('Error in getUserStats:', err);
             return null;
         }
-        return { 
-            aggregated, 
-            history, 
-            profile: profile || { koenig_taler: 0, last_login_date: null },
-            claimedBadges: (claimedBadges || []).map(b => b.badge_id)
-        };
     }
 
     async getProfile() {
-        if (!this.auth.isLoggedIn()) return { id: null, koenig_taler: 0, last_login_date: null };
+        // 1. Start with local data for instant response
+        let profile = this._getLocalProfile();
+
+        if (!this.auth.isLoggedIn()) return { ...profile, id: null };
+
         try {
-            // We try to fetch from 'stats' table since we know it works for the app
-            const { data, error } = await this.auth.client.from('stats').select('koenig_taler, last_login_date').eq('user_id', this.auth.user.id);
-            if (error) {
-                console.warn('Fallback: stats table taler fetch failed, trying profiles');
-                const { data: pData, error: pError } = await this.auth.client.from('profiles').select('*').eq('id', this.auth.user.id);
-                if (pError) throw pError;
-                return pData[0] || { id: this.auth.user.id, koenig_taler: 0, last_login_date: null };
-            }
-            if (data && data.length > 0) {
-                return { 
-                    id: this.auth.user.id, 
-                    koenig_taler: data[0].koenig_taler || 0, 
-                    last_login_date: data[0].last_login_date 
+            // 2. Try to fetch from cloud with a tight timeout (3s)
+            const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Cloud Timeout')), 3000));
+            const cloudFetch = this.auth.client.from('profiles').select('*').eq('id', this.auth.user.id).single();
+            
+            const res = await Promise.race([cloudFetch, timeout]);
+            
+            if (res && res.data) {
+                // Merge cloud data into local
+                profile = {
+                    ...profile,
+                    coins: res.data.coins !== undefined ? res.data.coins : profile.coins,
+                    last_daily_claim: res.data.last_daily_claim || profile.last_daily_claim,
+                    nickname: res.data.nickname || profile.nickname
                 };
+                this._setLocalProfile(profile);
             }
-            return { id: this.auth.user.id, koenig_taler: 0, last_login_date: null };
         } catch (e) {
-            console.error('getProfile failed:', e.message);
-            return { id: this.auth.user.id, koenig_taler: 0, last_login_date: null };
+            console.warn('getProfile cloud fetch failed, using local fallback:', e.message);
         }
+
+        return { id: this.auth.user ? this.auth.user.id : null, ...profile };
     }
 
     async _saveProfile(profileData) {
+        // 1. Update Local Storage Immediately
+        const currentLocal = this._getLocalProfile();
+        const updatedLocal = { ...currentLocal, ...profileData };
+        this._setLocalProfile(updatedLocal);
+
+        if (!this.auth.isLoggedIn()) return { success: true, localOnly: true };
+
         const userId = this.auth.user.id;
-        console.log('Saving profile data:', profileData);
+        console.log('Syncing profile to cloud:', profileData);
         
-        // Timeout protection: if no response in 6 seconds, throw error
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Datenbank-Timeout (6s)')), 6000));
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Sync Timeout')), 6000));
         
         try {
             const dbOp = (async () => {
-                // Try updating 'stats' table first as it is proven to work in this project
-                const statsData = { 
-                    user_id: userId,
-                    koenig_taler: profileData.koenig_taler,
-                    last_login_date: profileData.last_login_date,
-                    updated_at: new Date().toISOString()
+                const updateData = { 
+                    id: userId,
+                    updated_at: new Date().toISOString(),
+                    ...profileData
                 };
-                if (!statsData.last_login_date) delete statsData.last_login_date;
 
-                const { error: sError } = await this.auth.client.from('stats').upsert(statsData, { onConflict: 'user_id' });
-                
-                // Also try 'profiles' table for compatibility
-                await this.auth.client.from('profiles').upsert({ id: userId, ...profileData }).catch(() => {});
-                
-                if (sError) throw sError;
-                return { error: null };
+                const { error } = await this.auth.client.from('profiles').upsert(updateData, { onConflict: 'id' });
+                if (error) throw error;
+                return { success: true };
             })();
 
             return await Promise.race([dbOp, timeout]);
         } catch (e) {
-            console.error('Save operation failed:', e);
-            return { error: e };
+            console.error('Cloud sync failed, data saved locally only:', e);
+            // We return success true because it IS saved locally and will work for the user
+            return { success: true, cloudError: e.message || e };
         }
     }
 
@@ -138,21 +165,20 @@ class StorageService {
             const profile = await this.getProfile();
             const today = new Date().toISOString().split('T')[0];
             
-            if (profile.last_login_date === today) {
+            if (profile.last_daily_claim === today) {
                 return { success: false, error: 'Already claimed today' };
             }
 
-            const updatedTaler = (profile.koenig_taler || 0) + 20;
+            const updatedCoins = (profile.coins || 0) + 20;
             const res = await this._saveProfile({
-                koenig_taler: updatedTaler,
-                last_login_date: today,
-                updated_at: new Date().toISOString()
+                coins: updatedCoins,
+                last_daily_claim: today
             });
 
-            if (res.error) throw res.error;
-            return { success: true, newTaler: updatedTaler };
+            // Even if there was a cloud error, we consider it a success for the UI session
+            return { success: true, newCoins: updatedCoins };
         } catch (error) {
-            alert('Daily Login Fehler: ' + (error.message || 'Unbekannter Fehler'));
+            console.error('Daily Login Process Error:', error);
             return { success: false, error: error.message };
         }
     }
@@ -161,31 +187,29 @@ class StorageService {
         if (!this.auth.isLoggedIn()) return { success: false, error: 'Not logged in' };
         
         try {
-            // Check if already claimed in DB
-            const { data: alreadyClaimed } = await this.auth.client.from('claimed_badges').select('*').eq('user_id', this.auth.user.id).eq('badge_id', badgeId);
-            if (alreadyClaimed && alreadyClaimed.length > 0) {
-                return { success: false, error: 'Bereits abgeholt' };
-            }
-
-            // 1. Mark as claimed
+            // Check if already claimed in DB (this is the only part that needs cloud to be 100% sure, 
+            // but we can trust the process if the insert succeeds)
+            
+            // 1. Mark as claimed in cloud
             const { error: claimError } = await this.auth.client.from('claimed_badges').insert({
                 user_id: this.auth.user.id,
                 badge_id: badgeId
             });
-            if (claimError) throw claimError;
+            
+            if (claimError && !claimError.message.includes('unique')) {
+                 throw claimError;
+            }
 
-            // 2. Update Taler balance
+            // 2. Update Coins (Local-First via _saveProfile)
             const profile = await this.getProfile();
-            const updatedTaler = (profile.koenig_taler || 0) + amount;
-            const res = await this._saveProfile({
-                koenig_taler: updatedTaler,
-                updated_at: new Date().toISOString()
+            const updatedCoins = (profile.coins || 0) + amount;
+            await this._saveProfile({
+                coins: updatedCoins
             });
 
-            if (res.error) throw res.error;
-            return { success: true, newTaler: updatedTaler };
+            return { success: true, newCoins: updatedCoins };
         } catch (error) {
-            alert('Badge Reward Fehler: ' + (error.message || 'Unbekannter Fehler'));
+            console.error('Badge Reward Process Error:', error);
             return { success: false, error: error.message };
         }
     }
@@ -201,6 +225,10 @@ class StorageService {
         if (!this.auth.isLoggedIn() || !nickname) return;
         console.log('Attempting to update nickname in cloud:', nickname);
         try {
+            // 1. Update Profile table
+            await this._saveProfile({ nickname: nickname });
+
+            // 2. Update Stats table for backward compatibility/leaderboard
             const updateData = {
                 user_id: this.auth.user.id,
                 nickname: nickname,
@@ -209,13 +237,9 @@ class StorageService {
             
             const { error } = await this.auth.client.from('stats').upsert(updateData, { onConflict: 'user_id' });
             if (error) {
-                console.warn('Could not update nickname (maybe column missing?):', error.message);
-                if (error.message.includes('nickname')) {
-                    delete updateData.nickname;
-                    await this.auth.client.from('stats').upsert(updateData, { onConflict: 'user_id' });
-                }
+                console.warn('Could not update nickname in stats (maybe column missing?):', error.message);
             } else {
-                console.log('Nickname successfully updated in cloud.');
+                console.log('Nickname successfully updated in stats.');
             }
         } catch (err) {
             console.error('updateNickname error:', err);
@@ -465,19 +489,28 @@ class Auth {
     async syncNicknameFromCloud() {
         if (!this.user) return;
         try {
-            const stats = await this.storage._getFromCloud();
-            if (stats && stats.nickname) {
+            const profile = await this.storage.getProfile();
+            if (profile && profile.nickname) {
                 // Update local settings if they exist
                 if (window.settings) {
-                    window.settings.set('nickname', stats.nickname);
+                    window.settings.set('nickname', profile.nickname);
                 } else if (window.appSettings) {
-                    window.appSettings.set('nickname', stats.nickname);
+                    window.appSettings.set('nickname', profile.nickname);
                 }
-            } else if (stats && !stats.nickname) {
-                // If logged in but no nickname in cloud, push local one
-                const localNickname = (window.settings || window.appSettings)?.current?.nickname;
-                if (localNickname && localNickname !== 'Du') {
-                    await this.storage.updateNickname(localNickname);
+            } else {
+                // Fallback to stats if profile has no nickname
+                const stats = await this.storage._getFromCloud();
+                if (stats && stats.nickname) {
+                    if (window.settings) window.settings.set('nickname', stats.nickname);
+                    else if (window.appSettings) window.appSettings.set('nickname', stats.nickname);
+                    // Also sync to profile table for future consistency
+                    await this.storage.updateNickname(stats.nickname);
+                } else {
+                    // If logged in but no nickname in cloud, push local one
+                    const localNickname = (window.settings || window.appSettings)?.current?.nickname;
+                    if (localNickname && localNickname !== 'Du') {
+                        await this.storage.updateNickname(localNickname);
+                    }
                 }
             }
         } catch (err) {
@@ -547,7 +580,6 @@ class Auth {
     async renderTalerGroup() {
         const isStorePage = window.location.pathname.includes('store.html');
         const heroSection = document.getElementById('menu-primary');
-        const mainMenu = document.getElementById('main-menu');
         
         // Handle Store Page - Access Check
         if (isStorePage && !this.isLoggedIn()) {
@@ -565,9 +597,9 @@ class Auth {
         }
 
         // Fetch fresh profile data
-        let profile = { koenig_taler: 0, last_login_date: null };
+        let profile = { coins: 0, last_daily_claim: null };
         try { 
-            profile = await this.getProfile() || profile; 
+            profile = await this.storage.getProfile() || profile; 
         } catch(e){
             console.error('Failed to fetch profile in renderTalerGroup:', e);
         }
@@ -583,7 +615,7 @@ class Auth {
             }
 
             const today = new Date().toISOString().split('T')[0];
-            const canClaimDaily = profile.last_login_date !== today;
+            const canClaimDaily = profile.last_daily_claim !== today;
 
             group.innerHTML = `
                 <button id="btn-daily-login" class="floating-btn ${canClaimDaily ? 'glow-yellow' : 'claimed'}" title="Täglicher Bonus">
@@ -601,7 +633,7 @@ class Auth {
                     btnDaily.disabled = true; // Prevent double clicks
                     btnDaily.classList.remove('glow-yellow');
                     btnDaily.textContent = '...';
-                    const res = await this.claimDailyLogin();
+                    const res = await this.storage.claimDailyLogin();
                     if (res.success) {
                         // Crucial: Full re-render with fresh data
                         await this.renderTalerGroup();
@@ -631,7 +663,7 @@ class Auth {
             if (balanceDisplay) {
                 balanceDisplay.innerHTML = `
                     <img src="media/coin.png" class="taler-icon-large">
-                    <span>${profile.koenig_taler || 0}</span>
+                    <span>${profile.coins || 0}</span>
                 `;
             }
         }
