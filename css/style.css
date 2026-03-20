@@ -409,7 +409,8 @@ body {
 
 /* === Settings & Rules View === */
 #settings-view,
-#rules-view {
+#rules-view,
+#store-view {
     width: 100vw;
     height: 100vh;
     max-width: none;
@@ -473,7 +474,8 @@ body {
 
 /* Light Theme Adjustments for Settings & Rules */
 [data-theme="light"] #settings-view,
-[data-theme="light"] #rules-view {
+[data-theme="light"] #rules-view,
+[data-theme="light"] #store-view {
     background: #f0f9ff;
 }
 
@@ -616,7 +618,7 @@ body {
 
 .view-header {
     margin-bottom: 40px;
-    margin-top: 50px; /* Leave space for the sticky header menu */
+    margin-top: 25px; /* Reduced from 50px */
     text-align: center;
 }
 
@@ -3578,7 +3580,7 @@ body {
 
 /* Store Separation & Content */
 .store-container {
-    margin-top: 100px; /* Clear distance from headline */
+    margin-top: 20px; /* Reduced from 100px */
     display: flex;
     flex-direction: column;
     align-items: center;
