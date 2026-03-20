@@ -95,66 +95,81 @@ class StorageService {
     }
 
     async getProfile() {
-        // 1. Start with local data for instant response
-        let profile = this._getLocalProfile();
-
-        if (!this.auth.isLoggedIn()) return { ...profile, id: null };
+        // If not logged in, use local data
+        if (!this.auth.isLoggedIn()) {
+            return { id: null, ...this._getLocalProfile() };
+        }
 
         try {
-            // 2. Try to fetch from cloud with a tight timeout (3s)
-            const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Cloud Timeout')), 3000));
-            const cloudFetch = this.auth.client.from('profiles').select('*').eq('id', this.auth.user.id).single();
+            // CLOUD FIRST: Fetch authoritative data
+            const { data, error } = await this.auth.client.from('profiles').select('*').eq('id', this.auth.user.id).single();
             
-            const res = await Promise.race([cloudFetch, timeout]);
+            if (error && error.code !== 'PGRST116') {
+                 console.warn('getProfile error:', error.message);
+            }
             
-            if (res && res.data) {
-                // Merge cloud data into local
-                profile = {
-                    ...profile,
-                    coins: res.data.coins !== undefined ? res.data.coins : profile.coins,
-                    last_daily_claim: res.data.last_daily_claim || profile.last_daily_claim,
-                    nickname: res.data.nickname || profile.nickname
+            if (data) {
+                const profile = {
+                    coins: parseInt(data.coins || 0),
+                    last_daily_claim: data.last_daily_claim || null,
+                    nickname: data.nickname || null
                 };
+                // Update local cache
                 this._setLocalProfile(profile);
+                return { id: this.auth.user.id, ...profile };
             }
         } catch (e) {
             console.warn('getProfile cloud fetch failed, using local fallback:', e.message);
         }
 
-        return { id: this.auth.user ? this.auth.user.id : null, ...profile };
+        // Fallback to local cache only if cloud fails or no profile exists yet
+        const local = this._getLocalProfile();
+        return { 
+            id: this.auth.user.id, 
+            ...local,
+            coins: parseInt(local.coins || 0)
+        };
     }
 
     async _saveProfile(profileData) {
-        // 1. Update Local Storage Immediately
-        const currentLocal = this._getLocalProfile();
-        const updatedLocal = { ...currentLocal, ...profileData };
-        this._setLocalProfile(updatedLocal);
-
-        if (!this.auth.isLoggedIn()) return { success: true, localOnly: true };
+        if (!this.auth.isLoggedIn()) {
+            // Local only
+            const currentLocal = this._getLocalProfile();
+            const updatedLocal = { ...currentLocal, ...profileData };
+            this._setLocalProfile(updatedLocal);
+            return { success: true, localOnly: true };
+        }
 
         const userId = this.auth.user.id;
+        // Ensure coins is an integer if present
+        if (profileData.coins !== undefined) {
+            profileData.coins = parseInt(profileData.coins);
+        }
         console.log('Syncing profile to cloud:', profileData);
         
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Sync Timeout')), 6000));
-        
         try {
-            const dbOp = (async () => {
-                const updateData = { 
-                    id: userId,
-                    updated_at: new Date().toISOString(),
-                    ...profileData
-                };
+            // Cloud Update
+            const updateData = { 
+                id: userId,
+                updated_at: new Date().toISOString(),
+                ...profileData
+            };
 
-                const { error } = await this.auth.client.from('profiles').upsert(updateData, { onConflict: 'id' });
-                if (error) throw error;
-                return { success: true };
-            })();
+            const { error } = await this.auth.client.from('profiles').upsert(updateData, { onConflict: 'id' });
+            if (error) {
+                console.error('Supabase upsert error:', error);
+                throw error;
+            }
 
-            return await Promise.race([dbOp, timeout]);
+            // Update Local Cache AFTER successful cloud update
+            const currentLocal = this._getLocalProfile();
+            const updatedLocal = { ...currentLocal, ...profileData };
+            this._setLocalProfile(updatedLocal);
+
+            return { success: true };
         } catch (e) {
-            console.error('Cloud sync failed, data saved locally only:', e);
-            // We return success true because it IS saved locally and will work for the user
-            return { success: true, cloudError: e.message || e };
+            console.error('Cloud sync failed:', e.message || e);
+            return { success: false, error: e.message || e };
         }
     }
 
@@ -169,13 +184,18 @@ class StorageService {
                 return { success: false, error: 'Already claimed today' };
             }
 
-            const updatedCoins = (profile.coins || 0) + 20;
+            const currentCoins = parseInt(profile.coins || 0);
+            const updatedCoins = currentCoins + 20;
+            
             const res = await this._saveProfile({
                 coins: updatedCoins,
                 last_daily_claim: today
             });
 
-            // Even if there was a cloud error, we consider it a success for the UI session
+            if (!res.success) {
+                return { success: false, error: res.error };
+            }
+
             return { success: true, newCoins: updatedCoins };
         } catch (error) {
             console.error('Daily Login Process Error:', error);
@@ -532,7 +552,12 @@ class Auth {
         const options = window.location.protocol === 'file:' ? {} : { emailRedirectTo: 'https://flex6x.github.io/skat-app/' };
         return await this.client.auth.signUp({ email, password, options }); 
     }
-    async logout() { await this.client.auth.signOut(); window.location.reload(); }
+    async logout() { 
+        await this.client.auth.signOut(); 
+        localStorage.removeItem('skat_user_profile');
+        localStorage.removeItem('skatListStats'); // Also clear stats if desired, or keep as guest history? User said "coins from other account" so clear profile is key.
+        window.location.reload(); 
+    }
 
     updateUI() {
         const headerRight = document.querySelector('.header-right');
@@ -642,13 +667,27 @@ class Auth {
                     btnDaily.textContent = '...';
                     const res = await this.storage.claimDailyLogin();
                     if (res.success) {
-                        // Crucial: Full re-render with fresh data
+                        // Optimistic UI update
+                        btnDaily.textContent = '✓';
+                        btnDaily.classList.add('claimed');
+                        
+                        // Update balance display immediately if possible
+                        const balanceDisplay = document.getElementById('store-balance-header');
+                        if (balanceDisplay) {
+                            const coinSpan = balanceDisplay.querySelector('span');
+                            if (coinSpan) coinSpan.textContent = res.newCoins;
+                        }
+                        
+                        // Full re-render to be safe
                         await this.renderTalerGroup();
                     } else {
                         btnDaily.disabled = false;
                         btnDaily.classList.add('glow-yellow');
                         btnDaily.textContent = '+20';
                         console.error('Claim failed:', res.error);
+                        if (window.ui && typeof window.ui.showMessage === 'function') {
+                            window.ui.showMessage('Claim error: ' + res.error);
+                        }
                     }
                 };
             }
