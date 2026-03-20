@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.appSettings = new Settings();
 
     // Initialize UI
-    const ui = new UI();
+    window.ui = new UI();
+    const ui = window.ui;
 
     // Only proceed if we are on a page with a game container
     if (!ui.els.gameContainer) {
@@ -122,7 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         announcedSchwarz: result.announcedSchwarz,
                         declarerTrumpCount: result.declarerTrumpCount,
                         matadors: result.matadors,
-                        isOuvert: result.isOuvert
+                        isOuvert: result.isOuvert,
+                        playerRollmops: result.playerRollmops
                     });
                 }
                 ui.updateScoreboard(gameHistory);
@@ -135,11 +137,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveListToStats(gameHistory);
                 localStorage.removeItem('skatSessionState');
 
-                ui.els.btnRestart.textContent = ui.getTranslation('back_to_menu');
-                ui.els.btnRestart.onclick = () => {
-                    ui.els.gameOverOverlay.classList.add('hidden');
+                // CALCULATE TOTALS FOR SUMMARY
+                const finalTotals = [0, 0, 0];
+                gameHistory.forEach(g => {
+                    if (g.passedIn) return;
+                    if (g.isRamsch) {
+                        // flat -25 in NORMAL mode, actual individualScores in pure mode
+                        if (isRamschMode && g.individualScores) {
+                             g.individualScores.forEach((pts, i) => finalTotals[i] -= pts);
+                        } else {
+                             g.loserIndices.forEach(idx => finalTotals[idx] -= 25);
+                        }
+                    } else {
+                        const val = g.won ? g.value : -g.value;
+                        finalTotals[g.declarerId] += val;
+                    }
+                });
+
+                // Show Session Summary Overlay
+                ui.showSessionSummary(gameHistory, finalTotals, () => {
                     window.location.href = 'index.html';
-                };
+                });
             } else {
                 const nextGameLabel = ui.getTranslation('new_game');
                 ui.els.btnRestart.textContent = `${nextGameLabel} (${completedRounds + 1}/${sessionRounds})`;
@@ -167,6 +185,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let maxGameValue = 0;
         let maxTrumpCount = 0;
         let winGrandOhne4Count = 0;
+        let winNullNo7Count = 0;
+        let winEichelCount = 0;
+        let winGruenCount = 0;
+        let winRotCount = 0;
+        let winSchellenCount = 0;
+        let winRamschZeroCount = 0;
         let humanGamesPlayed = 0;
         let humanGamesWon = 0;
 
@@ -188,7 +212,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (game.passedIn) return;
             
             if (game.isRamsch) {
+                // Scoring in history totals: 
+                // In Normal Mode we ALWAYS use flat -25 (as requested).
+                // (Note: isRamschMode is true ONLY in pure Ramsch mode, where we skip saveListToStats anyway)
                 game.loserIndices.forEach(idx => totals[idx] -= 25);
+
+                // Ramsch Zero Points (Jungfrau) - Check if user (index 2) got 0 points
+                // In Normal mode, points are not tracked in individualScores, so we can't fully check this 
+                // UNLESS we store points even in normal mode. 
+                // However, "Jungfrau" usually means taking no tricks/points.
+                // Assuming `individualScores` might be present even if we use flat -25 for totals.
+                if (game.individualScores && game.individualScores[2] === 0) {
+                    winRamschZeroCount++;
+                }
+
                 if (!game.loserIndices.includes(2)) {
                     winRamschCount++;
                 }
@@ -208,28 +245,37 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (game.trumpMode === 'Grand') {
                             winGrandCount++;
                             gameTypeCounts.anzahlGrandSpiele++;
-                            // Grand Ouvert
                             if (game.handGame && game.isOuvert) {
                                 gameTypeCounts.anzahlGrandOuvert++;
                             }
-                            // Ohne 4: check matadors
                             if (game.matadors && game.matadors.type === 'ohne' && game.matadors.count >= 4) {
                                 winGrandOhne4Count++;
                             }
                         } else if (game.trumpMode === 'Null') {
                             winNullCount++;
                             gameTypeCounts.anzahlNullSpiele++;
-                            // Null Ouvert
                             if (game.isOuvert) {
                                 gameTypeCounts.anzahlNullOuvert++;
                             }
+                            // Führer Badge: Null without 7
+                            // We need to know if player had a 7. 
+                            // Since we don't store the full hand in history, we rely on a flag or assume check.
+                            // We will add `hasSeven` to game result in next step.
+                            if (game.playerHasSeven === false) {
+                                winNullNo7Count++;
+                            }
+                        } else {
+                            // Suit Games
+                            if (game.trumpMode === 'Eichel') winEichelCount++;
+                            else if (game.trumpMode === 'Grün') winGruenCount++;
+                            else if (game.trumpMode === 'Rot') winRotCount++;
+                            else if (game.trumpMode === 'Schellen') winSchellenCount++;
                         }
                         
                         if (game.handGame) {
                             gameTypeCounts.anzahlHandspiele++;
                         }
                         
-                        // Count both announced and actual Schneider/Schwarz (if won)
                         if (game.schwarz || game.announcedSchwarz) {
                             winSchwarzCount++;
                             gameTypeCounts.anzahlSchwarz++;
@@ -237,17 +283,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             gameTypeCounts.anzahlSchneider++;
                         }
                         
-                        // Big Busch: ONLY for 264 (Grand Ouvert with 4, Hand)
                         if (game.value === 264 && game.won) {
                             gameTypeCounts.anzahlBigBusch++;
                         }
-                        
-                        // Rollmops: Hand Null
-                        if (game.handGame && game.trumpMode === 'Null') {
-                            winRollmopsCount++;
-                            gameTypeCounts.anzahlRollmops++;
-                        }
                     }
+                }
+
+                const humanWonThisGame = (game.declarerId === 2) ? game.won : !game.won;
+                if (!game.isRamsch && game.playerRollmops && game.playerRollmops[2] && humanWonThisGame) {
+                    winRollmopsCount++;
+                    gameTypeCounts.anzahlRollmops++;
                 }
             }
         });
@@ -257,16 +302,23 @@ document.addEventListener('DOMContentLoaded', () => {
             scores: totals, // [bot2, bot1, player]
             rounds: history.length,
             ruleSet: window.appSettings.current.ruleSet,
+            isPureRamschList: isRamschMode, 
             ...gameTypeCounts,
             // New Badge Fields
             winGrandCount,
             winNullCount,
             winSchwarzCount,
             winRollmopsCount,
-            winRamschCount,
+            winRamschCount: winRamschCount + (isRamschMode && (totals[2] === Math.max(...totals)) ? 1 : 0),
             maxGameValue,
             maxTrumpCount,
             winGrandOhne4Count,
+            winNullNo7Count,
+            winEichelCount,
+            winGruenCount,
+            winRotCount,
+            winSchellenCount,
+            winRamschZeroCount,
             wonAllInList: (humanGamesPlayed > 0 && humanGamesPlayed === humanGamesWon)
         };
 

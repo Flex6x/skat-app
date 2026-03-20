@@ -7,16 +7,23 @@ https://flex6x.github.io/skat-app/
 
 - Diese App wurde größten Teils mit AI entwickelt und dient der Unterhaltung
 - Die Wahrscheinlichkeit, dass du nach der Skataufnahme (also aus deinen insgesamt 12 zur Verfügung stehenden Karten) mindestens 10 Trümpfe wählen kannst, liegt bei etwa 0,065 %.
+- Rollmops: Winnbar in allen Standardmodi (Suit, Grand, Null), basierend auf den Karten vor der Skataufnahme.
 
 ## To Do:
 
 - skat soll erst im richtigen moment verschwinden
+- bug reports abfangen
 - SEO Optimierung
-- Auswahl der Karten mit Store.
-- Entferne "verschiedene schnelligkeits stufen von animationen"
-- Acc löschen + PW Reset
-- badges reihenfolge ändern
+- "Rest meine/schenken" - Buttons nach jedem Spiel entfernen (bleiben beim Reizen)
+- alle Übersicht Stats bei Leaderboard anzeigen
+- Nickname System klarer machen
+- bessere emojis für neue badges
 
-- bitte schaue nochmal drüber, dass wenn man daten auf einen acc übertragen will, dass da eine warnung und bestätigungsnachricht kommt (dass dann die daten des accounts überschrieben werden.) Da wir jetzt das feld "stats löschen" entfernt haben, ist der Bereich data leer. Dieser soll auch nicht angezeigt werden wenn nix drin steht (soll nur da sein, wenn das feld "stats auf acc übertragen" da ist.)
+## Bugreports:
 
-## Bugs: 
+- Vorderhand, Mittelhand und Hinterhand werden normalerweise mit VH, MH und HH abgekürzt
+- Die KI überreizt sich auch, ohne dass Wenzel im Skat liegen.
+
+## Zukünftige Badges:
+
+- Farbspiel mit 4 oder weniger trumpf gewinnen.

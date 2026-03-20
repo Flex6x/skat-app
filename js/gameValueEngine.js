@@ -63,9 +63,11 @@ class GameValueEngine {
     /**
      * Berechnet den Multiplikator.
      * Bonusstufen bei Hand: Hand(1), Schneider(1), Schneider angesagt(1), Schwarz(1), Schwarz angesagt(1), Ouvert(1)
+     * Neu: Wenn gewonnen wurde, zählen Schneider/Schwarz nur, wenn sie erreicht wurden.
+     * Wenn verloren wurde, zählen Schneider/Schwarz für den Multiplikator, wenn die GEGNER sie erreicht haben.
      */
-    static calculateMultiplier({ matadors, handGame, schneider, schwarz, announcedSchneider, announcedSchwarz, isOuvert }) {
-        let multiplier = matadors + 1; // Spitze(n) + Spiel
+    static calculateMultiplier({ matadors, handGame, schneider, schwarz, announcedSchneider, announcedSchwarz, isOuvert, won, declarerPoints, defenderPoints }) {
+        let multiplier = matadors.count + 1; // Spitze(n) + Spiel
 
         if (handGame) {
             multiplier += 1; // +1 Hand
@@ -82,9 +84,11 @@ class GameValueEngine {
             if (hasAnnouncedSchwarz) multiplier += 1;
             if (isOuvert) multiplier += 1;
         } else {
+            // Wenn der Alleinspieler verliert, können die Gegner Schneider (31+ Augen) oder Schwarz (alle Stiche) gemacht haben.
+            // Der User möchte, dass Schneider/Schwarz-Verlust des Alleinspielers den Wert erhöht (noch mehr Minus).
             if (schneider) multiplier += 1;
             if (schwarz) multiplier += 1;
-            if (isOuvert) multiplier += 1; // Generally Hand, but for completeness
+            if (isOuvert) multiplier += 1; 
         }
 
         return multiplier;
@@ -160,15 +164,26 @@ class GameValueEngine {
             };
         }
 
-        // --- MATADOR CALCULATION FIX ---
-        // Calculate matadors based ONLY on the 10 cards the player kept (declarerCards).
+        // --- MATADOR CALCULATION ---
         const matadors = this.calculateMatadors(declarerCards);
 
-        const schneider = defenderPoints <= 30;
-        const schwarz = defenderTrickCount === 0;
+        // Schneider/Schwarz-Check
+        // Wenn der Alleinspieler gewinnt: Schneider = Gegner <= 30
+        // Wenn der Alleinspieler verliert: Schneider = Alleinspieler <= 30
+        let schneider = false;
+        let schwarz = false;
+
+        if (declarerWonNormally) {
+            schneider = defenderPoints <= 30;
+            schwarz = defenderTrickCount === 0;
+        } else {
+            // Alleinspieler hat verloren. Haben die Gegner Schneider/Schwarz geschafft?
+            schneider = declarerPoints <= 30;
+            schwarz = (10 - defenderTrickCount) === 0; // Declarer has 0 tricks
+        }
 
         const multiplier = this.calculateMultiplier({
-            matadors: matadors.count,
+            matadors,
             handGame,
             schneider,
             schwarz,
@@ -181,11 +196,11 @@ class GameValueEngine {
         const overbid = this.checkOverbid(bidValue, gameValue);
 
         let won = overbid ? false : declarerWonNormally;
-        if (announcedSchneider && !schneider) won = false;
-        if (announcedSchwarz && !schwarz) won = false;
-        if (isOuvert && !schwarz) won = false; // Ouvert in Suit/Grand implies winning all tricks
+        if (announcedSchneider && !schneider && declarerWonNormally) won = false;
+        if (announcedSchwarz && !schwarz && declarerWonNormally) won = false;
+        if (isOuvert && !schwarz && declarerWonNormally) won = false; 
 
-        const matadorType = getT(matadors.type); // 'mit' or 'ohne'
+        const matadorType = getT(matadors.type); 
         const matadorCount = matadors.count;
 
         let currentMult = matadorCount + 1; // 1. Spiel
@@ -195,7 +210,6 @@ class GameValueEngine {
             currentMult += 1; // 2. Hand
             parts.push(`${getT('hand')} ${currentMult}`);
             
-            // Re-use logic from calculateMultiplier for details
             const hasSchneider = schneider || announcedSchneider || announcedSchwarz || isOuvert;
             const hasAnnouncedSchneider = announcedSchneider || announcedSchwarz || isOuvert;
             const hasSchwarz = schwarz || announcedSchwarz || isOuvert;

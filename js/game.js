@@ -58,6 +58,7 @@ class Game {
         this.announcedSchwarz = false;
         this.isOuvert = false;
         this.isRamschMode = wasRamsch;
+        this.isRollmopsHand = false;
         
         this.phase = PHASES.DEALING;
         // Compute roles relative to dealer
@@ -304,6 +305,12 @@ class Game {
         // Sort hands AFTER animation
         this.players.forEach(p => this.sortHand(p.hand));
 
+        // Check for Rollmops (Hand with no Jacks) and Has Seven (for Führer Badge) BEFORE skat uptake
+        this.players.forEach(p => {
+            p.hasRollmopsHand = !p.hand.some(c => c.rank === 'U');
+            p.hasSeven = p.hand.some(c => c.rank === '7');
+        });
+
         // Resort and Re-render all hands in their sorted state
         this.ui.renderAllHands(this.players);
 
@@ -519,8 +526,8 @@ class Game {
                     this.ui.renderPlayerHand(this.players[this.declarerIndex].hand);
                     this.saveGameState();
                     this.startGameplay();
-                } else if (this.isOuvert && this.trumpMode === TRUMP_MODES.GRAND) {
-                    // Grand Ouvert implies Schwarz angesagt
+                } else if (this.isOuvert) {
+                    // Grand Ouvert OR Suit Ouvert: implies Schneider/Schwarz angesagt
                     this.announcedSchneider = true;
                     this.announcedSchwarz = true;
                     this.ui.setTrump(this.trumpMode, this.handGame, true, true, true);
@@ -1095,7 +1102,9 @@ class Game {
                 announcedSchwarz: this.announcedSchwarz,
                 isOuvert: this.isOuvert,
                 declarerTrumpCount: this.declarerTrumpCount,
-                matadors: evaluation.matadors
+                matadors: evaluation.matadors,
+                playerRollmops: this.players.map(p => p.hasRollmopsHand),
+                playerHasSeven: this.players.map(p => p.hasSeven)
             });
         }
     }

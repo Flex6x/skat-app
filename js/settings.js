@@ -14,7 +14,8 @@ class Settings {
         language: 'de',
         ruleSet: 'tournament', // 'tournament' or 'pub'
         dragDropEnabled: true,
-        batterySaver: false
+        batterySaver: false,
+        cardDesign: 'classic' // 'classic' or 'turnier'
     };
 
     static SPEED_MAP = {

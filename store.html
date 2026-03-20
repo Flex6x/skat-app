@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skat-König - Store</title>
+    <link rel="icon" type="image/jpeg" href="media/logo.jpg">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="main-menu" class="menu-overlay">
+        <header class="menu-header">
+            <div class="header-left" id="btn-logo-home" style="cursor: pointer;" onclick="window.location.href='index.html'">
+                <img src="media/logo.jpg" alt="Skat-König Logo" class="app-logo-img">
+                <span class="app-name">Skat-König</span>
+            </div>
+            <nav class="header-right">
+                <div id="store-balance-container" style="display: flex; align-items: center;"></div>
+                <button class="nav-link" onclick="window.location.href='index.html'">Hauptmenü</button>
+                <div id="auth-container"></div>
+            </nav>
+        </header>
+
+        <div class="menu-content" id="store-view">
+            <header class="view-header">
+                <h1 data-i18n="store_title">König-Store</h1>
+            </header>
+            
+            <div class="store-container">
+                <div id="store-items-grid" class="store-grid">
+                    <!-- Item: Turnierblatt -->
+                    <div class="store-card" id="item-turnierblatt">
+                        <div class="item-preview">
+                            <img src="media/tunier_blatt_preview.png" alt="Turnierblatt Vorschau" class="item-preview-img">
+                        </div>
+                        <div class="item-info">
+                            <h3>Turnierblatt</h3>
+                            <p>Das offizielle Turnierdesign für Profis.</p>
+                            <div class="item-price">
+                                <img src="media/coin.png" class="coin-small">
+                                <span>400</span>
+                            </div>
+                            <button class="btn primary buy-btn" id="btn-buy-turnierblatt">Kaufen</button>
+                            <span class="owned-label hidden" id="label-owned-turnierblatt">Im Besitz</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/settings.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            window.appSettings = new Settings();
+            
+            // Wait for auth to be ready
+            const checkAuth = setInterval(async () => {
+                if (window.auth) {
+                    clearInterval(checkAuth);
+                    initStore();
+                }
+            }, 100);
+
+            async function initStore() {
+                if (!window.auth.isLoggedIn()) {
+                    return; // auth.js handles the "Not logged in" message
+                }
+
+                const purchased = await window.storageService.getPurchasedItems();
+                
+                // Update Turnierblatt state
+                if (purchased.includes('turnierblatt')) {
+                    document.getElementById('btn-buy-turnierblatt').classList.add('hidden');
+                    document.getElementById('label-owned-turnierblatt').classList.remove('hidden');
+                }
+
+                document.getElementById('btn-buy-turnierblatt').onclick = async () => {
+                    const btn = document.getElementById('btn-buy-turnierblatt');
+                    btn.disabled = true;
+                    btn.textContent = '...';
+
+                    const res = await window.storageService.purchaseItem('turnierblatt', 400);
+                    
+                    if (res.success) {
+                        btn.classList.add('hidden');
+                        document.getElementById('label-owned-turnierblatt').classList.remove('hidden');
+                        // Update balance display
+                        const balanceSpan = document.querySelector('#store-balance-header span');
+                        if (balanceSpan) balanceSpan.textContent = res.newCoins;
+                        alert('Erfolgreich gekauft!');
+                    } else {
+                        btn.disabled = false;
+                        btn.textContent = 'Kaufen';
+                        alert(res.error);
+                    }
+                };
+            }
+        });
+    </script>
+</body>
+</html>

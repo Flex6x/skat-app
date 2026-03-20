@@ -1,0 +1,48 @@
+
+/* Session Summary Overlay Table */
+.session-summary-table-container {
+    width: 100%;
+    max-height: 350px;
+    overflow-y: auto;
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.summary-table th {
+    padding: 10px 5px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.8rem;
+}
+
+.summary-table td {
+    padding: 8px 5px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.summary-table .total-row {
+    background: rgba(255, 255, 255, 0.05);
+    font-weight: bold;
+}
+
+.summary-table .total-row td {
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 5px;
+    font-size: 1.1rem;
+}
+
+.score-pos { color: #4caf50; }
+.score-neg { color: #f44336; }
+
