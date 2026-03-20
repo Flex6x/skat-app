@@ -10,10 +10,18 @@ const SUITS = {
 };
 
 const SUIT_SYMBOLS = {
-    'Eichel': '<img src="media/eichel.png" class="suit-icon" alt="Eichel">',
-    'Grün': '<img src="media/gruen.png" class="suit-icon" alt="Grün">',
-    'Rot': '<img src="media/rot.png" class="suit-icon" alt="Rot">',
-    'Schellen': '<img src="media/schellen.png" class="suit-icon" alt="Schellen">'
+    'classic': {
+        'Eichel': '<img src="media/eichel.png" class="suit-icon" alt="Eichel">',
+        'Grün': '<img src="media/gruen.png" class="suit-icon" alt="Grün">',
+        'Rot': '<img src="media/rot.png" class="suit-icon" alt="Rot">',
+        'Schellen': '<img src="media/schellen.png" class="suit-icon" alt="Schellen">'
+    },
+    'turnier': {
+        'Eichel': '<img src="media/kreuz_turnier.png" class="suit-icon" alt="Kreuz">',
+        'Grün': '<img src="media/peak_turnier.png" class="suit-icon" alt="Pik">',
+        'Rot': '<img src="media/herz_turnier.png" class="suit-icon" alt="Herz">',
+        'Schellen': '<img src="media/karo_turnier.png" class="suit-icon" alt="Karo">'
+    }
 };
 
 const RANKS = ['7', '8', '9', '10', 'U', 'O', 'K', 'A']; // Unter (Bube), Ober (Dame), König, Ass
@@ -50,7 +58,8 @@ class Card {
         el.dataset.id = this.id;
         el.draggable = true;
 
-        const symbol = SUIT_SYMBOLS[this.suit];
+        const design = (window.appSettings && window.appSettings.current.cardDesign) || 'classic';
+        const symbol = SUIT_SYMBOLS[design][this.suit];
 
         el.innerHTML = `
             <div class="card-top-left">

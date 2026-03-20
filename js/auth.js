@@ -70,27 +70,98 @@ class StorageService {
             Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs))]);
 
         try {
-            const [aggRes, histRes, profRes, claimRes] = await Promise.allSettled([
+            const [aggRes, histRes, profRes, claimRes, purchaseRes] = await Promise.allSettled([
                 fetchWithTimeout(this.auth.client.from('stats').select('*').eq('user_id', userId).single()),
                 fetchWithTimeout(this.auth.client.from('history').select('*').eq('user_id', userId).order('id', { ascending: true })),
                 fetchWithTimeout(this.auth.client.from('profiles').select('*').eq('id', userId).single()),
-                fetchWithTimeout(this.auth.client.from('claimed_badges').select('badge_id').eq('user_id', userId))
+                fetchWithTimeout(this.auth.client.from('claimed_badges').select('badge_id').eq('user_id', userId)),
+                fetchWithTimeout(this.auth.client.from('purchased_items').select('item_id').eq('user_id', userId))
             ]);
 
             const aggregated = aggRes.status === 'fulfilled' ? aggRes.value.data : null;
             const history = histRes.status === 'fulfilled' ? histRes.value.data : [];
             const profile = profRes.status === 'fulfilled' ? profRes.value.data : this._getLocalProfile();
             const claimedBadges = claimRes.status === 'fulfilled' ? (claimRes.value.data || []) : [];
+            const purchasedItems = purchaseRes.status === 'fulfilled' ? (purchaseRes.value.data || []) : [];
 
             return { 
                 aggregated, 
                 history, 
                 profile: profile || { coins: 0, last_daily_claim: null },
-                claimedBadges: claimedBadges.map(b => b.badge_id)
+                claimedBadges: claimedBadges.map(b => b.badge_id),
+                purchasedItems: purchasedItems.map(i => i.item_id)
             };
         } catch (err) {
             console.error('Error in getUserStats:', err);
             return null;
+        }
+    }
+
+    async getPurchasedItems() {
+        if (!this.auth.isLoggedIn()) return [];
+        try {
+            const { data, error } = await this.auth.client
+                .from('purchased_items')
+                .select('item_id')
+                .eq('user_id', this.auth.user.id);
+            
+            if (error) throw error;
+            return (data || []).map(item => item.item_id);
+        } catch (err) {
+            console.warn('Error fetching purchased items:', err.message);
+            return [];
+        }
+    }
+
+    async purchaseItem(itemId, cost) {
+        if (!this.auth.isLoggedIn()) return { success: false, error: 'Nicht angemeldet!' };
+
+        console.log(`Versuche Item zu kaufen: ${itemId} für ${cost} Taler`);
+
+        try {
+            // 1. Get current profile to check coins
+            const profile = await this.getProfile();
+            const currentCoins = parseInt(profile.coins || 0);
+
+            if (currentCoins < cost) {
+                return { success: false, error: 'Nicht genug Taler! Du hast nur ' + currentCoins };
+            }
+
+            // 2. Add to purchased_items
+            const { error: purchaseError } = await this.auth.client
+                .from('purchased_items')
+                .insert({
+                    user_id: this.auth.user.id,
+                    item_id: itemId
+                });
+
+            if (purchaseError) {
+                console.error('Fehler beim Eintragen des Kaufs:', purchaseError);
+                if (purchaseError.code === '23505') { // Unique violation
+                    return { success: false, error: 'Bereits im Besitz!' };
+                }
+                if (purchaseError.code === '42P01') { // Undefined table
+                    return { success: false, error: 'Datenbank-Tabelle fehlt! Hast du das SQL-Skript ausgeführt?' };
+                }
+                throw purchaseError;
+            }
+
+            // 3. Deduct coins
+            const updatedCoins = currentCoins - cost;
+            const res = await this._saveProfile({
+                coins: updatedCoins
+            });
+
+            if (!res.success) {
+                console.error('Fehler beim Abziehen der Taler:', res.error);
+                throw new Error(res.error);
+            }
+
+            console.log('Kauf erfolgreich! Neue Taler:', updatedCoins);
+            return { success: true, newCoins: updatedCoins };
+        } catch (err) {
+            console.error('Kauf-Exception:', err);
+            return { success: false, error: 'Kauf fehlgeschlagen: ' + err.message };
         }
     }
 
@@ -141,19 +212,28 @@ class StorageService {
         }
 
         const userId = this.auth.user.id;
-        // Ensure coins is an integer if present
-        if (profileData.coins !== undefined) {
-            profileData.coins = parseInt(profileData.coins);
-        }
-        console.log('Syncing profile to cloud:', profileData);
         
         try {
-            // Cloud Update
+            // Get existing profile to merge and ensure NOT NULL columns like 'nickname' are present
+            const currentProfile = await this.getProfile();
+            
+            // Try to get nickname from auth metadata if missing in profile
+            const authNickname = this.auth.user.user_metadata?.nickname || this.auth.user.email.split('@')[0];
+            const nickname = profileData.nickname || currentProfile.nickname || authNickname;
+
+            // Ensure coins is an integer
+            if (profileData.coins !== undefined) {
+                profileData.coins = parseInt(profileData.coins);
+            }
+
             const updateData = { 
                 id: userId,
                 updated_at: new Date().toISOString(),
+                nickname: nickname, // Always include nickname to avoid NOT NULL issues
                 ...profileData
             };
+
+            console.log('Syncing profile to cloud:', updateData);
 
             const { error } = await this.auth.client.from('profiles').upsert(updateData, { onConflict: 'id' });
             if (error) {
@@ -162,8 +242,7 @@ class StorageService {
             }
 
             // Update Local Cache AFTER successful cloud update
-            const currentLocal = this._getLocalProfile();
-            const updatedLocal = { ...currentLocal, ...profileData };
+            const updatedLocal = { ...currentProfile, ...profileData, nickname: nickname };
             this._setLocalProfile(updatedLocal);
 
             return { success: true };

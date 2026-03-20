@@ -16,6 +16,7 @@
                 <span class="app-name">Skat-König</span>
             </div>
             <nav class="header-right">
+                <div id="store-balance-container" style="display: flex; align-items: center;"></div>
                 <button class="nav-link" onclick="window.location.href='index.html'">Hauptmenü</button>
                 <div id="auth-container"></div>
             </nav>
@@ -25,10 +26,29 @@
             <h1 class="glow-text">König-Store</h1>
             
             <div class="store-container">
-                <p class="subtitle" style="margin-top: 0; margin-bottom: 40px;">Coming Soon - Neue Kartendesigns & Tisch-Styles bald verfügbar!</p>
-                
-                <!-- If the user is logged in, auth.js will render more content here in the future. 
-                     For now, we have the access check and the store container. -->
+                <div id="store-items-grid" class="store-grid">
+                    <!-- Item: Turnierblatt -->
+                    <div class="store-card" id="item-turnierblatt">
+                        <div class="item-preview">
+                            <div class="preview-cards">
+                                <img src="media/kreuz_turnier.png" alt="Kreuz">
+                                <img src="media/peak_turnier.png" alt="Pik">
+                                <img src="media/herz_turnier.png" alt="Herz">
+                                <img src="media/karo_turnier.png" alt="Karo">
+                            </div>
+                        </div>
+                        <div class="item-info">
+                            <h3>Turnierblatt</h3>
+                            <p>Das offizielle Turnierdesign für Profis.</p>
+                            <div class="item-price">
+                                <img src="media/coin.png" class="coin-small">
+                                <span>400</span>
+                            </div>
+                            <button class="btn primary buy-btn" id="btn-buy-turnierblatt">Kaufen</button>
+                            <span class="owned-label hidden" id="label-owned-turnierblatt">Im Besitz</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -37,8 +57,51 @@
     <script src="js/auth.js"></script>
     <script src="js/settings.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             window.appSettings = new Settings();
+            
+            // Wait for auth to be ready
+            const checkAuth = setInterval(async () => {
+                if (window.auth) {
+                    clearInterval(checkAuth);
+                    initStore();
+                }
+            }, 100);
+
+            async function initStore() {
+                if (!window.auth.isLoggedIn()) {
+                    return; // auth.js handles the "Not logged in" message
+                }
+
+                const purchased = await window.storageService.getPurchasedItems();
+                
+                // Update Turnierblatt state
+                if (purchased.includes('turnierblatt')) {
+                    document.getElementById('btn-buy-turnierblatt').classList.add('hidden');
+                    document.getElementById('label-owned-turnierblatt').classList.remove('hidden');
+                }
+
+                document.getElementById('btn-buy-turnierblatt').onclick = async () => {
+                    const btn = document.getElementById('btn-buy-turnierblatt');
+                    btn.disabled = true;
+                    btn.textContent = '...';
+
+                    const res = await window.storageService.purchaseItem('turnierblatt', 400);
+                    
+                    if (res.success) {
+                        btn.classList.add('hidden');
+                        document.getElementById('label-owned-turnierblatt').classList.remove('hidden');
+                        // Update balance display
+                        const balanceSpan = document.querySelector('#store-balance-header span');
+                        if (balanceSpan) balanceSpan.textContent = res.newCoins;
+                        alert('Erfolgreich gekauft!');
+                    } else {
+                        btn.disabled = false;
+                        btn.textContent = 'Kaufen';
+                        alert(res.error);
+                    }
+                };
+            }
         });
     </script>
 </body>

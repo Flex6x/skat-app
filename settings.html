@@ -73,6 +73,24 @@
                     </div>
                 </div>
 
+                <!-- Card Design Section -->
+                <div class="settings-card" id="card-design-section">
+                    <h3 data-i18n="card_design">Kartenblatt</h3>
+                    <div class="settings-control">
+                        <div class="radio-group" id="card-design-radios">
+                            <label class="radio-label">
+                                <input type="radio" name="cardDesign" value="classic" checked>
+                                <span class="radio-custom"></span>
+                                <span data-i18n="classic_german">Klassisch alt deutsch</span>
+                            </label>
+                            <!-- Turnierblatt option will be added here if owned -->
+                        </div>
+                        <p id="design-locked-msg" class="locked-msg hidden" style="font-size: 0.8rem; color: #aaa; margin-top: 8px;">
+                            Weitere Blätter im <a href="store.html" style="color: var(--primary-color);">Store</a> freischalten.
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Rules Section -->
                 <div class="settings-card">
                     <h3 data-i18n="rule_set">Regeln</h3>
@@ -207,6 +225,44 @@
             if (dragDropChk) dragDropChk.checked = s.dragDropEnabled;
             const batterySaverChk = document.getElementById('chk-battery-saver');
             if (batterySaverChk) batterySaverChk.checked = s.batterySaver;
+
+            // --- Card Design logic (Ownership Check) ---
+            const cardDesignRadios = document.getElementById('card-design-radios');
+            const designLockedMsg = document.getElementById('design-locked-msg');
+            const cardDesignSection = document.getElementById('card-design-section');
+
+            async function initCardDesigns() {
+                if (!window.auth || !window.auth.isLoggedIn()) {
+                    cardDesignSection.classList.add('hidden');
+                    return;
+                }
+
+                const purchased = await window.storageService.getPurchasedItems();
+                const hasTurnier = purchased.includes('turnierblatt');
+
+                if (hasTurnier) {
+                    const turnierLabel = document.createElement('label');
+                    turnierLabel.className = 'radio-label';
+                    turnierLabel.innerHTML = `
+                        <input type="radio" name="cardDesign" value="turnier">
+                        <span class="radio-custom"></span>
+                        <span data-i18n="turnier_blatt">Turnierblatt</span>
+                    `;
+                    cardDesignRadios.appendChild(turnierLabel);
+                    designLockedMsg.classList.add('hidden');
+                } else {
+                    designLockedMsg.classList.remove('hidden');
+                }
+
+                // Now set the correct radio based on current setting
+                document.querySelectorAll('input[name="cardDesign"]').forEach(r => {
+                    r.checked = (r.value === s.cardDesign);
+                    r.addEventListener('change', () => {
+                        draft.cardDesign = r.value;
+                    });
+                });
+            }
+            initCardDesigns();
 
             // --- Bind form changes to draft (NOT to real settings) ---
             if (nicknameInput) {
