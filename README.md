@@ -14,15 +14,13 @@ https://flex6x.github.io/skat-app/
 - skat soll erst im richtigen moment verschwinden
 - bug reports abfangen
 - SEO Optimierung
-- anzahl der gespielten listen sollen mit spielverlauf matchen
 - "Rest meine/schenken" - Buttons nach jedem Spiel entfernen (bleiben beim Reizen)
 - alle Übersicht Stats bei Leaderboard anzeigen
-- eigene einstellungen für accounts (löschen, nickname, pw reset)
+- Nickname System klarer machen
 - bessere emojis für neue badges
 
 ## Bugreports:
 
-- Kein Bug aber vielleicht Bestenliste in Turnier und Kneipen unterteilen
 - Vorderhand, Mittelhand und Hinterhand werden normalerweise mit VH, MH und HH abgekürzt
 - Die KI überreizt sich auch, ohne dass Wenzel im Skat liegen.
 

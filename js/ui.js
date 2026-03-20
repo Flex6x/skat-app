@@ -2314,9 +2314,9 @@ class UI {
 
     updatePlayerRoles(vorhandId, mittelhandId, hinterhandId) {
         const roles = [];
-        roles[vorhandId] = ' (V)';
-        roles[mittelhandId] = ' (M)';
-        roles[hinterhandId] = ' (H)';
+        roles[vorhandId] = ' (VH)';
+        roles[mittelhandId] = ' (MH)';
+        roles[hinterhandId] = ' (HH)';
         
         const playerName = (window.appSettings && window.appSettings.current.nickname) || 'Du';
 
