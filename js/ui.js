@@ -82,6 +82,10 @@ const TRANSLATIONS = {
         null_ouvert: "Null Ouvert",
         null_ouvert_hand: "Null Ouvert Hand",
         grand_ouvert: "Grand Ouvert",
+        eichel_ouvert: "Eichel Ouvert",
+        gruen_ouvert: "Grün Ouvert",
+        rot_ouvert: "Rot Ouvert",
+        schellen_ouvert: "Schellen Ouvert",
         original_skat: "Original Skat",
         discarded_cards: "Gedrückt",
         announce_schneider: "Schneider ansagen",
@@ -161,12 +165,12 @@ const TRANSLATIONS = {
         badge_seriensieger_desc: "Gewinne 5-mal alle Spiele in einer Liste.",
         badge_grandmeister: "Grandmeister",
         badge_grandmeister_desc: "Gewinne 10 Grand-Spiele.",
-        badge_null_ass: "Hibbie",
+        badge_null_ass: "Hibby",
         badge_null_ass_desc: "Gewinne 10 Null-Spiele.",
         badge_rollmops: "Rollmops",
         badge_rollmops_desc: "Gewinne 3-mal mit einem Rollmops-Blatt.",
         badge_big_busch: "Big Busch",
-        badge_big_busch_desc: "Erreiche einen Spielwert von 264.",
+        badge_big_busch_desc: "Gewinne mit einem Spielwert von 264.",
         badge_ramsch_koenig: "Ramsch König",
         badge_ramsch_koenig_desc: "Gewinne 10-mal Ramsch.",
         badge_trumpfmaschine: "Trumpfmaschine",
@@ -179,6 +183,18 @@ const TRANSLATIONS = {
         badge_veteran_desc: "Absolviere 200 Spiele.",
         badge_ohne_4: "Ohne 4",
         badge_ohne_4_desc: "Gewinne einen Grand \"ohne 4\".",
+        badge_fuehrer: "Führer",
+        badge_fuehrer_desc: "Gewinne 5 Nullspiele ohne eine 7.",
+        badge_eichel_pro: "Eichel Profi",
+        badge_eichel_pro_desc: "Gewinne 15 Eichel-Spiele.",
+        badge_gruen_pro: "Grün Profi",
+        badge_gruen_pro_desc: "Gewinne 15 Grün-Spiele.",
+        badge_rot_pro: "Rot Profi",
+        badge_rot_pro_desc: "Gewinne 15 Rot-Spiele.",
+        badge_schellen_pro: "Schellen Profi",
+        badge_schellen_pro_desc: "Gewinne 15 Schellen-Spiele.",
+        badge_jungfrau: "Jungfrau",
+        badge_jungfrau_desc: "Erhalte beim Ramsch 5-mal 0 Punkte.",
         rules: "Regeln",
         rules_title: "Skat Regeln",
         rules_basics_title: "Grundregeln (Anfänger)",
@@ -215,6 +231,12 @@ const TRANSLATIONS = {
         rules_calculation_text: "Der Spielwert berechnet sich so:<br><br><strong>Grundwert × Multiplikatoren</strong><br><br>Beispiel (Rot-Spiel):<br><br>Grundwert Rot = <strong>10</strong><br><br>Multiplikatoren können sein:<br><br>Mit / Ohne<br>Spiel<br>Hand<br>Schneider<br>Schwarz<br>Ouvert<br><br>Beispiel:<br><br>Mit 2, Spiel, Hand → 4 × 10 = <strong>40</strong>",
         rules_ramsch_header: "Ramsch",
         rules_ramsch_text: "Nur bei <strong>Kneipenregeln</strong>, wenn <strong>eingepasst wird / niemand gereizt hat</strong>.<br><br>Dann spielt niemand als Alleinspieler.<br><br>Alle Spieler spielen gegeneinander und versuchen <strong>möglichst wenige Augen zu sammeln</strong>.<br><br>Der Spieler mit den meisten Augen verliert den Ramsch.",
+        summary: "Zusammenfassung",
+        summary_suit: "{n}x Farb",
+        summary_grand: "{n}x Grand",
+        summary_null: "{n}x Null",
+        summary_ramsch: "{n}x Ramsch",
+        summary_passed: "{n}x Einp.",
         login: "Login",
         logout: "Logout",
         profile: "Profil",
@@ -403,7 +425,16 @@ const TRANSLATIONS = {
         rules_calculation_text: "Formula: (Spitzen + Bonus) * Base Value. Base Values: Bells (9), Hearts (10), Leaves (11), Acorns (12), Grand (24).",
         rules_ramsch_header: "Ramsch & Rollmops",
         rules_ramsch_text: "If no one bids, Ramsch is often played: Everyone plays for themselves, goal is to get as few points as possible. Rollmops is a special form in Ramsch.",
-        overview: "Overview",
+        session_summary: "Listen-Zusammenfassung",
+        session_finished: "Liste beendet!",
+        back_to_menu: "Hauptmenü",
+        login: "Login",
+        summary_suit: "{n}x Suit",
+        summary_grand: "{n}x Grand",
+        summary_null: "{n}x Null",
+        summary_ramsch: "{n}x Ramsch",
+        summary_passed: "{n}x Pass.",
+        login: "Login",
         game_history: "Game History",
         badges: "Badges",
         unlocked: "Unlocked",
@@ -414,12 +445,12 @@ const TRANSLATIONS = {
         badge_seriensieger_desc: "Win all games within a single Liste.",
         badge_grandmeister: "Grand Master",
         badge_grandmeister_desc: "Win 10 Grand games.",
-        badge_null_ass: "Hibbie",
+        badge_null_ass: "Hibby",
         badge_null_ass_desc: "Successfully play Null 10 times.",
         badge_rollmops: "Rollmops",
         badge_rollmops_desc: "Win 3 games with a Rollmops hand.",
         badge_big_busch: "Big Busch",
-        badge_big_busch_desc: "Achieve a game value of at least 264.",
+        badge_big_busch_desc: "Win with a game value of 264.",
         badge_ramsch_koenig: "Ramsch King",
         badge_ramsch_koenig_desc: "Win Ramsch 10 times.",
         badge_trumpfmaschine: "Trump Machine",
@@ -432,6 +463,18 @@ const TRANSLATIONS = {
         badge_veteran_desc: "Play 200 games.",
         badge_ohne_4: "Without 4",
         badge_ohne_4_desc: "Win a Grand 'without 4'.",
+        badge_fuehrer: "Leader",
+        badge_fuehrer_desc: "Win 5 Null games without a 7.",
+        badge_eichel_pro: "Acorn Pro",
+        badge_eichel_pro_desc: "Win 15 Acorn games.",
+        badge_gruen_pro: "Leaves Pro",
+        badge_gruen_pro_desc: "Win 15 Leaves games.",
+        badge_rot_pro: "Hearts Pro",
+        badge_rot_pro_desc: "Win 15 Hearts games.",
+        badge_schellen_pro: "Bells Pro",
+        badge_schellen_pro_desc: "Win 15 Bells games.",
+        badge_jungfrau: "Virgin",
+        badge_jungfrau_desc: "Get 0 points in Ramsch 5 times.",
         login: "Login",
         logout: "Logout",
         profile: "Profile",
@@ -1307,7 +1350,13 @@ class UI {
             { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), desc: this.getTranslation('badge_anfaenger_desc'), target: 10, current: agg.games_played || 0, value: 100 },
             { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), desc: this.getTranslation('badge_stammspieler_desc'), target: 50, current: agg.games_played || 0, value: 100 },
             { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: agg.games_played || 0, value: 100 },
-            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: agg.win_grand_ohne_4_wins || 0, value: 200 }
+            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: agg.win_grand_ohne_4_wins || 0, value: 200 },
+            { id: 'fuehrer', icon: '👨‍✈️', title: this.getTranslation('badge_fuehrer'), desc: this.getTranslation('badge_fuehrer_desc'), target: 5, current: agg.null_no7_wins || 0, value: 200 },
+            { id: 'eichel_pro', icon: '🌰', title: this.getTranslation('badge_eichel_pro'), desc: this.getTranslation('badge_eichel_pro_desc'), target: 15, current: agg.eichel_wins || 0, value: 100 },
+            { id: 'gruen_pro', icon: '🍃', title: this.getTranslation('badge_gruen_pro'), desc: this.getTranslation('badge_gruen_pro_desc'), target: 15, current: agg.gruen_wins || 0, value: 100 },
+            { id: 'rot_pro', icon: '❤️', title: this.getTranslation('badge_rot_pro'), desc: this.getTranslation('badge_rot_pro_desc'), target: 15, current: agg.rot_wins || 0, value: 100 },
+            { id: 'schellen_pro', icon: '🔔', title: this.getTranslation('badge_schellen_pro'), desc: this.getTranslation('badge_schellen_pro_desc'), target: 15, current: agg.schellen_wins || 0, value: 100 },
+            { id: 'jungfrau', icon: '🧖‍♀️', title: this.getTranslation('badge_jungfrau'), desc: this.getTranslation('badge_jungfrau_desc'), target: 5, current: agg.ramsch_zero_wins || 0, value: 200 }
         ];
 
         badgeDefinitions.forEach(badge => {
@@ -1528,6 +1577,14 @@ class UI {
             aggregated.winRamschCount += (list.winRamschCount || 0);
             aggregated.maxTrumpCount = Math.max(aggregated.maxTrumpCount, list.maxTrumpCount || 0);
             aggregated.winGrandOhne4Count += (list.winGrandOhne4Count || 0);
+            
+            // New Counters
+            aggregated.winNullNo7Count += (list.winNullNo7Count || 0);
+            aggregated.winEichelCount += (list.winEichelCount || 0);
+            aggregated.winGruenCount += (list.winGruenCount || 0);
+            aggregated.winRotCount += (list.winRotCount || 0);
+            aggregated.winSchellenCount += (list.winSchellenCount || 0);
+            aggregated.winRamschZeroCount += (list.winRamschZeroCount || 0);
 
             // Legacy support / inference if new fields don't exist yet
             if (list.winSchwarzCount === undefined) aggregated.winSchwarzCount += (list.anzahlSchwarz || 0);
@@ -1549,7 +1606,13 @@ class UI {
             { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), desc: this.getTranslation('badge_anfaenger_desc'), target: 10, current: aggregated.totalGames },
             { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), desc: this.getTranslation('badge_stammspieler_desc'), target: 50, current: aggregated.totalGames },
             { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: aggregated.totalGames },
-            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: aggregated.winGrandOhne4Count }
+            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: aggregated.winGrandOhne4Count },
+            { id: 'fuehrer', icon: '👨‍✈️', title: this.getTranslation('badge_fuehrer'), desc: this.getTranslation('badge_fuehrer_desc'), target: 5, current: aggregated.winNullNo7Count },
+            { id: 'eichel_pro', icon: '🌰', title: this.getTranslation('badge_eichel_pro'), desc: this.getTranslation('badge_eichel_pro_desc'), target: 15, current: aggregated.winEichelCount },
+            { id: 'gruen_pro', icon: '🍃', title: this.getTranslation('badge_gruen_pro'), desc: this.getTranslation('badge_gruen_pro_desc'), target: 15, current: aggregated.winGruenCount },
+            { id: 'rot_pro', icon: '❤️', title: this.getTranslation('badge_rot_pro'), desc: this.getTranslation('badge_rot_pro_desc'), target: 15, current: aggregated.winRotCount },
+            { id: 'schellen_pro', icon: '🔔', title: this.getTranslation('badge_schellen_pro'), desc: this.getTranslation('badge_schellen_pro_desc'), target: 15, current: aggregated.winSchellenCount },
+            { id: 'jungfrau', icon: '🧖‍♀️', title: this.getTranslation('badge_jungfrau'), desc: this.getTranslation('badge_jungfrau_desc'), target: 5, current: aggregated.winRamschZeroCount }
         ];
 
         badgeDefinitions.forEach(badge => {
@@ -2023,26 +2086,21 @@ class UI {
     }
 
     showTrumpSelectionOverlay(isHand, onSelect) {
+        this.resetAllOverlays();
         this.els.trumpOverlay.classList.remove('hidden');
-        const h2 = this.els.trumpOverlay.querySelector('h2');
-        h2.textContent = this.getTranslation('choose_trump');
         
-        const btnGrandOuvert = document.getElementById('btn-grand-ouvert');
-        const btnNullOuvert = document.getElementById('btn-null-ouvert');
-
-        // Hand game rules: Grand Ouvert and Null Ouvert allowed
-        // Skat taken rules: Only Null Ouvert allowed (standard Skat)
-        if (isHand) {
-            btnGrandOuvert.style.display = 'inline-block';
-            btnNullOuvert.style.display = 'inline-block';
-            btnNullOuvert.textContent = this.getTranslation('null_ouvert_hand');
-        } else {
-            btnGrandOuvert.style.display = 'none';
-            btnNullOuvert.style.display = 'inline-block';
-            btnNullOuvert.textContent = this.getTranslation('null_ouvert');
+        const ouvertSection = document.getElementById('ouvert-section');
+        if (ouvertSection) {
+            if (isHand) {
+                ouvertSection.classList.remove('hidden');
+            } else {
+                ouvertSection.classList.add('hidden');
+            }
         }
 
-        this.els.trumpBtns.forEach(btn => {
+        // Re-bind all trump buttons in the overlay
+        const trumpBtns = this.els.trumpOverlay.querySelectorAll('.trump-btn');
+        trumpBtns.forEach(btn => {
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
             
@@ -2052,8 +2110,6 @@ class UI {
                 onSelect(newBtn.dataset.suit, isOuvert);
             });
         });
-        
-        this.els.trumpBtns = document.querySelectorAll('.trump-btn');
     }
 
     setTrump(trump, hand = false, schneider = false, schwarz = false, ouvert = false) {
@@ -2489,6 +2545,73 @@ class UI {
         this.els.reiztabelleOverlay.classList.toggle('hidden');
     }
 
+    showSessionSummary(history, totals, onExit) {
+        this.resetAllOverlays();
+        this.els.gameOverOverlay.classList.remove('hidden');
+        
+        document.getElementById('game-result-msg').textContent = this.getTranslation('session_finished');
+        
+        const resDiv = document.getElementById('results');
+        const names = ['Aicore', 'Aiden', (window.appSettings && window.appSettings.current.nickname) || 'Du'];
+        
+        let summaryHtml = `
+            <div class="session-summary-table-container">
+                <table class="scoreboard-table summary-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>${names[0]}</th>
+                            <th>${names[1]}</th>
+                            <th>${names[2]}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        history.forEach((game, index) => {
+            summaryHtml += '<tr>';
+            summaryHtml += `<td>${index + 1}</td>`;
+            for (let i = 0; i < 3; i++) {
+                if (game.passedIn) {
+                    summaryHtml += '<td style="color: #666">0</td>';
+                } else if (game.isRamsch) {
+                    const val = game.individualScores ? -game.individualScores[i] : (game.loserIndices.includes(i) ? -25 : 0);
+                    summaryHtml += `<td class="${val < 0 ? 'score-neg' : 'score-pos'}">${val}</td>`;
+                } else if (game.declarerId === i) {
+                    const val = game.won ? game.value : -game.value;
+                    summaryHtml += `<td class="${val >= 0 ? 'score-pos' : 'score-neg'}">${val}</td>`;
+                } else {
+                    summaryHtml += '<td style="color: #444">-</td>';
+                }
+            }
+            summaryHtml += '</tr>';
+        });
+        
+        summaryHtml += `
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td>∑</td>
+                            <td class="${totals[0] >= 0 ? 'score-pos' : 'score-neg'}">${totals[0]}</td>
+                            <td class="${totals[1] >= 0 ? 'score-pos' : 'score-neg'}">${totals[1]}</td>
+                            <td class="${totals[2] >= 0 ? 'score-pos' : 'score-neg'}">${totals[2]}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
+        
+        resDiv.innerHTML = summaryHtml;
+        
+        // Hide skat summary parts
+        document.getElementById('skat-summary').classList.add('hidden');
+        document.getElementById('overbid-warning').classList.add('hidden');
+        document.getElementById('game-value-details').classList.add('hidden');
+        
+        this.els.btnRestart.textContent = this.getTranslation('back_to_menu');
+        this.els.btnRestart.onclick = onExit;
+    }
+
     async renderLeaderboard() {
         const tableBody = document.getElementById('leaderboard-table-body');
         if (!tableBody) return;
@@ -2686,7 +2809,13 @@ class UI {
             { id: 'anfaenger', icon: '🌱', title: this.getTranslation('badge_anfaenger'), target: 10, current: agg.games_played || 0 },
             { id: 'stammspieler', icon: '🌳', title: this.getTranslation('badge_stammspieler'), target: 50, current: agg.games_played || 0 },
             { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), target: 200, current: agg.games_played || 0 },
-            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), target: 1, current: agg.win_grand_ohne_4_wins || 0 }
+            { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), target: 1, current: agg.win_grand_ohne_4_wins || 0 },
+            { id: 'fuehrer', icon: '👨‍✈️', title: this.getTranslation('badge_fuehrer'), target: 5, current: agg.null_no7_wins || 0 },
+            { id: 'eichel_pro', icon: '🌰', title: this.getTranslation('badge_eichel_pro'), target: 15, current: agg.eichel_wins || 0 },
+            { id: 'gruen_pro', icon: '🍃', title: this.getTranslation('badge_gruen_pro'), target: 15, current: agg.gruen_wins || 0 },
+            { id: 'rot_pro', icon: '❤️', title: this.getTranslation('badge_rot_pro'), target: 15, current: agg.rot_wins || 0 },
+            { id: 'schellen_pro', icon: '🔔', title: this.getTranslation('badge_schellen_pro'), target: 15, current: agg.schellen_wins || 0 },
+            { id: 'jungfrau', icon: '🧖‍♀️', title: this.getTranslation('badge_jungfrau'), target: 5, current: agg.ramsch_zero_wins || 0 }
         ];
 
         badgeDefinitions.forEach(badge => {

@@ -590,12 +590,6 @@ class Auth {
             return;
         }
 
-        if (!this.isLoggedIn()) {
-            const existing = document.getElementById('taler-group');
-            if (existing) existing.remove();
-            return;
-        }
-
         // Fetch fresh profile data
         let profile = { coins: 0, last_daily_claim: null };
         try { 
@@ -614,6 +608,16 @@ class Auth {
                 heroSection.appendChild(group);
             }
 
+            if (!this.isLoggedIn()) {
+                // Guest View: Only Bug Report
+                group.innerHTML = `
+                    <button class="floating-btn" onclick="if(window.ui) window.ui.showBugReportModal()" title="Bug melden">
+                        🐞
+                    </button>
+                `;
+                return;
+            }
+
             const today = new Date().toISOString().split('T')[0];
             const canClaimDaily = profile.last_daily_claim !== today;
 
@@ -623,6 +627,9 @@ class Auth {
                 </button>
                 <button class="floating-btn" onclick="window.location.href='store.html'" title="Store">
                     🏪
+                </button>
+                <button class="floating-btn" onclick="if(window.ui) window.ui.showBugReportModal()" title="Bug melden">
+                    🐞
                 </button>
             `;
 
