@@ -1422,6 +1422,11 @@ body {
     color: var(--color-schellen);
 }
 
+/* Tournament Design specific colors */
+.card-face.design-turnier.suit-Eichel {
+    color: #000; /* Kreuz is black in tournament deck */
+}
+
 .card-top-left {
     display: flex;
     flex-direction: column;

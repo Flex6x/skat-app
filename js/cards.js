@@ -59,6 +59,8 @@ class Card {
         el.draggable = true;
 
         const design = (window.appSettings && window.appSettings.current.cardDesign) || 'classic';
+        el.classList.add(`design-${design}`);
+        
         const symbol = SUIT_SYMBOLS[design][this.suit];
 
         el.innerHTML = `
