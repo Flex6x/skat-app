@@ -1562,6 +1562,10 @@ body {
     vertical-align: middle;
 }
 
+.suit-icon.smaller {
+    transform: scale(0.8);
+}
+
 .card-center .suit-icon {
     width: 1.2em;
     height: 1.2em;
