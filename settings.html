@@ -139,11 +139,6 @@
                     <h3 data-i18n="preferences">Preferences</h3>
                     <div class="settings-control stacked">
                         <label class="toggle-label">
-                            <input type="checkbox" id="chk-live-score">
-                            <span class="toggle-switch"></span>
-                            <span data-i18n="show_live_points">Punkte live anzeigen</span>
-                        </label>
-                        <label class="toggle-label">
                             <input type="checkbox" id="chk-sound">
                             <span class="toggle-switch"></span>
                             <span data-i18n="activate_sounds">Sounds aktivieren</span>
@@ -162,11 +157,10 @@
                 </div>
 
                 <!-- Data Section -->
-                <div class="settings-card danger-card">
+                <div class="settings-card danger-card hidden" id="data-settings-card">
                     <h3 data-i18n="data">Data</h3>
                     <div class="settings-control stacked">
-                        <button id="btn-transfer-stats" class="btn primary hidden" style="width: 100%; margin-bottom: 10px;" data-i18n="transfer_stats">Stats auf Acc übertragen</button>
-                        <button id="btn-delete-stats" class="btn danger" style="width: 100%;" data-i18n="delete_stats">Statistiken löschen</button>
+                        <button id="btn-transfer-stats" class="btn primary hidden" style="width: 100%;" data-i18n="transfer_stats">Stats auf Acc übertragen</button>
                     </div>
                 </div>
             </div>
@@ -348,43 +342,40 @@
                 };
             }
 
-            // --- Delete Stats (independent of save) ---
-            const deleteBtn = document.getElementById('btn-delete-stats');
-            if (deleteBtn) {
-                deleteBtn.onclick = () => {
-                    const msg = draft.language === 'en'
-                        ? 'Do you really want to delete all statistics permanently?'
-                        : 'Willst du wirklich alle Statistiken unwiderruflich löschen?';
-                    if (window.confirm(msg)) {
-                        localStorage.removeItem("skatListStats");
-                        const doneMsg = draft.language === 'en' ? 'Statistics deleted.' : 'Statistiken gelöscht.';
-                        if (saveStatus) {
-                            saveStatus.textContent = doneMsg;
-                            saveStatus.classList.remove('hidden');
-                            setTimeout(() => saveStatus.classList.add('hidden'), 2500);
-                        }
-                    }
-                };
-            }
-
             // --- Transfer Stats (independent of save) ---
             const transferBtn = document.getElementById('btn-transfer-stats');
-            if (transferBtn) {
+            const dataCard = document.getElementById('data-settings-card');
+            if (transferBtn && dataCard) {
                 const canMigrate = window.auth && window.auth.isLoggedIn() && window.storageService && window.storageService.hasLocalDataToMigrate();
                 if (canMigrate) {
                     transferBtn.classList.remove('hidden');
+                    dataCard.classList.remove('hidden');
                 } else {
                     transferBtn.classList.add('hidden');
+                    dataCard.classList.add('hidden');
                 }
                 transferBtn.onclick = async () => {
-                    const result = await window.storageService.migrateManual();
-                    if (result.success) {
-                        if (saveStatus) {
-                            saveStatus.textContent = draft.language === 'en' ? 'Statistics successfully transferred!' : 'Statistiken erfolgreich übertragen!';
-                            saveStatus.classList.remove('hidden');
-                            setTimeout(() => saveStatus.classList.add('hidden'), 2500);
+                    const msg = draft.language === 'en'
+                        ? 'Warning: Existing account statistics will be overwritten by your local data. Do you really want to proceed?'
+                        : 'Warnung: Bestehende Account-Statistiken werden durch deine lokalen Daten überschrieben. Willst du wirklich fortfahren?';
+                    
+                    if (window.confirm(msg)) {
+                        const result = await window.storageService.migrateManual();
+                        if (result.success) {
+                            if (saveStatus) {
+                                saveStatus.textContent = draft.language === 'en' ? 'Statistics successfully transferred!' : 'Statistiken erfolgreich übertragen!';
+                                saveStatus.classList.remove('hidden');
+                                setTimeout(() => saveStatus.classList.add('hidden'), 2500);
+                            }
+                            transferBtn.classList.add('hidden');
+                            dataCard.classList.add('hidden');
+                        } else {
+                            if (saveStatus) {
+                                saveStatus.textContent = (draft.language === 'en' ? 'Error: ' : 'Fehler: ') + result.error;
+                                saveStatus.classList.remove('hidden');
+                                setTimeout(() => saveStatus.classList.add('hidden'), 5000);
+                            }
                         }
-                        transferBtn.classList.add('hidden');
                     }
                 };
             }
