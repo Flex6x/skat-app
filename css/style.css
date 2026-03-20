@@ -3744,3 +3744,22 @@ body {
     background: rgba(255, 215, 0, 0.2);
 }
 
+
+/* Forgot Password Button Styling */
+#btn-forgot-pass {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    padding: 5px;
+    margin-top: 5px;
+}
+
+#btn-forgot-pass:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
+}
+

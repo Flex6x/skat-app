@@ -18,6 +18,7 @@ https://flex6x.github.io/skat-app/
 - "Rest meine/schenken" - Buttons nach jedem Spiel entfernen (bleiben beim Reizen)
 - alle Übersicht Stats bei Leaderboard anzeigen
 - eigene einstellungen für accounts (löschen, nickname, pw reset)
+- bessere emojis für neue badges
 
 ## Bugreports:
 

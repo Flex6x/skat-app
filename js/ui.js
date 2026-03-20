@@ -1056,10 +1056,21 @@ class UI {
         // Nickname
         if (this.els.inputNickname) {
             this.els.inputNickname.value = s.nickname;
-            this.els.inputNickname.oninput = () => {
-                settings.set('nickname', this.els.inputNickname.value || 'Du');
-                this.updateNicknames();
-            };
+            
+            // If logged in, hide/disable main nickname input
+            if (window.auth && window.auth.isLoggedIn()) {
+                // Option A: Hide completely
+                const nickContainer = this.els.inputNickname.closest('.settings-group');
+                if (nickContainer) nickContainer.style.display = 'none';
+            } else {
+                const nickContainer = this.els.inputNickname.closest('.settings-group');
+                if (nickContainer) nickContainer.style.display = 'block';
+                
+                this.els.inputNickname.oninput = () => {
+                    settings.set('nickname', this.els.inputNickname.value || 'Du');
+                    this.updateNicknames();
+                };
+            }
         }
 
         // Language toggle

@@ -547,16 +547,84 @@ class Auth {
     }
 
     async loginWithEmail(email, password) { return await this.client.auth.signInWithPassword({ email, password }); }
-    async signUp(email, password) { 
+    async resetPassword(email) {
         if (!this.client) return { error: 'Client not initialized' };
-        const options = window.location.protocol === 'file:' ? {} : { emailRedirectTo: 'https://flex6x.github.io/skat-app/' };
-        return await this.client.auth.signUp({ email, password, options }); 
+        const redirectOptions = window.location.protocol === 'file:' ? {} : { redirectTo: 'https://flex6x.github.io/skat-app/reset-password.html' };
+        return await this.client.auth.resetPasswordForEmail(email, redirectOptions);
     }
+
     async logout() { 
         await this.client.auth.signOut(); 
         localStorage.removeItem('skat_user_profile');
-        localStorage.removeItem('skatListStats'); // Also clear stats if desired, or keep as guest history? User said "coins from other account" so clear profile is key.
+        localStorage.removeItem('skatListStats'); 
         window.location.reload(); 
+    }
+
+    async deleteAccount() {
+        if (!this.isLoggedIn()) return;
+        const confirmDelete = confirm("Are you sure? This will delete ALL your data (stats, history, coins) and cannot be undone.");
+        if (!confirmDelete) return;
+
+        const userId = this.user.id;
+        try {
+            // Delete all user data from public tables
+            await this.client.from('history').delete().eq('user_id', userId);
+            await this.client.from('badges').delete().eq('user_id', userId);
+            await this.client.from('stats').delete().eq('user_id', userId);
+            await this.client.from('profiles').delete().eq('id', userId);
+            await this.client.from('claimed_badges').delete().eq('user_id', userId);
+            
+            alert('Account data deleted.');
+            await this.logout();
+        } catch (e) {
+            console.error('Error deleting account:', e);
+            alert('Error deleting data: ' + e.message);
+        }
+    }
+
+    showAccountSettings() {
+        const modalId = 'account-settings-overlay';
+        if (document.getElementById(modalId)) return;
+        
+        const settings = window.settings || window.appSettings;
+        const currentNick = settings?.current?.nickname || '';
+        
+        const overlay = document.createElement('div');
+        overlay.id = modalId;
+        overlay.className = 'menu-overlay';
+        overlay.innerHTML = `
+            <div class="menu-content" style="max-width: 400px;">
+                <button class="btn-close-modal" id="btn-close-account">×</button>
+                <h2 data-i18n="account_settings">Account Settings</h2>
+                
+                <div class="settings-group">
+                    <label style="display:block; margin-bottom:5px;">Change Nickname</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="account-nickname" value="${currentNick}" class="nickname-input" style="flex:1;">
+                        <button id="btn-save-nick" class="btn primary">Save</button>
+                    </div>
+                </div>
+
+                <div class="settings-group" style="margin-top: 30px; border-top: 1px solid #444; padding-top: 20px;">
+                    <h3 style="color: #ff4444; margin-bottom: 10px;">Danger Zone</h3>
+                    <button id="btn-delete-account" class="btn" style="background: #ff4444; color: white; width: 100%;">Delete Account</button>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+
+        document.getElementById('btn-close-account').onclick = () => document.body.removeChild(overlay);
+        
+        document.getElementById('btn-save-nick').onclick = async () => {
+            const newNick = document.getElementById('account-nickname').value;
+            if (newNick) {
+                await this.storage.updateNickname(newNick);
+                if (settings) settings.set('nickname', newNick);
+                this.updateUI();
+                alert('Nickname updated!');
+            }
+        };
+
+        document.getElementById('btn-delete-account').onclick = () => this.deleteAccount();
     }
 
     updateUI() {
@@ -570,7 +638,6 @@ class Auth {
             headerRight.appendChild(authContainer);
         }
         if (this.isLoggedIn()) {
-            // Priority: Local settings nickname -> Cloud nickname -> Email prefix
             const settings = window.settings || window.appSettings;
             let displayName = settings ? settings.current.nickname : null;
             
@@ -583,6 +650,7 @@ class Auth {
                     <button class="nav-link profile-btn" id="btn-profile"><span class="user-icon">👤</span> ${displayName}</button>
                     <div class="dropdown-content hidden" id="profile-dropdown-content">
                         <button onclick="window.location.href='stats.html'" data-i18n="view_stats">Stats</button>
+                        <button id="btn-account-settings">Account</button>
                         <button id="btn-logout" data-i18n="logout">Logout</button>
                     </div>
                 </div>`;
@@ -590,6 +658,10 @@ class Auth {
             const dropdown = document.getElementById('profile-dropdown-content');
             if (btnProfile) btnProfile.onclick = (e) => { e.stopPropagation(); dropdown.classList.toggle('hidden'); };
             document.addEventListener('click', () => { if (dropdown) dropdown.classList.add('hidden'); });
+            
+            const btnAccount = document.getElementById('btn-account-settings');
+            if (btnAccount) btnAccount.onclick = () => this.showAccountSettings();
+
             const logoutBtn = document.getElementById('btn-logout');
             if (logoutBtn) logoutBtn.onclick = () => this.logout();
         } else {
@@ -598,7 +670,6 @@ class Auth {
             if (loginBtn) loginBtn.onclick = () => this.showLoginModal();
         }
 
-        // Always call renderTalerGroup, it will handle the logged-in check internally
         this.renderTalerGroup();
     }
 
@@ -606,7 +677,6 @@ class Auth {
         const isStorePage = window.location.pathname.includes('store.html');
         const heroSection = document.getElementById('menu-primary');
         
-        // Handle Store Page - Access Check
         if (isStorePage && !this.isLoggedIn()) {
             const container = document.querySelector('.store-container');
             if (container) {
@@ -615,7 +685,6 @@ class Auth {
             return;
         }
 
-        // Fetch fresh profile data
         let profile = { coins: 0, last_daily_claim: null };
         try { 
             profile = await this.storage.getProfile() || profile; 
@@ -623,7 +692,6 @@ class Auth {
             console.error('Failed to fetch profile in renderTalerGroup:', e);
         }
 
-        // 1. Handle Main Menu (index.html)
         if (heroSection) {
             let group = document.getElementById('taler-group');
             if (!group) {
@@ -634,7 +702,6 @@ class Auth {
             }
 
             if (!this.isLoggedIn()) {
-                // Guest View: Only Bug Report
                 group.innerHTML = `
                     <button class="floating-btn" onclick="if(window.ui) window.ui.showBugReportModal()" title="Bug melden">
                         🐞
@@ -662,23 +729,18 @@ class Auth {
             if (btnDaily && canClaimDaily) {
                 btnDaily.onclick = async (e) => {
                     e.stopPropagation();
-                    btnDaily.disabled = true; // Prevent double clicks
+                    btnDaily.disabled = true;
                     btnDaily.classList.remove('glow-yellow');
                     btnDaily.textContent = '...';
                     const res = await this.storage.claimDailyLogin();
                     if (res.success) {
-                        // Optimistic UI update
                         btnDaily.textContent = '✓';
                         btnDaily.classList.add('claimed');
-                        
-                        // Update balance display immediately if possible
                         const balanceDisplay = document.getElementById('store-balance-header');
                         if (balanceDisplay) {
                             const coinSpan = balanceDisplay.querySelector('span');
                             if (coinSpan) coinSpan.textContent = res.newCoins;
                         }
-                        
-                        // Full re-render to be safe
                         await this.renderTalerGroup();
                     } else {
                         btnDaily.disabled = false;
@@ -693,7 +755,6 @@ class Auth {
             }
         }
 
-        // 2. Handle Store Balance (store.html)
         if (isStorePage) {
             let balanceDisplay = document.getElementById('store-balance-header');
             if (!balanceDisplay) {
@@ -715,6 +776,23 @@ class Auth {
         }
     }
 
+    async signUp(email, password, nickname) { 
+        if (!this.client) return { error: 'Client not initialized' };
+        const options = window.location.protocol === 'file:' ? {} : { emailRedirectTo: 'https://flex6x.github.io/skat-app/' };
+        
+        // Add nickname to metadata
+        options.data = { nickname: nickname };
+        
+        const res = await this.client.auth.signUp({ email, password, options });
+        
+        if (res.data.user && nickname) {
+            // Immediately save nickname to profile
+            await this._saveProfile({ nickname: nickname });
+        }
+        
+        return res;
+    }
+
     showLoginModal() {
         const modalId = 'login-modal-overlay';
         if (document.getElementById(modalId)) return;
@@ -722,46 +800,102 @@ class Auth {
         overlay.id = modalId;
         overlay.className = 'menu-overlay';
         overlay.innerHTML = `
-            <div class="menu-content login-modal">
+            <div class="menu-content login-modal" style="min-width: 320px;">
                 <button class="btn-close-modal" id="btn-close-login">×</button>
                 <h2 data-i18n="account_login">Account Login</h2>
                 <div class="login-tabs">
-                    <button class="login-tab-btn active" data-tab="magic-link">Magic Link</button>
-                    <button class="login-tab-btn" data-tab="password">Password</button>
+                    <button class="login-tab-btn active" data-tab="login">Login</button>
+                    <button class="login-tab-btn" data-tab="signup">Sign Up</button>
+                    <button class="login-tab-btn" data-tab="magic-link">Magic Link</button>
                 </div>
-                <div id="magic-link-section" class="auth-section">
-                    <input type="email" id="login-email-magic" placeholder="Email" class="nickname-input" style="margin-bottom: 15px;">
-                    <button id="btn-send-magic" class="btn primary large-btn" style="width: 100%;">Send Login Link</button>
-                </div>
-                <div id="password-section" class="auth-section hidden">
+                
+                <!-- Login Section -->
+                <div id="login-section" class="auth-section">
                     <input type="email" id="login-email" placeholder="Email" class="nickname-input" style="margin-bottom: 10px;">
                     <input type="password" id="login-password" placeholder="Password" class="nickname-input" style="margin-bottom: 15px;">
-                    <div style="display: flex; gap: 10px;"><button id="btn-login-pass" class="btn primary" style="flex: 1;">Login</button><button id="btn-signup-pass" class="btn" style="flex: 1;">Sign Up</button></div>
+                    <button id="btn-login-pass" class="btn primary large-btn" style="width: 100%;">Login</button>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <button id="btn-forgot-pass" class="btn-text" style="color: #aaa; text-decoration: underline; font-size: 0.9rem;">Forgot Password?</button>
+                    </div>
                 </div>
+
+                <!-- Sign Up Section -->
+                <div id="signup-section" class="auth-section hidden">
+                    <input type="email" id="signup-email" placeholder="Email" class="nickname-input" style="margin-bottom: 10px;">
+                    <input type="text" id="signup-nickname" placeholder="Nickname" class="nickname-input" style="margin-bottom: 10px;">
+                    <input type="password" id="signup-password" placeholder="Password" class="nickname-input" style="margin-bottom: 15px;">
+                    <button id="btn-signup-submit" class="btn primary large-btn" style="width: 100%;">Create Account</button>
+                </div>
+                
+                <!-- Magic Link Section -->
+                <div id="magic-link-section" class="auth-section hidden">
+                    <p style="color: #ccc; margin-bottom: 10px; font-size: 0.9rem;">Receive a login link via email.</p>
+                    <input type="email" id="login-email-magic" placeholder="Email" class="nickname-input" style="margin-bottom: 15px;">
+                    <button id="btn-send-magic" class="btn primary large-btn" style="width: 100%;">Send Link</button>
+                </div>
+                
                 <div id="auth-status" class="auth-status hidden"></div>
             </div>`;
         document.body.appendChild(overlay);
-        document.getElementById('btn-close-login').onclick = () => document.body.removeChild(overlay);
+        
+        const closeBtn = document.getElementById('btn-close-login');
+        closeBtn.onclick = () => document.body.removeChild(overlay);
+        
         const tabs = overlay.querySelectorAll('.login-tab-btn');
         tabs.forEach(tab => tab.onclick = () => {
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            document.getElementById('magic-link-section').classList.toggle('hidden', tab.dataset.tab !== 'magic-link');
-            document.getElementById('password-section').classList.toggle('hidden', tab.dataset.tab === 'magic-link');
+            
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('signup-section').classList.add('hidden');
+            document.getElementById('magic-link-section').classList.add('hidden');
+            
+            document.getElementById(`${tab.dataset.tab}-section`).classList.remove('hidden');
+            
+            // Clear status
+            document.getElementById('auth-status').classList.add('hidden');
         });
+        
         const statusEl = document.getElementById('auth-status');
         const showStatus = (msg, isError = false) => { statusEl.innerText = msg; statusEl.className = 'auth-status ' + (isError ? 'error' : 'success'); statusEl.classList.remove('hidden'); };
-        document.getElementById('btn-send-magic').onclick = async () => {
-            const { error } = await this.loginWithMagicLink(document.getElementById('login-email-magic').value);
-            if (error) showStatus(error.message, true); else showStatus('Check your email!');
-        };
+        
+        // Login Logic
         document.getElementById('btn-login-pass').onclick = async () => {
-            const { error } = await this.loginWithEmail(document.getElementById('login-email').value, document.getElementById('login-password').value);
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            if (!email || !pass) { showStatus('Please fill in all fields', true); return; }
+            
+            const { error } = await this.loginWithEmail(email, pass);
             if (error) showStatus(error.message, true); else document.body.removeChild(overlay);
         };
-        document.getElementById('btn-signup-pass').onclick = async () => {
-            const { error } = await this.signUp(document.getElementById('login-email').value, document.getElementById('login-password').value);
+
+        // Sign Up Logic
+        document.getElementById('btn-signup-submit').onclick = async () => {
+            const email = document.getElementById('signup-email').value;
+            const pass = document.getElementById('signup-password').value;
+            const nick = document.getElementById('signup-nickname').value;
+            
+            if (!email || !pass || !nick) { showStatus('All fields are required!', true); return; }
+            
+            const { error } = await this.signUp(email, pass, nick);
+            if (error) showStatus(error.message, true); else showStatus('Account created! Check your email.');
+        };
+
+        // Magic Link Logic
+        document.getElementById('btn-send-magic').onclick = async () => {
+            const email = document.getElementById('login-email-magic').value;
+            if (!email) { showStatus('Please enter email', true); return; }
+            
+            const { error } = await this.loginWithMagicLink(email);
             if (error) showStatus(error.message, true); else showStatus('Check your email!');
+        };
+
+        // Forgot Password Logic
+        document.getElementById('btn-forgot-pass').onclick = async () => {
+            const email = document.getElementById('login-email').value;
+            if (!email) { showStatus('Please enter your email in the field above.', true); return; }
+            const { error } = await this.resetPassword(email);
+            if (error) showStatus(error.message, true); else showStatus('Password reset link sent!');
         };
     }
 }
