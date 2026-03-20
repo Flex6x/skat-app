@@ -232,35 +232,57 @@
             const cardDesignSection = document.getElementById('card-design-section');
 
             async function initCardDesigns() {
-                if (!window.auth || !window.auth.isLoggedIn()) {
+                // Wait for auth to be fully ready
+                let attempts = 0;
+                while ((!window.auth || !window.auth.client) && attempts < 20) {
+                    await new Promise(r => setTimeout(r, 100));
+                    attempts++;
+                }
+
+                if (!window.auth || !window.auth.client) return;
+
+                // Explicitly check session to be sure
+                const { data: { session } } = await window.auth.client.auth.getSession();
+                
+                if (!session) {
                     cardDesignSection.classList.add('hidden');
                     return;
                 }
 
-                const purchased = await window.storageService.getPurchasedItems();
-                const hasTurnier = purchased.includes('turnierblatt');
+                // Show section for logged in users
+                cardDesignSection.classList.remove('hidden');
 
-                if (hasTurnier) {
-                    const turnierLabel = document.createElement('label');
-                    turnierLabel.className = 'radio-label';
-                    turnierLabel.innerHTML = `
-                        <input type="radio" name="cardDesign" value="turnier">
-                        <span class="radio-custom"></span>
-                        <span data-i18n="turnier_blatt">Turnierblatt</span>
-                    `;
-                    cardDesignRadios.appendChild(turnierLabel);
-                    designLockedMsg.classList.add('hidden');
-                } else {
-                    designLockedMsg.classList.remove('hidden');
-                }
+                try {
+                    const purchased = await window.storageService.getPurchasedItems();
+                    const hasTurnier = purchased.includes('turnierblatt');
 
-                // Now set the correct radio based on current setting
-                document.querySelectorAll('input[name="cardDesign"]').forEach(r => {
-                    r.checked = (r.value === s.cardDesign);
-                    r.addEventListener('change', () => {
-                        draft.cardDesign = r.value;
+                    if (hasTurnier) {
+                        // Check if already exists to avoid duplicates on re-init
+                        if (!document.querySelector('input[name="cardDesign"][value="turnier"]')) {
+                            const turnierLabel = document.createElement('label');
+                            turnierLabel.className = 'radio-label';
+                            turnierLabel.innerHTML = `
+                                <input type="radio" name="cardDesign" value="turnier">
+                                <span class="radio-custom"></span>
+                                <span data-i18n="turnier_blatt">Turnierblatt</span>
+                            `;
+                            cardDesignRadios.appendChild(turnierLabel);
+                        }
+                        designLockedMsg.classList.add('hidden');
+                    } else {
+                        designLockedMsg.classList.remove('hidden');
+                    }
+
+                    // Now set the correct radio based on current setting
+                    document.querySelectorAll('input[name="cardDesign"]').forEach(r => {
+                        r.checked = (r.value === draft.cardDesign);
+                        r.addEventListener('change', () => {
+                            draft.cardDesign = r.value;
+                        });
                     });
-                });
+                } catch (err) {
+                    console.error('Error loading owned items:', err);
+                }
             }
             initCardDesigns();
 
