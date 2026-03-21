@@ -49,8 +49,9 @@ class SkatEngine {
     /**
      * @param {Array} players - Array von Player-Objekten { id, type, name, socketId? }
      * @param {Object} settings - Spiel-Einstellungen (optional)
+     * @param {Object} engines - Optional: externe Engines { biddingEngine, gameValueEngine, cardValidator }
      */
-    constructor(players, settings = {}) {
+    constructor(players, settings = {}, engines = {}) {
         // Basis-Setup
         this.players = players.map((p, idx) => ({
             id: idx,
@@ -64,6 +65,9 @@ class SkatEngine {
 
         this.settings = settings;
         this.dealerIndex = Math.floor(Math.random() * 3);
+
+        // Optional externe Engines (falls nicht vorhanden, verwendete interne Stubs)
+        this.externalCardValidator = engines.cardValidator || null;
 
         // Game State
         this.reset();
