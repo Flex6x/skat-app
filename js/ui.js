@@ -189,7 +189,7 @@ const TRANSLATIONS = {
         badge_ohne_4_desc: "Gewinne einen Grand \"ohne 4\".",
         badge_fuehrer: "Führer",
         badge_fuehrer_desc: "Gewinne 5 Nullspiele ohne eine 7.",
-        badge_eichel_pro: "Eichel Profi",
+        badge_eichel_pro: "Waldmeister",
         badge_eichel_pro_desc: "Gewinne 15 Eichel-Spiele.",
         badge_gruen_pro: "Grüner Daumen",
         badge_gruen_pro_desc: "Gewinne 15 Grün-Spiele.",
@@ -470,7 +470,7 @@ const TRANSLATIONS = {
         badge_ohne_4_desc: "Win a Grand 'without 4'.",
         badge_fuehrer: "Leader",
         badge_fuehrer_desc: "Win 5 Null games without a 7.",
-        badge_eichel_pro: "Acorn Pro",
+        badge_eichel_pro: "Waldmaster",
         badge_eichel_pro_desc: "Win 15 Acorn games.",
         badge_gruen_pro: "Leaves Pro",
         badge_gruen_pro_desc: "Win 15 Leaves games.",
@@ -591,6 +591,20 @@ class UI {
         };
         
         this.bindGlobalEvents();
+        
+        // Ensure UI is updated when auth is initialized
+        if (window.auth) {
+            this.updateLoginUI();
+        } else {
+            // Fallback: poll if auth not ready yet
+            const checkAuthInterval = setInterval(() => {
+                if (window.auth) {
+                    this.updateLoginUI();
+                    clearInterval(checkAuthInterval);
+                }
+            }, 500);
+            setTimeout(() => clearInterval(checkAuthInterval), 5000);
+        }
     }
     
     bindGlobalEvents() {
@@ -659,6 +673,16 @@ class UI {
             };
         }
 
+        // Daily Challenge Button
+        const btnDailyChallenges = document.getElementById('btn-daily-challenges');
+        if (btnDailyChallenges) {
+            btnDailyChallenges.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showDailyChallengesModal();
+            };
+        }
+
         // Bug report button (menu)
         const btnBugReport = document.getElementById('btn-bug-report');
         if (btnBugReport) {
@@ -667,6 +691,105 @@ class UI {
                 e.stopPropagation();
                 this.showBugReportModal();
             };
+        }
+
+        // Check auth status and update UI accordingly
+        if (window.auth) {
+            this.updateLoginUI();
+        }
+    }
+
+    updateLoginUI() {
+        const btnDailyChallenges = document.getElementById('btn-daily-challenges');
+        if (btnDailyChallenges) {
+            btnDailyChallenges.style.display = 'block';
+        }
+    }
+
+    async showDailyChallengesModal() {
+        const modalId = 'daily-challenge-modal';
+        if (document.getElementById(modalId)) return;
+
+        const userId = window.auth?.user?.id;
+        
+        const overlay = document.createElement('div');
+        overlay.id = modalId;
+        overlay.className = 'menu-overlay';
+        
+        let html = `
+            <div class="menu-content challenge-modal">
+                <button class="btn-close-modal" id="btn-close-challenges">×</button>
+                <h2>Tägliche Herausforderungen</h2>
+        `;
+
+        if (!userId) {
+            html += `
+                <div class="not-logged-in-msg">
+                    <p>Diese Funktion ist nur für angemeldete Nutzer verfügbar.</p>
+                    <button class="btn primary" id="btn-login-from-modal">Zum Login</button>
+                </div>
+            `;
+        } else {
+            const manager = new ChallengeManager(window.storageService);
+            const challenges = await manager.getOrAssignChallenges(userId);
+
+            html += `<div class="challenge-grid">`;
+            
+            challenges.forEach(c => {
+                const pool = c.pool === 10 ? 'POOL_10' : 'POOL_20';
+                const def = CHALLENGE_POOLS[pool].find(p => p.id === c.challenge_id);
+                const isDone = c.is_completed;
+                
+                html += `
+                    <div class="challenge-card ${isDone ? 'completed' : ''}">
+                        <span class="challenge-title">${def.title} (${c.pool} Taler)</span>
+                        <span class="challenge-desc">${def.desc}</span>
+                        <span class="challenge-progress">Fortschritt: ${c.progress} / ${c.target}</span>
+                        <button class="btn primary" ${!isDone || c.reward_claimed ? 'disabled' : ''} id="btn-claim-${c.challenge_id}">
+                            ${isDone ? (c.reward_claimed ? 'Belohnung erhalten' : 'Belohnung einsammeln') : 'Noch offen'}
+                        </button>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+        
+        html += `</div>`;
+        overlay.innerHTML = html;
+        document.body.appendChild(overlay);
+
+        const close = () => {
+            if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        };
+        overlay.onclick = (e) => { if (e.target === overlay) close(); };
+        document.getElementById('btn-close-challenges').onclick = close;
+
+        if (!userId) {
+            document.getElementById('btn-login-from-modal').onclick = () => {
+                close();
+                window.auth.showLoginModal();
+            };
+        } else {
+            const manager = new ChallengeManager(window.storageService);
+            const challenges = await manager.getOrAssignChallenges(userId);
+            challenges.forEach(c => {
+                const btn = document.getElementById(`btn-claim-${c.challenge_id}`);
+                if (btn && c.is_completed && !c.reward_claimed) {
+                    btn.onclick = async () => {
+                        btn.disabled = true;
+                        btn.textContent = 'Lädt...';
+                        const ok = await window.storageService.claimChallengeReward(userId, c.id);
+                        if (ok) {
+                            btn.textContent = 'Belohnung erhalten';
+                            btn.classList.add('claimed');
+                            if (window.auth) window.auth.renderTalerGroup();
+                        } else {
+                            btn.disabled = false;
+                            btn.textContent = 'Fehler!';
+                        }
+                    };
+                }
+            });
         }
     }
 
@@ -1379,10 +1502,10 @@ class UI {
             { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: agg.games_played || 0, value: 100 },
             { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: agg.win_grand_ohne_4_wins || 0, value: 200 },
             { id: 'fuehrer', icon: '👨‍✈️', title: this.getTranslation('badge_fuehrer'), desc: this.getTranslation('badge_fuehrer_desc'), target: 5, current: agg.null_no7_wins || 0, value: 200 },
-            { id: 'eichel_pro', icon: '🌰', title: this.getTranslation('badge_eichel_pro'), desc: this.getTranslation('badge_eichel_pro_desc'), target: 15, current: agg.eichel_wins || 0, value: 100 },
-            { id: 'gruen_pro', icon: '🍃', title: this.getTranslation('badge_gruen_pro'), desc: this.getTranslation('badge_gruen_pro_desc'), target: 15, current: agg.gruen_wins || 0, value: 100 },
-            { id: 'rot_pro', icon: '❤️', title: this.getTranslation('badge_rot_pro'), desc: this.getTranslation('badge_rot_pro_desc'), target: 15, current: agg.rot_wins || 0, value: 100 },
-            { id: 'schellen_pro', icon: '🔔', title: this.getTranslation('badge_schellen_pro'), desc: this.getTranslation('badge_schellen_pro_desc'), target: 15, current: agg.schellen_wins || 0, value: 100 },
+            { id: 'eichel_pro', icon: '<img src="media/eichel.png" style="height: 40px; width: auto;" alt="Eichel">', title: this.getTranslation('badge_eichel_pro'), desc: this.getTranslation('badge_eichel_pro_desc'), target: 15, current: agg.eichel_wins || 0, value: 100 },
+            { id: 'gruen_pro', icon: '<img src="media/gruen.png" style="height: 40px; width: auto;" alt="Grün">', title: this.getTranslation('badge_gruen_pro'), desc: this.getTranslation('badge_gruen_pro_desc'), target: 15, current: agg.gruen_wins || 0, value: 100 },
+            { id: 'rot_pro', icon: '<img src="media/rot.png" style="height: 40px; width: auto;" alt="Rot">', title: this.getTranslation('badge_rot_pro'), desc: this.getTranslation('badge_rot_pro_desc'), target: 15, current: agg.rot_wins || 0, value: 100 },
+            { id: 'schellen_pro', icon: '<img src="media/schellen.png" style="height: 40px; width: auto;" alt="Schellen">', title: this.getTranslation('badge_schellen_pro'), desc: this.getTranslation('badge_schellen_pro_desc'), target: 15, current: agg.schellen_wins || 0, value: 100 },
             { id: 'jungfrau', icon: '🧖‍♀️', title: this.getTranslation('badge_jungfrau'), desc: this.getTranslation('badge_jungfrau_desc'), target: 5, current: agg.ramsch_zero_wins || 0, value: 200 }
         ];
 
@@ -1635,10 +1758,10 @@ class UI {
             { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: aggregated.totalGames },
             { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: aggregated.winGrandOhne4Count },
             { id: 'fuehrer', icon: '👨‍✈️', title: this.getTranslation('badge_fuehrer'), desc: this.getTranslation('badge_fuehrer_desc'), target: 5, current: aggregated.winNullNo7Count },
-            { id: 'eichel_pro', icon: '🌰', title: this.getTranslation('badge_eichel_pro'), desc: this.getTranslation('badge_eichel_pro_desc'), target: 15, current: aggregated.winEichelCount },
-            { id: 'gruen_pro', icon: '🍃', title: this.getTranslation('badge_gruen_pro'), desc: this.getTranslation('badge_gruen_pro_desc'), target: 15, current: aggregated.winGruenCount },
-            { id: 'rot_pro', icon: '❤️', title: this.getTranslation('badge_rot_pro'), desc: this.getTranslation('badge_rot_pro_desc'), target: 15, current: aggregated.winRotCount },
-            { id: 'schellen_pro', icon: '🔔', title: this.getTranslation('badge_schellen_pro'), desc: this.getTranslation('badge_schellen_pro_desc'), target: 15, current: aggregated.winSchellenCount },
+            { id: 'eichel_pro', icon: '<img src="media/eichel.png" style="height: 40px; width: auto;" alt="Eichel">', title: this.getTranslation('badge_eichel_pro'), desc: this.getTranslation('badge_eichel_pro_desc'), target: 15, current: aggregated.winEichelCount },
+            { id: 'gruen_pro', icon: '<img src="media/gruen.png" style="height: 40px; width: auto;" alt="Grün">', title: this.getTranslation('badge_gruen_pro'), desc: this.getTranslation('badge_gruen_pro_desc'), target: 15, current: aggregated.winGruenCount },
+            { id: 'rot_pro', icon: '<img src="media/rot.png" style="height: 40px; width: auto;" alt="Rot">', title: this.getTranslation('badge_rot_pro'), desc: this.getTranslation('badge_rot_pro_desc'), target: 15, current: aggregated.winRotCount },
+            { id: 'schellen_pro', icon: '<img src="media/schellen.png" style="height: 40px; width: auto;" alt="Schellen">', title: this.getTranslation('badge_schellen_pro'), desc: this.getTranslation('badge_schellen_pro_desc'), target: 15, current: aggregated.winSchellenCount },
             { id: 'jungfrau', icon: '🧖‍♀️', title: this.getTranslation('badge_jungfrau'), desc: this.getTranslation('badge_jungfrau_desc'), target: 5, current: aggregated.winRamschZeroCount }
         ];
 
@@ -2838,10 +2961,10 @@ class UI {
             { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), target: 200, current: agg.games_played || 0 },
             { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), target: 1, current: agg.win_grand_ohne_4_wins || 0 },
             { id: 'fuehrer', icon: '👨‍✈️', title: this.getTranslation('badge_fuehrer'), target: 5, current: agg.null_no7_wins || 0 },
-            { id: 'eichel_pro', icon: '🌰', title: this.getTranslation('badge_eichel_pro'), target: 15, current: agg.eichel_wins || 0 },
-            { id: 'gruen_pro', icon: '🍃', title: this.getTranslation('badge_gruen_pro'), target: 15, current: agg.gruen_wins || 0 },
-            { id: 'rot_pro', icon: '❤️', title: this.getTranslation('badge_rot_pro'), target: 15, current: agg.rot_wins || 0 },
-            { id: 'schellen_pro', icon: '🔔', title: this.getTranslation('badge_schellen_pro'), target: 15, current: agg.schellen_wins || 0 },
+            { id: 'eichel_pro', icon: '<img src="media/eichel.png" style="height: 30px; width: auto;" alt="Eichel">', title: this.getTranslation('badge_eichel_pro'), target: 15, current: agg.eichel_wins || 0 },
+            { id: 'gruen_pro', icon: '<img src="media/gruen.png" style="height: 30px; width: auto;" alt="Grün">', title: this.getTranslation('badge_gruen_pro'), target: 15, current: agg.gruen_wins || 0 },
+            { id: 'rot_pro', icon: '<img src="media/rot.png" style="height: 30px; width: auto;" alt="Rot">', title: this.getTranslation('badge_rot_pro'), target: 15, current: agg.rot_wins || 0 },
+            { id: 'schellen_pro', icon: '<img src="media/schellen.png" style="height: 30px; width: auto;" alt="Schellen">', title: this.getTranslation('badge_schellen_pro'), target: 15, current: agg.schellen_wins || 0 },
             { id: 'jungfrau', icon: '🧖‍♀️', title: this.getTranslation('badge_jungfrau'), target: 5, current: agg.ramsch_zero_wins || 0 }
         ];
 

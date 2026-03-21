@@ -83,9 +83,15 @@ class Game {
         this.inputLocked = false;
         this.claimRejectedThisRound = false;
         this.giftRejectedThisRound = false;
-        
-        this.ui.resetLiveScore();
-        this.ui.resetTrumpUI();
+
+        // Challenge tracking flags
+        this.lostJack = false;
+        this.lastTrickHasSeven = false;
+        this.hadAllJacks = false;
+        this.noAcesInHand = false;
+        this.skatPoints = 0;
+
+        this.ui.resetLiveScore();        this.ui.resetTrumpUI();
         // Setup Last trick binding
         this.ui.showLastTrickBtn(() => {
             if (this.lastTrick) {
@@ -576,6 +582,9 @@ class Game {
         // Count trumps for badges
         this.declarerTrumpCount = this.originalDeclarerHand.filter(c => this.isTrump(c)).length;
 
+        // Challenge flag: No aces in hand after discard
+        this.noAcesInHand = !this.players[this.declarerIndex].hand.some(c => c.rank === 'A');
+
         // Visuals: Hide skat pile (only if not already hidden in hand games)
         // For non-hand games, hide it now. For hand games, it was already hidden in startAnnouncement
         if (!this.handGame) {
@@ -868,6 +877,22 @@ class Game {
         
         const winnerId = this.determineTrickWinner();
         
+        // --- Challenge Tracking: Unter verloren? ---
+        if (this.trumpMode !== TRUMP_MODES.NULL && this.phase === PHASES.PLAYING) {
+            const hasUnter = this.currentTrick.cards.some(tc => tc.card.rank === 'U');
+            if (hasUnter && winnerId !== this.declarerIndex) {
+                this.lostJack = true;
+            }
+        }
+
+        // --- Challenge Tracking: Schellen-7 im letzten Stich? ---
+        if (this.trickCount === 9) { // 10th trick (index 9)
+            const hasSchellenSeven = this.currentTrick.cards.some(tc => tc.card.suit === SUITS.SCHELLEN && tc.card.rank === '7');
+            if (hasSchellenSeven && winnerId === this.declarerIndex) {
+                this.lastTrickHasSeven = true;
+            }
+        }
+
         // Save trick for "Last Trick" review before clearing
         this.lastTrick = [...this.currentTrick.cards];
         this.ui.showLastTrickBtn(() => {
@@ -1104,7 +1129,16 @@ class Game {
                 declarerTrumpCount: this.declarerTrumpCount,
                 matadors: evaluation.matadors,
                 playerRollmops: this.players.map(p => p.hasRollmopsHand),
-                playerHasSeven: this.players.map(p => p.hasSeven)
+                playerHasSeven: this.players.map(p => p.hasSeven),
+                
+                // Challenge flags
+                declarerPoints: declarerPoints,
+                defenderPoints: defendersPoints,
+                lostJack: this.lostJack,
+                lastTrickHasSeven: this.lastTrickHasSeven,
+                hadAllJacks: (this.originalDeclarerHand.filter(c => c.rank === 'U').length === 4),
+                skatPoints: this.calculatePoints(this.skat),
+                noAcesInHand: !this.players[this.declarerIndex].hand.some(c => c.rank === 'A') // hand is already cleared here? No, check
             });
         }
     }

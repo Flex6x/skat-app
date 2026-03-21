@@ -930,6 +930,51 @@ body {
     box-shadow: 0 0 15px var(--accent-hover);
 }
 
+/* Daily Challenge Modal */
+.challenge-modal {
+    max-width: 800px;
+}
+
+.challenge-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.challenge-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.challenge-card.completed {
+    border-color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.challenge-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.challenge-desc {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.challenge-progress {
+    font-size: 0.8rem;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+    display: block;
+}
+
 /* === Top Bots Area === */
 #bots-area {
     display: flex;

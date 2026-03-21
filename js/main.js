@@ -26,6 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.game = new Game(ui, aiControllers, window.appSettings);
     const game = window.game;
+
+    // Initialize Challenge Manager
+    const challengeManager = new ChallengeManager(window.storageService);
+    
+    // Assign challenges if logged in
+    if (window.auth && window.auth.isLoggedIn()) {
+        challengeManager.getOrAssignChallenges(window.auth.user.id);
+    }
     
     // Check for Ramsch Mode in URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -89,10 +97,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const startNewGame = () => {
         game.reset();
         saveSessionState();
-        game.start((result) => {
+        game.start(async (result) => {
             // Callback when game ends
             localStorage.removeItem('skatGameState');
             if (result) {
+                // Track Challenges if logged in
+                if (window.auth && window.auth.isLoggedIn()) {
+                    await challengeManager.trackGameResult(window.auth.user.id, result);
+                }
+
                 if (result.passedIn) {
                     gameHistory.push({ passedIn: true });
                 } else if (result.isRamsch) {
