@@ -15,7 +15,6 @@ https://flex6x.github.io/skat-app/
 - SEO Optimierung
 - alle Übersicht Stats bei Leaderboard anzeigen
 - Nickname System klarer machen
-- Tagesherausforderungen
 
 ## Bugreports:
 

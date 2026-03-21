@@ -778,7 +778,7 @@ class UI {
                     btn.onclick = async () => {
                         btn.disabled = true;
                         btn.textContent = 'Lädt...';
-                        const ok = await window.storageService.claimChallengeReward(userId, c.challenge_id);
+                        const ok = await window.storageService.claimChallengeReward(userId, c.id);
                         if (ok) {
                             btn.textContent = 'Belohnung erhalten';
                             btn.classList.add('claimed');

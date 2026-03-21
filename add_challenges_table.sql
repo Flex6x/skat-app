@@ -9,7 +9,7 @@ create table if not exists public.user_challenges (
     target int not null,
     is_completed boolean default false,
     assigned_at date default current_date,
-    unique(user_id, challenge_id, assigned_at)
+    reward_claimed boolean default false
 );
 
 alter table public.user_challenges enable row level security;
