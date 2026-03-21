@@ -10,10 +10,10 @@
  * - Auswertung
  */
 
-const SkatEngine = require('../engines/skatEngine');
-const Player = require('./player');
-const BiddingCoordinator = require('./biddingCoordinator');
-const GameValueEngine = require('../engines/gameValueEngine');
+import SkatEngine from '../engines/skatEngine.js';
+import Player from './player.js';
+import BiddingCoordinator from './biddingCoordinator.js';
+import GameValueEngine from '../engines/gameValueEngine.js';
 
 class GameRoom {
     /**
@@ -422,4 +422,4 @@ class GameRoom {
     }
 }
 
-module.exports = GameRoom;
+export default GameRoom;

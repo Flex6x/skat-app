@@ -249,4 +249,4 @@ class BotBidding {
     }
 }
 
-module.exports = BotBidding;
+export default BotBidding;

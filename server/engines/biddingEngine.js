@@ -60,4 +60,4 @@ class BiddingEngine {
     }
 }
 
-module.exports = BiddingEngine;
+export default BiddingEngine;

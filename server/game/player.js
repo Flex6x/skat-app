@@ -5,8 +5,8 @@
  * Bietet eine einheitliche Schnittstelle für die BiddingCoordinator und GameRoom.
  */
 
-const AIController = require('../ai/aiController');
-const BotBidding = require('../ai/botBidding');
+import AIController from '../ai/aiController.js';
+import BotBidding from '../ai/botBidding.js';
 
 class Player {
     /**
@@ -252,4 +252,4 @@ class Player {
     }
 }
 
-module.exports = Player;
+export default Player;

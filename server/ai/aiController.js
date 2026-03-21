@@ -343,4 +343,4 @@ class AIController {
     }
 }
 
-module.exports = AIController;
+export default AIController;

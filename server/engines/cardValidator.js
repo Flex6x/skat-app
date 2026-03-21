@@ -120,4 +120,4 @@ class CardValidator {
     }
 }
 
-module.exports = CardValidator;
+export default CardValidator;

@@ -736,7 +736,5 @@ class SkatEngine {
 // EXPORT
 // ============================================================================
 
-module.exports = SkatEngine;
-module.exports.PHASES = PHASES;
-module.exports.TRUMP_MODES = TRUMP_MODES;
-module.exports.PLAYER_TYPES = PLAYER_TYPES;
+export default SkatEngine;
+export { PHASES, TRUMP_MODES, PLAYER_TYPES };

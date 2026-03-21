@@ -264,4 +264,4 @@ class GameValueEngine {
     }
 }
 
-module.exports = GameValueEngine;
+export default GameValueEngine;

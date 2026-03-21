@@ -5,7 +5,7 @@
  * Adaptiert von BiddingController.js aus dem Frontend.
  */
 
-const BiddingEngine = require('../engines/biddingEngine');
+import BiddingEngine from '../engines/biddingEngine.js';
 
 class BiddingCoordinator {
     /**
@@ -213,4 +213,4 @@ class BiddingCoordinator {
     }
 }
 
-module.exports = BiddingCoordinator;
+export default BiddingCoordinator;
