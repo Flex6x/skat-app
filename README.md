@@ -11,19 +11,22 @@ https://flex6x.github.io/skat-app/
 
 ## To Do:
 
-- skat soll erst im richtigen moment verschwinden
 - bug reports abfangen
 - SEO Optimierung
-- "Rest meine/schenken" - Buttons nach jedem Spiel entfernen (bleiben beim Reizen)
 - alle Übersicht Stats bei Leaderboard anzeigen
 - Nickname System klarer machen
-- bessere emojis für neue badges
+- Tagesherausforderungen
 
 ## Bugreports:
 
-- Vorderhand, Mittelhand und Hinterhand werden normalerweise mit VH, MH und HH abgekürzt
-- Die KI überreizt sich auch, ohne dass Wenzel im Skat liegen.
 
 ## Zukünftige Badges:
 
 - Farbspiel mit 4 oder weniger trumpf gewinnen.
+
+## Botverbesserungen:
+
+- Bots sollen besser drücken
+- Bots sollen schneller mit vollen stechen
+- bots sollen als gegenpartei möglichst keine luschen stechen
+- Bots überreizen manchmal, ohne dass wezel im skat liegen

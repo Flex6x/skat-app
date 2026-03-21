@@ -189,7 +189,7 @@ const TRANSLATIONS = {
         badge_ohne_4_desc: "Gewinne einen Grand \"ohne 4\".",
         badge_fuehrer: "Führer",
         badge_fuehrer_desc: "Gewinne 5 Nullspiele ohne eine 7.",
-        badge_eichel_pro: "Eichel Profi",
+        badge_eichel_pro: "Waldmeister",
         badge_eichel_pro_desc: "Gewinne 15 Eichel-Spiele.",
         badge_gruen_pro: "Grüner Daumen",
         badge_gruen_pro_desc: "Gewinne 15 Grün-Spiele.",
@@ -470,7 +470,7 @@ const TRANSLATIONS = {
         badge_ohne_4_desc: "Win a Grand 'without 4'.",
         badge_fuehrer: "Leader",
         badge_fuehrer_desc: "Win 5 Null games without a 7.",
-        badge_eichel_pro: "Acorn Pro",
+        badge_eichel_pro: "Waldmaster",
         badge_eichel_pro_desc: "Win 15 Acorn games.",
         badge_gruen_pro: "Leaves Pro",
         badge_gruen_pro_desc: "Win 15 Leaves games.",
@@ -1379,10 +1379,10 @@ class UI {
             { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: agg.games_played || 0, value: 100 },
             { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: agg.win_grand_ohne_4_wins || 0, value: 200 },
             { id: 'fuehrer', icon: '👨‍✈️', title: this.getTranslation('badge_fuehrer'), desc: this.getTranslation('badge_fuehrer_desc'), target: 5, current: agg.null_no7_wins || 0, value: 200 },
-            { id: 'eichel_pro', icon: '🌰', title: this.getTranslation('badge_eichel_pro'), desc: this.getTranslation('badge_eichel_pro_desc'), target: 15, current: agg.eichel_wins || 0, value: 100 },
-            { id: 'gruen_pro', icon: '🍃', title: this.getTranslation('badge_gruen_pro'), desc: this.getTranslation('badge_gruen_pro_desc'), target: 15, current: agg.gruen_wins || 0, value: 100 },
-            { id: 'rot_pro', icon: '❤️', title: this.getTranslation('badge_rot_pro'), desc: this.getTranslation('badge_rot_pro_desc'), target: 15, current: agg.rot_wins || 0, value: 100 },
-            { id: 'schellen_pro', icon: '🔔', title: this.getTranslation('badge_schellen_pro'), desc: this.getTranslation('badge_schellen_pro_desc'), target: 15, current: agg.schellen_wins || 0, value: 100 },
+            { id: 'eichel_pro', icon: '<img src="media/eichel.png" style="height: 40px; width: auto;" alt="Eichel">', title: this.getTranslation('badge_eichel_pro'), desc: this.getTranslation('badge_eichel_pro_desc'), target: 15, current: agg.eichel_wins || 0, value: 100 },
+            { id: 'gruen_pro', icon: '<img src="media/gruen.png" style="height: 40px; width: auto;" alt="Grün">', title: this.getTranslation('badge_gruen_pro'), desc: this.getTranslation('badge_gruen_pro_desc'), target: 15, current: agg.gruen_wins || 0, value: 100 },
+            { id: 'rot_pro', icon: '<img src="media/rot.png" style="height: 40px; width: auto;" alt="Rot">', title: this.getTranslation('badge_rot_pro'), desc: this.getTranslation('badge_rot_pro_desc'), target: 15, current: agg.rot_wins || 0, value: 100 },
+            { id: 'schellen_pro', icon: '<img src="media/schellen.png" style="height: 40px; width: auto;" alt="Schellen">', title: this.getTranslation('badge_schellen_pro'), desc: this.getTranslation('badge_schellen_pro_desc'), target: 15, current: agg.schellen_wins || 0, value: 100 },
             { id: 'jungfrau', icon: '🧖‍♀️', title: this.getTranslation('badge_jungfrau'), desc: this.getTranslation('badge_jungfrau_desc'), target: 5, current: agg.ramsch_zero_wins || 0, value: 200 }
         ];
 
@@ -1635,10 +1635,10 @@ class UI {
             { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), desc: this.getTranslation('badge_veteran_desc'), target: 200, current: aggregated.totalGames },
             { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), desc: this.getTranslation('badge_ohne_4_desc'), target: 1, current: aggregated.winGrandOhne4Count },
             { id: 'fuehrer', icon: '👨‍✈️', title: this.getTranslation('badge_fuehrer'), desc: this.getTranslation('badge_fuehrer_desc'), target: 5, current: aggregated.winNullNo7Count },
-            { id: 'eichel_pro', icon: '🌰', title: this.getTranslation('badge_eichel_pro'), desc: this.getTranslation('badge_eichel_pro_desc'), target: 15, current: aggregated.winEichelCount },
-            { id: 'gruen_pro', icon: '🍃', title: this.getTranslation('badge_gruen_pro'), desc: this.getTranslation('badge_gruen_pro_desc'), target: 15, current: aggregated.winGruenCount },
-            { id: 'rot_pro', icon: '❤️', title: this.getTranslation('badge_rot_pro'), desc: this.getTranslation('badge_rot_pro_desc'), target: 15, current: aggregated.winRotCount },
-            { id: 'schellen_pro', icon: '🔔', title: this.getTranslation('badge_schellen_pro'), desc: this.getTranslation('badge_schellen_pro_desc'), target: 15, current: aggregated.winSchellenCount },
+            { id: 'eichel_pro', icon: '<img src="media/eichel.png" style="height: 40px; width: auto;" alt="Eichel">', title: this.getTranslation('badge_eichel_pro'), desc: this.getTranslation('badge_eichel_pro_desc'), target: 15, current: aggregated.winEichelCount },
+            { id: 'gruen_pro', icon: '<img src="media/gruen.png" style="height: 40px; width: auto;" alt="Grün">', title: this.getTranslation('badge_gruen_pro'), desc: this.getTranslation('badge_gruen_pro_desc'), target: 15, current: aggregated.winGruenCount },
+            { id: 'rot_pro', icon: '<img src="media/rot.png" style="height: 40px; width: auto;" alt="Rot">', title: this.getTranslation('badge_rot_pro'), desc: this.getTranslation('badge_rot_pro_desc'), target: 15, current: aggregated.winRotCount },
+            { id: 'schellen_pro', icon: '<img src="media/schellen.png" style="height: 40px; width: auto;" alt="Schellen">', title: this.getTranslation('badge_schellen_pro'), desc: this.getTranslation('badge_schellen_pro_desc'), target: 15, current: aggregated.winSchellenCount },
             { id: 'jungfrau', icon: '🧖‍♀️', title: this.getTranslation('badge_jungfrau'), desc: this.getTranslation('badge_jungfrau_desc'), target: 5, current: aggregated.winRamschZeroCount }
         ];
 
@@ -2838,10 +2838,10 @@ class UI {
             { id: 'veteran', icon: '🏅', title: this.getTranslation('badge_veteran'), target: 200, current: agg.games_played || 0 },
             { id: 'ohne_4', icon: '⚡', title: this.getTranslation('badge_ohne_4'), target: 1, current: agg.win_grand_ohne_4_wins || 0 },
             { id: 'fuehrer', icon: '👨‍✈️', title: this.getTranslation('badge_fuehrer'), target: 5, current: agg.null_no7_wins || 0 },
-            { id: 'eichel_pro', icon: '🌰', title: this.getTranslation('badge_eichel_pro'), target: 15, current: agg.eichel_wins || 0 },
-            { id: 'gruen_pro', icon: '🍃', title: this.getTranslation('badge_gruen_pro'), target: 15, current: agg.gruen_wins || 0 },
-            { id: 'rot_pro', icon: '❤️', title: this.getTranslation('badge_rot_pro'), target: 15, current: agg.rot_wins || 0 },
-            { id: 'schellen_pro', icon: '🔔', title: this.getTranslation('badge_schellen_pro'), target: 15, current: agg.schellen_wins || 0 },
+            { id: 'eichel_pro', icon: '<img src="media/eichel.png" style="height: 30px; width: auto;" alt="Eichel">', title: this.getTranslation('badge_eichel_pro'), target: 15, current: agg.eichel_wins || 0 },
+            { id: 'gruen_pro', icon: '<img src="media/gruen.png" style="height: 30px; width: auto;" alt="Grün">', title: this.getTranslation('badge_gruen_pro'), target: 15, current: agg.gruen_wins || 0 },
+            { id: 'rot_pro', icon: '<img src="media/rot.png" style="height: 30px; width: auto;" alt="Rot">', title: this.getTranslation('badge_rot_pro'), target: 15, current: agg.rot_wins || 0 },
+            { id: 'schellen_pro', icon: '<img src="media/schellen.png" style="height: 30px; width: auto;" alt="Schellen">', title: this.getTranslation('badge_schellen_pro'), target: 15, current: agg.schellen_wins || 0 },
             { id: 'jungfrau', icon: '🧖‍♀️', title: this.getTranslation('badge_jungfrau'), target: 5, current: agg.ramsch_zero_wins || 0 }
         ];
 
