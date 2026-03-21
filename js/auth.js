@@ -317,10 +317,59 @@ class StorageService {
         if (!this.auth.isLoggedIn()) return [];
         const { data, error } = await this.auth.client.from('claimed_badges').select('badge_id').eq('user_id', this.auth.user.id);
         if (error) return [];
-        return data.map(b => b.badge_id);
-    }
+        return data.map(d => d.badge_id);
+        }
 
-    async updateNickname(nickname) {
+        // --- Daily Challenges ---
+
+        async getDailyChallenges(userId) {
+        if (!this.auth.client) return [];
+        const today = new Date().toISOString().split('T')[0];
+        const { data, error } = await this.auth.client
+            .from('user_challenges')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('assigned_at', today);
+
+        if (error) {
+            console.error('getDailyChallenges error:', error);
+            return [];
+        }
+        return data;
+        }
+
+        async saveDailyChallenges(challenges) {
+        if (!this.auth.client) return [];
+        const { data, error } = await this.auth.client
+            .from('user_challenges')
+            .insert(challenges)
+            .select();
+
+        if (error) {
+            console.error('saveDailyChallenges error:', error);
+            return [];
+        }
+        return data;
+        }
+
+        async updateChallenges(userId, challenges) {
+        if (!this.auth.client) return;
+
+        // Update each challenge individually to sync with DB
+        for (const challenge of challenges) {
+            const { error } = await this.auth.client
+                .from('user_challenges')
+                .update({ 
+                    progress: challenge.progress, 
+                    is_completed: challenge.is_completed 
+                })
+                .eq('id', challenge.id);
+
+            if (error) console.error('updateChallenge error:', error);
+        }
+        }
+
+        async syncStats(localStats) {
         if (!this.auth.isLoggedIn() || !nickname) return;
         console.log('Attempting to update nickname in cloud:', nickname);
         try {

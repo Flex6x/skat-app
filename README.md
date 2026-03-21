@@ -23,6 +23,7 @@ https://flex6x.github.io/skat-app/
 ## Zukünftige Badges:
 
 - Farbspiel mit 4 oder weniger trumpf gewinnen.
+- Absolviere 20 Tages Herausforderungen
 
 ## Botverbesserungen:
 
