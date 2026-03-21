@@ -591,6 +591,20 @@ class UI {
         };
         
         this.bindGlobalEvents();
+        
+        // Ensure UI is updated when auth is initialized
+        if (window.auth) {
+            this.updateLoginUI();
+        } else {
+            // Fallback: poll if auth not ready yet
+            const checkAuthInterval = setInterval(() => {
+                if (window.auth) {
+                    this.updateLoginUI();
+                    clearInterval(checkAuthInterval);
+                }
+            }, 500);
+            setTimeout(() => clearInterval(checkAuthInterval), 5000);
+        }
     }
     
     bindGlobalEvents() {
@@ -659,6 +673,16 @@ class UI {
             };
         }
 
+        // Daily Challenge Button
+        const btnDailyChallenges = document.getElementById('btn-daily-challenges');
+        if (btnDailyChallenges) {
+            btnDailyChallenges.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showDailyChallengesModal();
+            };
+        }
+
         // Bug report button (menu)
         const btnBugReport = document.getElementById('btn-bug-report');
         if (btnBugReport) {
@@ -667,6 +691,105 @@ class UI {
                 e.stopPropagation();
                 this.showBugReportModal();
             };
+        }
+
+        // Check auth status and update UI accordingly
+        if (window.auth) {
+            this.updateLoginUI();
+        }
+    }
+
+    updateLoginUI() {
+        const btnDailyChallenges = document.getElementById('btn-daily-challenges');
+        if (btnDailyChallenges) {
+            btnDailyChallenges.style.display = 'block';
+        }
+    }
+
+    async showDailyChallengesModal() {
+        const modalId = 'daily-challenge-modal';
+        if (document.getElementById(modalId)) return;
+
+        const userId = window.auth?.user?.id;
+        
+        const overlay = document.createElement('div');
+        overlay.id = modalId;
+        overlay.className = 'menu-overlay';
+        
+        let html = `
+            <div class="menu-content challenge-modal">
+                <button class="btn-close-modal" id="btn-close-challenges">×</button>
+                <h2>Tägliche Herausforderungen</h2>
+        `;
+
+        if (!userId) {
+            html += `
+                <div class="not-logged-in-msg">
+                    <p>Diese Funktion ist nur für angemeldete Nutzer verfügbar.</p>
+                    <button class="btn primary" id="btn-login-from-modal">Zum Login</button>
+                </div>
+            `;
+        } else {
+            const manager = new ChallengeManager(window.storageService);
+            const challenges = await manager.getOrAssignChallenges(userId);
+
+            html += `<div class="challenge-grid">`;
+            
+            challenges.forEach(c => {
+                const pool = c.pool === 10 ? 'POOL_10' : 'POOL_20';
+                const def = CHALLENGE_POOLS[pool].find(p => p.id === c.challenge_id);
+                const isDone = c.is_completed;
+                
+                html += `
+                    <div class="challenge-card ${isDone ? 'completed' : ''}">
+                        <span class="challenge-title">${def.title} (${c.pool} Taler)</span>
+                        <span class="challenge-desc">${def.desc}</span>
+                        <span class="challenge-progress">Fortschritt: ${c.progress} / ${c.target}</span>
+                        <button class="btn primary" ${!isDone || c.reward_claimed ? 'disabled' : ''} id="btn-claim-${c.challenge_id}">
+                            ${isDone ? (c.reward_claimed ? 'Belohnung erhalten' : 'Belohnung einsammeln') : 'Noch offen'}
+                        </button>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+        
+        html += `</div>`;
+        overlay.innerHTML = html;
+        document.body.appendChild(overlay);
+
+        const close = () => {
+            if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        };
+        overlay.onclick = (e) => { if (e.target === overlay) close(); };
+        document.getElementById('btn-close-challenges').onclick = close;
+
+        if (!userId) {
+            document.getElementById('btn-login-from-modal').onclick = () => {
+                close();
+                window.auth.showLoginModal();
+            };
+        } else {
+            const manager = new ChallengeManager(window.storageService);
+            const challenges = await manager.getOrAssignChallenges(userId);
+            challenges.forEach(c => {
+                const btn = document.getElementById(`btn-claim-${c.challenge_id}`);
+                if (btn && c.is_completed && !c.reward_claimed) {
+                    btn.onclick = async () => {
+                        btn.disabled = true;
+                        btn.textContent = 'Lädt...';
+                        const ok = await window.storageService.claimChallengeReward(userId, c.challenge_id);
+                        if (ok) {
+                            btn.textContent = 'Belohnung erhalten';
+                            btn.classList.add('claimed');
+                            if (window.auth) window.auth.renderTalerGroup();
+                        } else {
+                            btn.disabled = false;
+                            btn.textContent = 'Fehler!';
+                        }
+                    };
+                }
+            });
         }
     }
 

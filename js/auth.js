@@ -286,9 +286,6 @@ class StorageService {
         if (!this.auth.isLoggedIn()) return { success: false, error: 'Not logged in' };
         
         try {
-            // Check if already claimed in DB (this is the only part that needs cloud to be 100% sure, 
-            // but we can trust the process if the insert succeeds)
-            
             // 1. Mark as claimed in cloud
             const { error: claimError } = await this.auth.client.from('claimed_badges').insert({
                 user_id: this.auth.user.id,
@@ -313,12 +310,48 @@ class StorageService {
         }
     }
 
+    async claimChallengeReward(userId, challengeId) {
+        if (!this.auth.isLoggedIn()) return false;
+        
+        try {
+            // 1. Update challenge to 'reward_claimed' = true
+            const { error } = await this.auth.client
+                .from('user_challenges')
+                .update({ reward_claimed: true })
+                .eq('id', challengeId)
+                .eq('user_id', userId);
+
+            if (error) throw error;
+
+            // 2. Add Reward (e.g., 10 or 20 Taler) to profile
+            // We need to fetch challenge info to know reward amount,
+            // or we assume challenge object has it.
+            // Let's assume we need to fetch the challenge first.
+            const { data: challenge } = await this.auth.client
+                .from('user_challenges')
+                .select('pool')
+                .eq('id', challengeId)
+                .single();
+            
+            const reward = challenge?.pool || 0;
+            const profile = await this.getProfile();
+            const updatedCoins = (profile.coins || 0) + reward;
+            
+            await this._saveProfile({ coins: updatedCoins });
+            
+            return true;
+        } catch (err) {
+            console.error('claimChallengeReward error:', err);
+            return false;
+        }
+    }
+
     async getClaimedBadges() {
         if (!this.auth.isLoggedIn()) return [];
         const { data, error } = await this.auth.client.from('claimed_badges').select('badge_id').eq('user_id', this.auth.user.id);
         if (error) return [];
         return data.map(d => d.badge_id);
-        }
+    }
 
         // --- Daily Challenges ---
 
@@ -369,7 +402,7 @@ class StorageService {
         }
         }
 
-        async syncStats(localStats) {
+    async updateNickname(nickname) {
         if (!this.auth.isLoggedIn() || !nickname) return;
         console.log('Attempting to update nickname in cloud:', nickname);
         try {
@@ -831,17 +864,25 @@ class Auth {
 
             if (!this.isLoggedIn()) {
                 group.innerHTML = `
+                    <button id="btn-daily-challenges" class="floating-btn" title="Tägliche Herausforderungen" onclick="if(window.ui) window.ui.showDailyChallengesModal()">🏆</button>
+                    <button id="btn-daily-login" class="floating-btn ${canClaimDaily ? 'glow-yellow' : 'claimed'}" title="Täglicher Bonus">
+                        ${canClaimDaily ? '+20' : '✓'}
+                    </button>
+                    <button class="floating-btn" onclick="window.location.href='store.html'" title="Store">
+                        🏪
+                    </button>
                     <button class="floating-btn" onclick="if(window.ui) window.ui.showBugReportModal()" title="Bug melden">
                         🐞
                     </button>
                 `;
-                return;
+                return; // Re-added return statement
             }
 
             const today = new Date().toISOString().split('T')[0];
             const canClaimDaily = profile.last_daily_claim !== today;
 
             group.innerHTML = `
+                <button id="btn-daily-challenges" class="floating-btn" title="Tägliche Herausforderungen" onclick="if(window.ui) window.ui.showDailyChallengesModal()">🏆</button>
                 <button id="btn-daily-login" class="floating-btn ${canClaimDaily ? 'glow-yellow' : 'claimed'}" title="Täglicher Bonus">
                     ${canClaimDaily ? '+20' : '✓'}
                 </button>
@@ -903,7 +944,6 @@ class Auth {
             }
         }
     }
-
     async signUp(email, password, nickname) { 
         if (!this.client) return { error: 'Client not initialized' };
         const options = window.location.protocol === 'file:' ? {} : { emailRedirectTo: 'https://flex6x.github.io/skat-app/' };
