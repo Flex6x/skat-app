@@ -36,7 +36,7 @@ const io = new SocketIOServer(httpServer, {
 });
 
 // Middleware
-app.use(express.static('public'));
+app.use(express.static(__dirname));  // Serve all static files from root
 app.use(express.json());
 
 // ============================================================================
@@ -53,6 +53,40 @@ const socketPlayers = new Map(); // socketId → playerId
 
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
+});
+
+app.get('/play', (req, res) => {
+    res.sendFile(join(__dirname, 'play.html'));
+});
+
+app.get('/play-multiplayer', (req, res) => {
+    res.sendFile(join(__dirname, 'play-multiplayer.html'));
+});
+
+app.get('/rules', (req, res) => {
+    res.sendFile(join(__dirname, 'rules.html'));
+});
+
+app.get('/stats', (req, res) => {
+    res.sendFile(join(__dirname, 'stats.html'));
+});
+
+app.get('/settings', (req, res) => {
+    res.sendFile(join(__dirname, 'settings.html'));
+});
+
+app.get('/store', (req, res) => {
+    res.sendFile(join(__dirname, 'store.html'));
+});
+
+// Fallback: Any .html file can be requested directly
+app.get('/:page.html', (req, res) => {
+    const fileName = req.params.page + '.html';
+    res.sendFile(join(__dirname, fileName), (err) => {
+        if (err) {
+            res.status(404).send('Page not found');
+        }
+    });
 });
 
 app.get('/health', (req, res) => {

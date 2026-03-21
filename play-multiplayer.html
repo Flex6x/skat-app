@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Skat</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .multiplayer-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+
+        .multiplayer-header {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            color: white;
+            text-align: center;
+            border-bottom: 2px solid #ffd700;
+        }
+
+        .multiplayer-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .room-info {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .game-content {
+            display: flex;
+            flex: 1;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .game-board {
+            flex: 3;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-status {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            color: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .current-trick {
+            background: rgba(0,100,0,0.3);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            min-height: 120px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .trick-card {
+            width: 60px;
+            height: 90px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            position: relative;
+        }
+
+        .card-player {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            font-size: 9px;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .hand-area {
+            flex: 1;
+            display: flex;
+            gap: 5px;
+            align-items: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .card-hand {
+            width: 50px;
+            height: 75px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e72 100%);
+            border: 2px solid #ffd700;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .card-hand:hover:not(.disabled) {
+            transform: translateY(-10px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .card-hand.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .card-suit {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 8px;
+        }
+
+        .card-rank {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #ffd700;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #ffed4e;
+            transform: scale(1.05);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-pass {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-pass:hover:not(:disabled) {
+            background: #c0392b;
+        }
+
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .panel {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .panel h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 10px;
+        }
+
+        .player-item {
+            padding: 8px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-status {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+
+        .connected {
+            color: #00ff00;
+        }
+
+        .disconnected {
+            color: #ff6b6b;
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .chat-message {
+            font-size: 11px;
+            padding: 5px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 3px;
+            word-break: break-word;
+        }
+
+        .chat-message strong {
+            color: #ffd700;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 5px;
+            border: none;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .chat-input button {
+            padding: 5px 10px;
+            background: #ffd700;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #ffd700;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .waiting-players {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .player-slot {
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border: 2px dashed #ffd700;
+            border-radius: 5px;
+            margin: 10px 0;
+            color: white;
+        }
+
+        .player-slot.connected {
+            border-style: solid;
+            border-color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="multiplayer-container">
+        <div class="multiplayer-header">
+            <h1>🎴 Multiplayer Skat</h1>
+            <div class="room-info">
+                <span id="roomInfo">Connecting...</span>
+            </div>
+        </div>
+
+        <div class="game-content">
+            <!-- Main Game Board -->
+            <div class="game-board">
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+                <div id="loadingScreen" class="loading">
+                    <div class="spinner"></div>
+                    <p>Connecting to server...</p>
+                </div>
+
+                <div id="waitingScreen" style="display: none;">
+                    <div class="waiting-players">
+                        <h2>Waiting for players...</h2>
+                        <div id="playerList"></div>
+                    </div>
+                </div>
+
+                <div id="gameScreen" style="display: none;">
+                    <div class="game-status">
+                        <span id="gamePhase">Phase: Loading</span> | 
+                        <span id="gameTrump">Trump: -</span> | 
+                        <span id="gameTurn">Your turn: false</span>
+                    </div>
+
+                    <div class="current-trick" id="currentTrick">
+                        <div style="color: white; text-align: center;">
+                            Waiting for cards...
+                        </div>
+                    </div>
+
+                    <div class="hand-area" id="handArea"></div>
+
+                    <div class="action-buttons">
+                        <button class="btn" id="passBtn" style="display: none;">Pass</button>
+                        <button class="btn btn-pass" id="quitBtn">Quit Game</button>
+                        <button class="btn" id="debugBtn" style="display: none;">Debug</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Players Panel -->
+                <div class="panel">
+                    <h3>Players</h3>
+                    <div id="playersPanelList"></div>
+                </div>
+
+                <!-- Chat Panel -->
+                <div class="panel">
+                    <h3>Chat</h3>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Message...">
+                        <button onclick="document.querySelector('.multiplayer-game').sendChat()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Socket.io Client -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+
+    <!-- Game Scripts -->
+    <script src="js/socketClient.js"></script>
+    <script src="js/multiplayerGame.js"></script>
+    <script src="js/settings.js"></script>
+
+    <script>
+        class MultiplayerUI {
+            constructor() {
+                this.gameContainer = document.querySelector('.multiplayer-container');
+                this.loadingScreen = document.getElementById('loadingScreen');
+                this.gameScreen = document.getElementById('gameScreen');
+                this.waitingScreen = document.getElementById('waitingScreen');
+                this.errorMessageEl = document.getElementById('errorMessage');
+                this.currentTrick = document.getElementById('currentTrick');
+                this.handArea = document.getElementById('handArea');
+                this.playersPanelList = document.getElementById('playersPanelList');
+                this.chatMessages = document.getElementById('chatMessages');
+                this.passBtn = document.getElementById('passBtn');
+                this.quitBtn = document.getElementById('quitBtn');
+                this.roomInfo = document.getElementById('roomInfo');
+                
+                this.quitBtn.addEventListener('click', () => this.quit());
+            }
+
+            showLoading() {
+                this.loadingScreen.style.display = 'block';
+                this.gameScreen.style.display = 'none';
+                this.waitingScreen.style.display = 'none';
+            }
+
+            showWaitingForPlayers(players) {
+                this.waitingScreen.style.display = 'block';
+                this.gameScreen.style.display = 'none';
+                this.loadingScreen.style.display = 'none';
+                
+                const playerList = document.getElementById('playerList');
+                playerList.innerHTML = players.map(p => `
+                    <div class="player-slot ${p.connected ? 'connected' : ''}">
+                        ${p.name} (${p.type})
+                        <span class="player-status ${p.connected ? 'connected' : 'disconnected'}">
+                            ${p.connected ? '✓ Connected' : '○ Waiting'}
+                        </span>
+                    </div>
+                `).join('');
+            }
+
+            showGameArea() {
+                this.gameScreen.style.display = 'flex';
+                this.loadingScreen.style.display = 'none';
+                this.waitingScreen.style.display = 'none';
+            }
+
+            showError(message) {
+                this.errorMessageEl.textContent = message;
+                this.errorMessageEl.style.display = 'block';
+                setTimeout(() => {
+                    this.errorMessageEl.style.display = 'none';
+                }, 5000);
+            }
+
+            updatePlayerList(players) {
+                this.playersPanelList.innerHTML = players.map((p, idx) => `
+                    <div class="player-item">
+                        <span>${p.name} (Player ${idx})</span>
+                        <span class="player-status ${p.type === 'human' ? 'connected' : 'disconnected'}">
+                            ${p.type === 'human' ? '👤' : '🤖'}
+                        </span>
+                    </div>
+                `).join('');
+            }
+
+            renderHand(hand) {
+                this.handArea.innerHTML = hand.map((card, idx) => {
+                    const suitSymbol = {
+                        'Eichel': '♣',
+                        'Grün': '♠',
+                        'Rot': '♥',
+                        'Schellen': '♦'
+                    }[card.suit] || '♠';
+
+                    return `
+                        <div class="card-hand" onclick="window.multiplayerGameInstance.onCardClick(${idx})">
+                            <span class="card-suit">${suitSymbol}</span>
+                            <span>${card.rank}</span>
+                            <span class="card-rank">${suitSymbol}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            renderCurrentTrick(trick) {
+                if (!trick || trick.length === 0) {
+                    this.currentTrick.innerHTML = '<div style="color: white;">Waiting for cards...</div>';
+                    return;
+                }
+
+                this.currentTrick.innerHTML = trick.map(card => `
+                    <div class="trick-card">
+                        ${card.suit || '-'} ${card.rank || '-'}
+                        <div class="card-player">P${card.playerId}</div>
+                    </div>
+                `).join('');
+            }
+
+            updateGameStatus(status) {
+                document.getElementById('gamePhase').textContent = `Phase: ${status.phase}`;
+                document.getElementById('gameTrump').textContent = `Trump: ${status.trumpMode || '-'}`;
+                document.getElementById('gameTurn').textContent = `Your turn: ${status.turnIndex === window.socketClient.playerId}`;
+            }
+
+            disableAllActions() {
+                this.passBtn.style.display = 'none';
+                this.handArea.querySelectorAll('.card-hand').forEach(card => {
+                    card.classList.add('disabled');
+                });
+            }
+
+            enableCardSelection(validCards) {
+                this.passBtn.style.display = 'inline-block';
+                this.handArea.querySelectorAll('.card-hand').forEach(card => {
+                    card.classList.remove('disabled');
+                });
+            }
+
+            enableBidding(bidOptions) {
+                this.passBtn.style.display = 'inline-block';
+            }
+
+            showSkatDecision() {
+                // TODO: Skat-Auswahlschnittstelle
+            }
+
+            showTrumpSelection() {
+                // TODO: Trump-Auswahlschnittstelle
+            }
+
+            showAnnouncements() {
+                // TODO: Ansage-Schnittstelle
+            }
+
+            addChatMessage(playerName, message) {
+                const msg = document.createElement('div');
+                msg.className = 'chat-message';
+                msg.innerHTML = `<strong>${playerName}:</strong> ${message}`;
+                this.chatMessages.appendChild(msg);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            updatePlayerList(data) {
+                // Update when player joins
+                console.log('Player updated:', data);
+            }
+
+            showPlayerDisconnected(playerName) {
+                this.showError(`${playerName} disconnected`);
+            }
+
+            showGameResult(result) {
+                alert(`Game Over!\n${JSON.stringify(result, null, 2)}`);
+            }
+
+            hideMainMenu() {}
+            showMainMenu() {}
+            updateOpponentCardCount(idx, count) {}
+            showWaitingForPlayers(players) {
+                this.showWaitingForPlayers(players);
+            }
+
+            quit() {
+                if (confirm('Leave the game?')) {
+                    window.multiplayerGameInstance.disconnect();
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+
+        // Initialize
+        const socketClient = new SocketClient();
+        const multiplayerUI = new MultiplayerUI();
+        const multiplayerGame = new MultiplayerGame(multiplayerUI, socketClient);
+        window.multiplayerGameInstance = multiplayerGame;
+        window.socketClient = socketClient;
+
+        // Start
+        (async () => {
+            try {
+                multiplayerUI.showLoading();
+                
+                // Get player name (from URL or localStorage)
+                const params = new URLSearchParams(window.location.search);
+                const playerName = params.get('name') || localStorage.getItem('playerName') || `Player_${Math.random().toString(36).substring(7)}`;
+                const roomId = params.get('room') || null;
+
+                // Join game
+                await multiplayerGame.joinGame(playerName, roomId);
+                multiplayerUI.roomInfo.innerHTML = `Room: ${socketClient.roomId} | You: Player ${socketClient.playerId}`;
+            } catch (error) {
+                console.error('Failed to start game:', error);
+                multiplayerUI.showError(`Connection failed: ${error.message}`);
+            }
+        })();
+    </script>
+</body>
+</html>
