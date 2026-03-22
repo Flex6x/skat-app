@@ -75,6 +75,7 @@ export default function gameEvents(io, gameRooms, playerSockets, socketPlayers) 
                     },
                     {
                         onStateUpdate: (state) => {
+                            console.log(`[stateUpdate] Broadcasting state update: phase=${state.phase}`);
                             io.to(`room-${newRoomId}`).emit('stateUpdate', {
                                 ...state,
                                 filteredStates: room.players.map(p => ({
@@ -310,17 +311,36 @@ export default function gameEvents(io, gameRooms, playerSockets, socketPlayers) 
                     return;
                 }
 
+                // Prüfe ob Spiel bereits läuft
+                if (meta.status === 'playing' || meta.status === 'finished') {
+                    console.log(`[startGame] Game already started in room ${roomId}`);
+                    return;
+                }
+
                 meta.status = 'playing';
 
                 // Starte das Spiel
                 console.log(`[startGame] Starting game in room ${roomId}`);
+                
+                // Sende initial state update zu beiden Spielern
+                io.to(`room-${roomId}`).emit('stateUpdate', {
+                    roomId,
+                    phase: 'initializing',
+                    filteredStates: room.players.map(p => ({
+                        playerId: p.id,
+                        state: room.skatEngine.getFilteredState(p.id)
+                    }))
+                });
+
                 room.run()
                     .then(result => {
                         console.log(`[Game] Finished:`, result);
+                        meta.status = 'finished';
                         io.to(`room-${roomId}`).emit('gameFinished', result);
                     })
                     .catch(error => {
                         console.error(`[Game] Error:`, error);
+                        meta.status = 'error';
                         io.to(`room-${roomId}`).emit('gameError', {
                             message: error.message
                         });

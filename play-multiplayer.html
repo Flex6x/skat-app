@@ -111,6 +111,29 @@
         </div>
     </div>
 
+    <!-- Screen 5: Game Playing -->
+    <div id="game-screen" class="screen">
+        <div style="padding: 20px; color: #fff;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 id="game-phase-title">Spiel lädt...</h2>
+                <p id="game-current-player" style="color: #b0b0b0; font-size: 14px;"></p>
+            </div>
+            
+            <div id="game-board" style="min-height: 400px; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                <!-- Game state will be rendered here -->
+                <div style="text-align: center; color: #b0b0b0;">
+                    <p>🎴 Spiel lädt...</p>
+                </div>
+            </div>
+
+            <div id="game-actions" style="margin-bottom: 20px;">
+                <!-- Action buttons will appear here -->
+            </div>
+
+            <button class="btn-back" onclick="app.leaveRoom()" style="width: 100%;">← Spiel verlassen</button>
+        </div>
+    </div>
+
     <!-- Screen 4: Lobby -->
     <div id="lobby-screen" class="screen">
         <div class="container">
@@ -135,6 +158,18 @@
         </div>
     </div>
 
+    <!-- Screen 6: Game Finished -->
+    <div id="finished-screen" class="screen">
+        <div class="container">
+            <h1>🎉 Spiel beendet!</h1>
+            <p class="subtitle" id="finished-message">Ergebnisse laden...</p>
+            <div id="finished-results" style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <!-- Results will appear here -->
+            </div>
+            <button class="btn-primary" onclick="app.goToMenu()" style="margin: 20px 0;">← Zurück zum Menü</button>
+        </div>
+    </div>
+
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="js/socketClient.js"></script>
     <script>
@@ -151,6 +186,7 @@
                     isHost: false
                 };
                 this.socketClient = null;
+                this.gameStarting = false;
             }
 
             async initialize() {
@@ -188,6 +224,23 @@
 
                 this.socketClient.on('errorOccurred', (data) => {
                     this.onServerError(data);
+                });
+
+                this.socketClient.on('stateUpdate', (data) => {
+                    this.onStateUpdate(data);
+                });
+
+                this.socketClient.on('requestAction', (data) => {
+                    this.onRequestAction(data);
+                });
+
+                this.socketClient.on('gameFinished', (data) => {
+                    this.onGameFinished(data);
+                });
+
+                this.socketClient.on('gameError', (data) => {
+                    console.error('[App] Game error:', data);
+                    alert('Fehler: ' + data.message);
                 });
 
                 this.socketClient.on('disconnected', () => {
@@ -410,6 +463,12 @@
             }
 
             startGame() {
+                if (this.gameStarting) {
+                    console.log('[App] Game already starting, ignoring click');
+                    return;
+                }
+                
+                this.gameStarting = true;
                 console.log('[App] Starting game...');
                 this.socketClient.startGame(this.state.roomCode);
                 // Das gameFinished Event wird dann kommen
@@ -422,6 +481,80 @@
                 } else if (this.state.screen === 'join-room-screen') {
                     this.showError('join-error', data.message);
                 }
+            }
+
+            onStateUpdate(data) {
+                console.log('[App] State update:', data);
+                
+                // Wechsel zum Game-Screen beim ersten State-Update
+                if (this.state.screen !== 'game-screen') {
+                    console.log('[App] Switching to game screen');
+                    this.showScreen('game-screen');
+                }
+                
+                // Finde meinen gefilterten State
+                const myFiltered = data.filteredStates?.find(f => f.playerId === this.state.playerId);
+                if (myFiltered) {
+                    this.renderGameState(myFiltered.state);
+                }
+            }
+
+            onRequestAction(data) {
+                console.log('[App] Action requested:', data.phase);
+                // Server fragt nach eine Aktion vom Spieler
+                // Das wird später implementiert wenn wir mit dem Spiel interagieren
+            }
+
+            onGameFinished(data) {
+                console.log('[App] Game finished:', data);
+                this.renderGameResults(data);
+                this.showScreen('finished-screen');
+            }
+
+            renderGameState(state) {
+                const board = document.getElementById('game-board');
+                if (!board) return;
+
+                // Einfache Anzeige des Spiel-Status
+                let html = '<div style="text-align: center; color: #e0e0e0;">';
+                
+                if (state.phase === 'bidding') {
+                    html += '<h3>🎴 Reizphase</h3>';
+                } else if (state.phase === 'trump') {
+                    html += '<h3>♠ Trumpf wählen</h3>';
+                } else if (state.phase === 'skat') {
+                    html += '<h3>📚 Skat annehmen/ablehnen</h3>';
+                } else if (state.phase === 'play') {
+                    html += '<h3>🎮 Kartenspielen</h3>';
+                }
+
+                html += '<p style="color: #b0b0b0; margin-top: 20px;">Phase: <strong>' + state.phase + '</strong></p>';
+                
+                if (state.hand) {
+                    html += '<p>Meine Karten: ' + state.hand.length + '</p>';
+                }
+
+                html += '</div>';
+                board.innerHTML = html;
+            }
+
+            renderGameResults(result) {
+                const resultsDiv = document.getElementById('finished-results');
+                let html = '<h3 style="color: #e0e0e0; margin-bottom: 15px;">Ergebnisse:</h3>';
+                
+                if (result.scores) {
+                    html += '<div style="display: grid; gap: 10px;">';
+                    Object.entries(result.scores).forEach(([name, score]) => {
+                        html += `<div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(63,81,181,0.1); border-radius: 6px;">
+                            <span>${name}</span>
+                            <strong>${score} Punkte</strong>
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
+
+                document.getElementById('finished-message').textContent = 'Spiel abgeschlossen!';
+                resultsDiv.innerHTML = html;
             }
 
             leaveRoom() {
