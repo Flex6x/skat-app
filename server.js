@@ -119,6 +119,10 @@ io.on('connection', (socket) => {
     const events = gameEvents(io, gameRooms, playerSockets, socketPlayers);
 
     // Register all event handlers for this socket
+    socket.on('createRoom', (data) => events.onCreateRoom(socket, data));
+    socket.on('joinRoom', (data) => events.onJoinRoom(socket, data));
+    socket.on('setPlayerReady', (data) => events.onSetPlayerReady(socket, data));
+    socket.on('startGame', (data) => events.onStartGame(socket, data));
     socket.on('joinGame', (data) => events.onJoinGame(socket, data));
     socket.on('playerAction', (data) => events.onPlayerAction(socket, data));
     socket.on('chat', (data) => events.onChat(socket, data));

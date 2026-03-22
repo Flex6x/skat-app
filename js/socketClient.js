@@ -119,10 +119,85 @@ class SocketClient {
             console.log('[Socket] Server requesting action');
             this._emit('requestAction', data);
         });
+
+        this.socket.on('roomCreated', (data) => {
+            this.roomId = data.roomId;
+            this.playerId = data.playerId;
+            console.log(`[Socket] Room created: ${data.roomCode}`);
+            this._emit('roomCreated', data);
+        });
+
+        this.socket.on('roomJoined', (data) => {
+            this.roomId = data.roomId;
+            this.playerId = data.playerId;
+            console.log(`[Socket] Joined room: ${data.roomCode}`);
+            this._emit('roomJoined', data);
+        });
+
+        this.socket.on('playerJoined', (data) => {
+            console.log(`[Socket] Player ${data.playerName} joined`);
+            this._emit('playerJoined', data);
+        });
+
+        this.socket.on('playerReadyChanged', (data) => {
+            console.log(`[Socket] Player ${data.playerId} ready: ${data.isReady}`);
+            this._emit('playerReadyChanged', data);
+        });
+
+        this.socket.on('bothPlayersReady', (data) => {
+            console.log('[Socket] Both players ready - game can start');
+            this._emit('bothPlayersReady', data);
+        });
     }
 
     /**
-     * Trete einem Spiel bei oder erstelle eines
+     * PHASE 2: Erstelle einen neuen Room
+     */
+    createRoom(playerName) {
+        return new Promise((resolve) => {
+            this.socket.emit('createRoom', { playerName });
+            this._once('roomCreated', resolve);
+        });
+    }
+
+    /**
+     * PHASE 2: Trete einem existierenden Room bei
+     */
+    joinRoom(roomCode, playerName) {
+        return new Promise((resolve, reject) => {
+            this.socket.emit('joinRoom', { roomCode, playerName });
+            
+            // Warte auf roomJoined oder error
+            const onJoined = (data) => {
+                resolve(data);
+                this._off('errorOccurred', onError);
+            };
+            const onError = (data) => {
+                reject(new Error(data.message));
+                this._off('roomJoined', onJoined);
+            };
+            
+            this._once('roomJoined', onJoined);
+            this.on('errorOccurred', onError);
+        });
+    }
+
+    /**
+     * PHASE 2: Signalisiere dass Spieler bereit ist
+     */
+    setPlayerReady(roomCode, isReady) {
+        this.socket.emit('setPlayerReady', { roomCode, isReady });
+    }
+
+    /**
+     * PHASE 2: Starte das Spiel
+     */
+    startGame(roomCode) {
+        this.socket.emit('startGame', { roomCode });
+    }
+
+    /**
+     * Trete einem Spiel bei oder erstelle eines (OLD - deprecated)
      */
     joinGame(playerName, roomId = null) {
         return new Promise((resolve) => {

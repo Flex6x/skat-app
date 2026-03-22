@@ -135,6 +135,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="js/socketClient.js"></script>
     <script>
         class MultiplayerApp {
             constructor() {
@@ -148,6 +150,50 @@
                     isReady: false,
                     isHost: false
                 };
+                this.socketClient = null;
+            }
+
+            async initialize() {
+                this.socketClient = new SocketClient();
+                try {
+                    await this.socketClient.connect();
+                    console.log('[App] Connected to server');
+                    this.setupSocketListeners();
+                } catch (error) {
+                    console.error('[App] Failed to connect:', error);
+                    this.showError('create-error', 'Verbindung zum Server fehlgeschlagen');
+                }
+            }
+
+            setupSocketListeners() {
+                this.socketClient.on('roomCreated', (data) => {
+                    this.onRoomCreated(data);
+                });
+
+                this.socketClient.on('roomJoined', (data) => {
+                    this.onRoomJoined(data);
+                });
+
+                this.socketClient.on('playerJoined', (data) => {
+                    this.onPlayerJoined(data);
+                });
+
+                this.socketClient.on('playerReadyChanged', (data) => {
+                    this.onPlayerReadyChanged(data);
+                });
+
+                this.socketClient.on('bothPlayersReady', (data) => {
+                    this.onBothPlayersReady(data);
+                });
+
+                this.socketClient.on('errorOccurred', (data) => {
+                    this.onServerError(data);
+                });
+
+                this.socketClient.on('disconnected', () => {
+                    alert('Verbindung zum Server unterbrochen');
+                    this.goToMenu();
+                });
             }
 
             showScreen(screenId) {
@@ -186,7 +232,7 @@
                 this.showScreen('join-room-screen');
             }
 
-            createRoom() {
+            async createRoom() {
                 const username = document.getElementById('create-username').value.trim();
                 
                 if (!username) {
@@ -199,23 +245,29 @@
                     return;
                 }
 
-                const roomCode = this.generateRoomCode();
-                const roomId = this.generateRoomId();
+                try {
+                    const data = await this.socketClient.createRoom(username);
+                    this.onRoomCreated(data);
+                } catch (error) {
+                    this.showError('create-error', error.message);
+                }
+            }
 
-                this.state.playerName = username;
-                this.state.roomCode = roomCode;
-                this.state.roomId = roomId;
-                this.state.playerId = 0;
+            onRoomCreated(data) {
+                this.state.playerName = data.playerName;
+                this.state.roomCode = data.roomCode;
+                this.state.roomId = data.roomId;
+                this.state.playerId = data.playerId;
                 this.state.isHost = true;
                 this.state.players = [
-                    { id: 0, name: username, type: 'human', ready: false }
+                    { id: 0, name: data.playerName, type: 'human', ready: false }
                 ];
 
                 document.getElementById('create-error').classList.remove('show');
                 document.getElementById('room-created').style.display = 'block';
-                document.getElementById('display-room-code').textContent = roomCode;
+                document.getElementById('display-room-code').textContent = data.roomCode;
 
-                console.log('[App] Room created:', { roomCode, roomId, playerName: username });
+                console.log('[App] Room created:', data.roomCode);
                 
                 // Auto-navigate to lobby after 1.5 seconds
                 setTimeout(() => this.goToLobby(), 1500);
@@ -238,7 +290,7 @@
                 });
             }
 
-            joinRoom() {
+            async joinRoom() {
                 const code = document.getElementById('join-code').value.trim();
                 const username = document.getElementById('join-username').value.trim();
 
@@ -262,20 +314,32 @@
                     return;
                 }
 
-                this.state.playerName = username;
-                this.state.roomCode = code;
-                this.state.roomId = this.generateRoomId();
-                this.state.playerId = 1;
+                try {
+                    const data = await this.socketClient.joinRoom(code, username);
+                    this.onRoomJoined(data);
+                } catch (error) {
+                    this.showError('join-error', error.message);
+                }
+            }
+
+            onRoomJoined(data) {
+                this.state.playerName = data.playerName;
+                this.state.roomCode = data.roomCode;
+                this.state.roomId = data.roomId;
+                this.state.playerId = data.playerId;
                 this.state.isHost = false;
-                this.state.players = [
-                    { id: 0, name: 'Host', type: 'human', ready: false },
-                    { id: 1, name: username, type: 'human', ready: false }
-                ];
+                this.state.players = data.players;
 
                 document.getElementById('join-error').classList.remove('show');
                 this.goToLobby();
 
-                console.log('[App] Joined room:', { roomCode: code, playerName: username });
+                console.log('[App] Joined room:', data.roomCode);
+            }
+
+            onPlayerJoined(data) {
+                this.state.players = data.players;
+                this.renderLobbyPlayers();
+                console.log('[App] Player joined, now:', data.players);
             }
 
             goToLobby() {
@@ -324,33 +388,46 @@
             toggleReady() {
                 const myPlayer = this.state.players.find(p => p.id === this.state.playerId);
                 if (myPlayer) {
-                    myPlayer.ready = !myPlayer.ready;
+                    const newReadyState = !myPlayer.ready;
+                    this.socketClient.setPlayerReady(this.state.roomCode, newReadyState);
+                    myPlayer.ready = newReadyState;
                     this.renderLobbyPlayers();
                 }
             }
 
+            onPlayerReadyChanged(data) {
+                const player = this.state.players.find(p => p.id === data.playerId);
+                if (player) {
+                    player.ready = data.isReady;
+                }
+                this.renderLobbyPlayers();
+                console.log('[App] Player ready changed:', data);
+            }
+
+            onBothPlayersReady(data) {
+                console.log('[App] Both players ready - game can start');
+                this.updateLobbyStatus();
+            }
+
             startGame() {
-                console.log('[App] Game start requested');
-                alert('🎮 Spiel würde jetzt starten!\n\nPhase 2: Server-Integration');
+                console.log('[App] Starting game...');
+                this.socketClient.startGame(this.state.roomCode);
+                // Das gameFinished Event wird dann kommen
+            }
+
+            onServerError(data) {
+                console.error('[App] Server error:', data);
+                if (this.state.screen === 'create-room-screen') {
+                    this.showError('create-error', data.message);
+                } else if (this.state.screen === 'join-room-screen') {
+                    this.showError('join-error', data.message);
+                }
             }
 
             leaveRoom() {
                 if (confirm('Raum verlassen?')) {
                     this.goToMenu();
                 }
-            }
-
-            generateRoomCode() {
-                const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-                let code = '';
-                for (let i = 0; i < 6; i++) {
-                    code += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                return 'SKT-' + code;
-            }
-
-            generateRoomId() {
-                return 'room-' + Math.random().toString(36).substr(2, 9);
             }
 
             showError(elementId, message) {
@@ -362,8 +439,9 @@
         }
 
         let app;
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             app = new MultiplayerApp();
+            await app.initialize();
             console.log('[App] Multiplayer UI initialized');
         });
     </script>

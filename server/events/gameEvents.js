@@ -17,10 +17,325 @@ import { v4 as uuidv4 } from 'uuid';
  * @param {Map} playerSockets - Map von playerId → {socketId, roomId}
  * @param {Map} socketPlayers - Map von socketId → playerId
  */
+// Map: roomCode → roomId (für Room-Lookup)
+const roomCodeMap = new Map();
+
+// Map: roomId → {roomCode, status, players: [{id, name, socketId, ready}]}
+const roomMetadata = new Map();
+
+/**
+ * Generiere eindeutigen 6-Zeichen Room-Code (ohne verwirrende Zeichen)
+ */
+function generateRoomCode() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return 'SKT-' + code;
+}
+
 export default function gameEvents(io, gameRooms, playerSockets, socketPlayers) {
     return {
         /**
-         * Spieler tritt einem Spiel bei oder erstellt ein neues
+         * PHASE 2: Player 1 erstellt einen Room und erhält einen Code
+         */
+        async onCreateRoom(socket, data) {
+            try {
+                const { playerName } = data;
+                
+                if (!playerName || playerName.trim().length === 0) {
+                    socket.emit('errorOccurred', {
+                        code: 'INVALID_NAME',
+                        message: 'Spielername erforderlich'
+                    });
+                    return;
+                }
+
+                // Generiere Room-Code
+                let roomCode = generateRoomCode();
+                while (roomCodeMap.has(roomCode)) {
+                    roomCode = generateRoomCode(); // Falls Collision (sehr selten)
+                }
+
+                // Erstelle GameRoom mit 2 Human + 1 Bot
+                const newRoomId = `room-${uuidv4()}`;
+                const playerConfigs = [
+                    { type: 'human', name: playerName },
+                    { type: 'human', name: 'Warte auf Spieler 2...' },
+                    { type: 'bot', name: 'Bot' }
+                ];
+
+                const room = new GameRoom(
+                    newRoomId,
+                    playerConfigs,
+                    {
+                        ruleSet: 'standard',
+                        autoStart: false // Nicht automatisch starten, nur wenn beide ready sind
+                    },
+                    {
+                        onStateUpdate: (state) => {
+                            io.to(`room-${newRoomId}`).emit('stateUpdate', {
+                                ...state,
+                                filteredStates: room.players.map(p => ({
+                                    playerId: p.id,
+                                    state: room.skatEngine.getFilteredState(p.id)
+                                }))
+                            });
+                        },
+                        onGameEnd: (result) => {
+                            io.to(`room-${newRoomId}`).emit('gameFinished', result);
+                            gameRooms.delete(newRoomId);
+                            roomCodeMap.delete(roomCode);
+                            roomMetadata.delete(newRoomId);
+                        },
+                        onRequestAction: (request) => {
+                            const player = room.players[request.playerId];
+                            if (player && player.socketId) {
+                                io.to(player.socketId).emit('requestAction', request);
+                            }
+                        }
+                    }
+                );
+
+                gameRooms.set(newRoomId, room);
+                roomCodeMap.set(roomCode, newRoomId);
+
+                // Speichere Room-Metadata
+                roomMetadata.set(newRoomId, {
+                    roomCode,
+                    status: 'waiting', // waiting, ready, playing, finished
+                    players: [
+                        { id: 0, name: playerName, socketId: socket.id, ready: false }
+                    ]
+                });
+
+                // Registriere Player 1
+                socketPlayers.set(socket.id, 0);
+                playerSockets.set(0, { socketId: socket.id, roomId: newRoomId });
+                room.players[0].socketId = socket.id;
+
+                // Socket tritt Room-Channel bei
+                socket.join(`room-${newRoomId}`);
+
+                // Sende Bestätigung
+                socket.emit('roomCreated', {
+                    roomId: newRoomId,
+                    roomCode,
+                    playerId: 0,
+                    playerName
+                });
+
+                console.log(`[createRoom] Player 1 (${playerName}) created room ${newRoomId} with code ${roomCode}`);
+            } catch (error) {
+                console.error('[createRoom] Error:', error);
+                socket.emit('errorOccurred', {
+                    code: 'CREATE_FAILED',
+                    message: error.message
+                });
+            }
+        },
+
+        /**
+         * PHASE 2: Player 2 tritt mit Room-Code bei
+         */
+        async onJoinRoom(socket, data) {
+            try {
+                const { roomCode, playerName } = data;
+
+                if (!roomCode || !playerName) {
+                    socket.emit('errorOccurred', {
+                        code: 'INVALID_DATA',
+                        message: 'Raum-Code und Spielername erforderlich'
+                    });
+                    return;
+                }
+
+                // Lookup Room-Code
+                const roomId = roomCodeMap.get(roomCode);
+                if (!roomId) {
+                    socket.emit('errorOccurred', {
+                        code: 'ROOM_NOT_FOUND',
+                        message: 'Raum mit diesem Code existiert nicht'
+                    });
+                    return;
+                }
+
+                const room = gameRooms.get(roomId);
+                const meta = roomMetadata.get(roomId);
+
+                if (!room || !meta) {
+                    socket.emit('errorOccurred', {
+                        code: 'ROOM_INVALID',
+                        message: 'Raum ist ungültig'
+                    });
+                    return;
+                }
+
+                // Prüfe ob Platz für zweiten Spieler
+                if (meta.players.length >= 2) {
+                    socket.emit('errorOccurred', {
+                        code: 'ROOM_FULL',
+                        message: 'Raum ist voll'
+                    });
+                    return;
+                }
+
+                // Registriere Player 2
+                const playerId = 1;
+                socketPlayers.set(socket.id, playerId);
+                playerSockets.set(playerId, { socketId: socket.id, roomId });
+                room.players[playerId].socketId = socket.id;
+                room.players[playerId].name = playerName;
+
+                // Update Room-Metadata
+                meta.players.push({
+                    id: playerId,
+                    name: playerName,
+                    socketId: socket.id,
+                    ready: false
+                });
+
+                // Socket tritt Room-Channel bei
+                socket.join(`room-${roomId}`);
+
+                // Sende Bestätigung an Player 2
+                socket.emit('roomJoined', {
+                    roomId,
+                    roomCode,
+                    playerId,
+                    playerName,
+                    players: meta.players
+                });
+
+                // Benachrichtige Player 1
+                io.to(`room-${roomId}`).emit('playerJoined', {
+                    playerId,
+                    playerName,
+                    players: meta.players
+                });
+
+                console.log(`[joinRoom] Player 2 (${playerName}) joined room ${roomId} with code ${roomCode}`);
+            } catch (error) {
+                console.error('[joinRoom] Error:', error);
+                socket.emit('errorOccurred', {
+                    code: 'JOIN_FAILED',
+                    message: error.message
+                });
+            }
+        },
+
+        /**
+         * PHASE 2: Spieler signalisiert dass er bereit ist
+         */
+        async onSetPlayerReady(socket, data) {
+            try {
+                const { roomCode, isReady } = data;
+                const playerId = socketPlayers.get(socket.id);
+
+                if (playerId === undefined) {
+                    socket.emit('errorOccurred', {
+                        code: 'NOT_IN_ROOM',
+                        message: 'Du bist in keinem Raum'
+                    });
+                    return;
+                }
+
+                const roomId = roomCodeMap.get(roomCode);
+                const meta = roomMetadata.get(roomId);
+
+                if (!meta) {
+                    socket.emit('errorOccurred', {
+                        code: 'ROOM_NOT_FOUND',
+                        message: 'Raum existiert nicht'
+                    });
+                    return;
+                }
+
+                // Update Ready-Status
+                const playerMeta = meta.players.find(p => p.id === playerId);
+                if (playerMeta) {
+                    playerMeta.ready = isReady;
+                }
+
+                // Broadcast neuer Status an alle im Room
+                io.to(`room-${roomId}`).emit('playerReadyChanged', {
+                    playerId,
+                    isReady,
+                    players: meta.players
+                });
+
+                // Prüfe ob beide ready sind
+                const bothReady = meta.players.length === 2 && meta.players.every(p => p.ready);
+                if (bothReady) {
+                    meta.status = 'ready';
+                    io.to(`room-${roomId}`).emit('bothPlayersReady', { roomCode });
+                    console.log(`[setPlayerReady] Both players ready in room ${roomId}`);
+                }
+            } catch (error) {
+                console.error('[setPlayerReady] Error:', error);
+                socket.emit('errorOccurred', {
+                    code: 'READY_FAILED',
+                    message: error.message
+                });
+            }
+        },
+
+        /**
+         * PHASE 2: Beide Spieler haben "Bereit" geklickt → Spiel starten
+         */
+        async onStartGame(socket, data) {
+            try {
+                const { roomCode } = data;
+                const playerId = socketPlayers.get(socket.id);
+
+                const roomId = roomCodeMap.get(roomCode);
+                const room = gameRooms.get(roomId);
+                const meta = roomMetadata.get(roomId);
+
+                if (!room || !meta) {
+                    socket.emit('errorOccurred', {
+                        code: 'ROOM_NOT_FOUND',
+                        message: 'Raum existiert nicht'
+                    });
+                    return;
+                }
+
+                // Prüfe ob beide bereit sind
+                if (!meta.players.every(p => p.ready)) {
+                    socket.emit('errorOccurred', {
+                        code: 'NOT_ALL_READY',
+                        message: 'Nicht alle Spieler sind bereit'
+                    });
+                    return;
+                }
+
+                meta.status = 'playing';
+
+                // Starte das Spiel
+                console.log(`[startGame] Starting game in room ${roomId}`);
+                room.run()
+                    .then(result => {
+                        console.log(`[Game] Finished:`, result);
+                        io.to(`room-${roomId}`).emit('gameFinished', result);
+                    })
+                    .catch(error => {
+                        console.error(`[Game] Error:`, error);
+                        io.to(`room-${roomId}`).emit('gameError', {
+                            message: error.message
+                        });
+                    });
+            } catch (error) {
+                console.error('[startGame] Error:', error);
+                socket.emit('errorOccurred', {
+                    code: 'START_FAILED',
+                    message: error.message
+                });
+            }
+        },
+
+        /**
+         * Spieler tritt einem Spiel bei oder erstellt ein neues (OLD - deprecated)
          */
         async onJoinGame(socket, data) {
             try {
