@@ -216,6 +216,9 @@
                 document.getElementById('display-room-code').textContent = roomCode;
 
                 console.log('[App] Room created:', { roomCode, roomId, playerName: username });
+                
+                // Auto-navigate to lobby after 1.5 seconds
+                setTimeout(() => this.goToLobby(), 1500);
             }
 
             cancelCreate() {
