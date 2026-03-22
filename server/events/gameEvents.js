@@ -39,34 +39,36 @@ export default function gameEvents(io, gameRooms, playerSockets, socketPlayers) 
                 if (roomId && gameRooms.has(roomId)) {
                     room = gameRooms.get(roomId);
                     
-                    // Prüfe ob Platz vorhanden
+                    // Prüfe ob Platz vorhanden für zweiten Human
                     const humanPlayers = room.players.filter(p => p.type === 'human' && !p.socketId);
                     if (humanPlayers.length === 0) {
                         socket.emit('errorOccurred', {
                             code: 'ROOM_FULL',
-                            message: 'Room is full'
+                            message: 'Room is full - 2 human players already connected'
                         });
                         return;
                     }
 
-                    // Ordne einen menschlichen Spieler zu
+                    // Ordne zweiten menschlichen Spieler zu
                     playerId = humanPlayers[0].id;
                     humanPlayers[0].socketId = socket.id;
+                    console.log(`[joinGame] Second player (${playerName}) joined room ${roomId}`);
                 } else {
-                    // Neues Spiel erstellen
+                    // Neues Spiel erstellen (mit 2 Human Slots + 1 Bot)
                     const newRoomId = `room-${uuidv4()}`;
+                    
                     const playerConfigs = [
                         { type: playerType, name: playerName },
-                        { type: 'bot', name: 'Bot1' },
-                        { type: 'bot', name: 'Bot2' }
+                        { type: 'human', name: 'Warte auf zweiten Spieler...' },
+                        { type: 'bot', name: 'Bot' }
                     ];
 
                     room = new GameRoom(
                         newRoomId,
                         playerConfigs,
                         {
-                            ruleSet: 'standard', // oder 'pub' für Ramsch
-                            autoStart: true
+                            ruleSet: 'standard',
+                            autoStart: true  // Start automatisch wenn beide Human-Spieler verbunden sind
                         },
                         {
                             onStateUpdate: (state) => {
@@ -80,8 +82,15 @@ export default function gameEvents(io, gameRooms, playerSockets, socketPlayers) 
                                 });
                             },
                             onGameEnd: (result) => {
-                                io.to(`room-${newRoomId}`).emit('gameEnd', result);
+                                io.to(`room-${newRoomId}`).emit('gameFinished', result);
                                 gameRooms.delete(newRoomId);
+                            },
+                            onRequestAction: (request) => {
+                                // Sende Action-Request zum Human Player
+                                const player = room.players[request.playerId];
+                                if (player && player.socketId) {
+                                    io.to(player.socketId).emit('requestAction', request);
+                                }
                             }
                         }
                     );
@@ -89,6 +98,7 @@ export default function gameEvents(io, gameRooms, playerSockets, socketPlayers) 
                     gameRooms.set(newRoomId, room);
                     playerId = 0; // First player
                     room.players[0].socketId = socket.id;
+                    console.log(`[joinGame] First player created room ${newRoomId}`);
                 }
 
                 // Registriere Socket-Mappings
@@ -101,7 +111,7 @@ export default function gameEvents(io, gameRooms, playerSockets, socketPlayers) 
                 // Socket tritt room-spezifischem Channel bei
                 socket.join(`room-${room.roomId}`);
 
-                // Sende Bestätigung an Client
+                // Sende Bestätigung an Client mit Room-Code
                 socket.emit('joinedGame', {
                     roomId: room.roomId,
                     playerId,
@@ -116,15 +126,24 @@ export default function gameEvents(io, gameRooms, playerSockets, socketPlayers) 
                 // Benachrichtige andere Spieler
                 socket.broadcast.to(`room-${room.roomId}`).emit('playerJoined', {
                     playerId,
-                    playerName
+                    playerName,
+                    players: room.players.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        type: p.type,
+                        connected: !!p.socketId
+                    }))
                 });
 
                 console.log(`[joinGame] ${socket.id} joined as Player ${playerId} in Room ${room.roomId}`);
 
-                // Wenn alle Spieler connected + autoStart: Spiel starten
-                const allConnected = room.players.every(p => p.type === 'bot' || p.socketId);
-                if (allConnected && room.settings.autoStart) {
-                    console.log(`[joinGame] All players connected. Starting game...`);
+                // Prüfe ob alle Human-Spieler connected + autoStart
+                const allHumansConnected = room.players
+                    .filter(p => p.type === 'human')
+                    .every(p => p.socketId);
+                
+                if (allHumansConnected && room.settings.autoStart) {
+                    console.log(`[joinGame] All humans connected. Starting game...`);
                     
                     // Starte Spiel im Hintergrund (nicht blockierend)
                     room.run()
@@ -138,6 +157,16 @@ export default function gameEvents(io, gameRooms, playerSockets, socketPlayers) 
                                 message: error.message
                             });
                         });
+                } else if (allHumansConnected && !room.settings.autoStart) {
+                    // Sende Signal dass beide Spieler da sind und Spiel bereit ist
+                    console.log(`[joinGame] All humans connected. Game ready to start.`);
+                    io.to(`room-${room.roomId}`).emit('gameReady', {
+                        players: room.players.map(p => ({
+                            id: p.id,
+                            name: p.name,
+                            type: p.type
+                        }))
+                    });
                 }
             } catch (error) {
                 console.error('[joinGame] Error:', error);
@@ -195,19 +224,11 @@ export default function gameEvents(io, gameRooms, playerSockets, socketPlayers) 
                     return;
                 }
 
-                // Führe Aktion aus
-                room.skatEngine.executeAction(playerId, action);
-
-                // Submitiere Aktion für human player
+                // Submitiere Aktion für human player (dies löst das Promise in Player.getAction auf)
+                // Die GameRoom wird dann executeAction aufrufen
                 room.players[playerId].submitAction(action);
 
-                // Broadcast neuer State
-                io.to(`room-${roomId}`).emit('actionExecuted', {
-                    playerId,
-                    action,
-                    phase: room.skatEngine.phase
-                });
-
+                // Broadcast neuer State (wird später von GameRoom gebroadcasted nach executeAction)
                 socket.emit('actionAccepted', { action: action.type });
             } catch (error) {
                 console.error('[playerAction] Error:', error);

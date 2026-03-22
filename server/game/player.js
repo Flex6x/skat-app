@@ -14,12 +14,14 @@ class Player {
      * @param {string} type - 'human' oder 'bot'
      * @param {string} name - Spieler-Name
      * @param {string} socketId - Socket.io ID (nur für human)
+     * @param {Object} callbacks - { onRequestAction }
      */
-    constructor(id, type, name, socketId = null) {
+    constructor(id, type, name, socketId = null, callbacks = {}) {
         this.id = id;
         this.type = type;
         this.name = name;
         this.socketId = socketId;
+        this.callbacks = callbacks;
         this.hand = [];
         this.tricks = [];
         this.score = 0;
@@ -201,8 +203,16 @@ class Player {
     async _getHumanAction(validActions, gameState) {
         return new Promise((resolve) => {
             this._actionResolver = resolve;
-            // Die GameRoom wird socket.emit('requestAction', { playerId, validActions })
-            // senden und der Client wird socket.emit('playerAction', action) zurückgeben
+            
+            // Rufe onRequestAction Callback auf
+            if (this.callbacks.onRequestAction) {
+                this.callbacks.onRequestAction({
+                    playerId: this.id,
+                    playerName: this.name,
+                    validActions,
+                    gameState
+                });
+            }
         });
     }
 

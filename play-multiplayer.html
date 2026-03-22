@@ -3,547 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiplayer Skat</title>
+    <title>Multiplayer Skat - Room</title>
     <link rel="icon" type="image/jpeg" href="media/logo.jpg">
-    <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .screen { display: none; width: 100%; max-width: 500px; padding: 20px; animation: fadeIn 0.3s ease-in; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .container { background: linear-gradient(180deg, #0f3460 0%, #16213e 100%); border: 2px solid #3f51b5; border-radius: 12px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        h1 { font-size: 28px; margin-bottom: 10px; text-align: center; color: #e0e0e0; }
+        .subtitle { text-align: center; color: #b0b0b0; margin-bottom: 30px; font-size: 14px; }
+        .button-group { display: flex; flex-direction: column; gap: 15px; margin: 30px 0; }
+        button { padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; width: 100%; }
+        .btn-primary { background: linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(63,81,181,0.4); }
+        .btn-secondary, .btn-back { background: rgba(255,255,255,0.1); color: #e0e0e0; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-back { font-size: 14px; color: #b0b0b0; }
+        .btn-secondary:hover, .btn-back:hover { background: rgba(255,255,255,0.15); }
+        .input-group { margin: 20px 0; }
+        label { display: block; margin-bottom: 8px; color: #b0b0b0; font-size: 14px; font-weight: 600; }
+        input { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; background: rgba(255,255,255,0.05); color: white; font-size: 16px; font-family: 'Courier New', monospace; }
+        input:focus { outline: none; border-color: #3f51b5; background: rgba(63,81,181,0.1); box-shadow: 0 0 10px rgba(63,81,181,0.2); }
+        .room-code-display { background: rgba(255,255,255,0.08); border: 2px solid #3f51b5; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
+        .room-code-label { color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .room-code { font-size: 32px; font-weight: 700; font-family: 'Courier New', monospace; color: #3f51b5; letter-spacing: 3px; margin: 15px 0; }
+        .copy-feedback { display: none; color: #4caf50; font-size: 12px; margin-top: 8px; }
+        .copy-feedback.show { display: block; }
+        .status-message { text-align: center; padding: 15px; border-radius: 6px; margin: 20px 0; font-size: 14px; }
+        .status-waiting { background: rgba(33,150,243,0.1); border: 1px solid rgba(33,150,243,0.3); color: #64b5f6; }
+        .status-success { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.3); color: #81c784; }
+        .player-list { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .player-item { display: flex; align-items: center; padding: 12px; margin: 10px 0; background: rgba(63,81,181,0.1); border-radius: 6px; border-left: 3px solid #3f51b5; }
+        .player-icon { font-size: 24px; margin-right: 12px; }
+        .player-name { flex: 1; font-weight: 600; }
+        .player-status { font-size: 12px; color: #b0b0b0; }
+        .player-status.ready { color: #4caf50; font-weight: 600; }
+        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(63,81,181,0.3); border-top-color: #3f51b5; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-message { display: none; padding: 15px; background: rgba(244,67,54,0.1); border: 1px solid rgba(244,67,54,0.3); border-radius: 6px; color: #ef5350; font-size: 14px; margin: 15px 0; text-align: center; }
+        .error-message.show { display: block; }
+        .info-text { color: #b0b0b0; font-size: 13px; margin: 15px 0; line-height: 1.5; }
+    </style>
 </head>
-
 <body>
-    <div id="game-container" class="hidden">
-        <!-- Info Box Top Center (Same as play.html) -->
-        <div class="game-info-container">
-            <div class="game-info-top">
-                <div id="current-declarer"><span>Alleinspieler</span>: -</div>
-                <div id="current-bid"><span>Reizwert</span>: -</div>
-                <div id="current-trump"><span>Trumpf</span>: -</div>
-                <div id="current-turn"><span>Zug</span>: -</div>
-                <div id="live-score" class="live-score hidden"><span>Punkte</span>: -</div>
+    <!-- Screen 1: Menu -->
+    <div id="menu-screen" class="screen active">
+        <div class="container">
+            <h1>🎴 Skat Multiplayer</h1>
+            <p class="subtitle">Spielen Sie mit einem Freund</p>
+            <div class="button-group">
+                <button class="btn-primary" onclick="app.goToCreateRoom()">➕ Neuen Raum erstellen</button>
+                <button class="btn-primary" onclick="app.goToJoinRoom()">🔗 Raum beitreten</button>
             </div>
-
-            <!-- Controls below info -->
-            <div class="game-controls-bottom" style="display: flex; gap: 15px; margin-top: 10px;">
-                <button id="btn-home" class="floating-btn">🏠</button>
-                <button id="btn-show-scoreboard" class="floating-btn">📋</button>
-            </div>
-        </div>
-
-        <!-- Bots Area (Same layout) -->
-        <div id="bots-area">
-            <div id="bot2" class="player-zone">
-                <div class="player-info"><span class="ai-text">Bot</span>1</div>
-                <div class="cards-container bot-cards"></div>
-            </div>
-            <div id="bot1" class="player-zone">
-                <div class="player-info"><span class="ai-text">Bot</span>2</div>
-                <div class="cards-container bot-cards"></div>
-            </div>
-        </div>
-
-        <!-- Table Area (Same layout) -->
-        <div id="table-area">
-            <div id="trick-zone">
-                <div id="played-card-bot2" class="played-card-slot"></div>
-                <div id="played-card-bot1" class="played-card-slot"></div>
-                <div id="played-card-player" class="played-card-slot"></div>
-            </div>
-
-            <!-- Game Over Overlay -->
-            <div id="game-over-overlay" class="overlay hidden">
-                <h2 id="game-result-msg">Spiel beendet</h2>
-                <div id="results"></div>
-                <button id="btn-restart" class="btn primary">Neues Spiel</button>
-            </div>
-
-            <!-- Loading Overlay -->
-            <div id="loading-overlay" class="overlay">
-                <h2>Verbinden...</h2>
-                <p id="loading-status">Verbindung zum Server wird hergestellt...</p>
-            </div>
-
-            <!-- Error Overlay -->
-            <div id="error-overlay" class="overlay hidden">
-                <h2>❌ Fehler</h2>
-                <p id="error-message"></p>
-                <button class="btn primary" onclick="window.location.href='index.html'">Zurück zum Menü</button>
-            </div>
-        </div>
-
-        <!-- Player Area (Same layout) -->
-        <div id="player-area" class="player-zone">
-            <div class="player-info">Du (Spieler)</div>
-            <div id="player-hand" class="cards-container player-cards"></div>
+            <p class="info-text" style="text-align: center; margin-top: 40px;">Spielen Sie Skat gegen echte Spieler im Multiplayer-Modus</p>
         </div>
     </div>
 
-    <!-- Scoreboard Drawer -->
-    <div id="scoreboard-drawer" class="drawer hidden">
-        <div class="drawer-header">
-            <h2>Spielliste</h2>
-            <button id="btn-close-scoreboard" class="btn-close">×</button>
-        </div>
-        <div class="drawer-content">
-            <table id="scoreboard-table">
-                <thead>
-                    <tr>
-                        <th style="width: 40px;">#</th>
-                        <th id="player0-name">Bot1</th>
-                        <th id="player1-name">Bot2</th>
-                        <th id="player2-name-list">Du</th>
-                    </tr>
-                </thead>
-                <tbody id="scoreboard-body">
-                    <!-- Rows added by JS -->
-                </tbody>
-                <tfoot>
-                    <tr class="total-row">
-                        <td id="total-player-num">Total</td>
-                        <td id="total-player0">0</td>
-                        <td id="total-player1">0</td>
-                        <td id="total-player2">0</td>
-                    </tr>
-                </tfoot>
-            </table>
+    <!-- Screen 2: Create Room -->
+    <div id="create-room-screen" class="screen">
+        <div class="container">
+            <h1>Neuen Raum erstellen</h1>
+            <p class="subtitle">Laden Sie einen Freund zum Spielen ein</p>
+            <div class="input-group">
+                <label for="create-username">Ihr Spielername:</label>
+                <input type="text" id="create-username" placeholder="z.B. Alice" maxlength="20">
+            </div>
+            <button class="btn-primary" onclick="app.createRoom()" style="margin: 30px 0;">Raum erstellen</button>
+            <div id="create-error" class="error-message"></div>
+            <div id="room-created" style="display: none;">
+                <div class="status-message status-success">✓ Raum erstellt! Geben Sie diesen Code Ihrem Freund:</div>
+                <div class="room-code-display">
+                    <div class="room-code-label">Raum-Code</div>
+                    <div class="room-code" id="display-room-code">SKT-000000</div>
+                    <button class="btn-secondary" onclick="app.copyRoomCode()" style="margin-top: 15px;">📋 Kopieren</button>
+                    <div class="copy-feedback" id="copy-feedback">✓ Kopiert!</div>
+                </div>
+                <div class="status-message status-waiting"><span class="loading-spinner"></span>Warte auf Spieler 2...</div>
+                <button class="btn-back" onclick="app.cancelCreate()" style="margin-top: 20px;">← Abbrechen</button>
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="btn-back" onclick="app.goToMenu()">← Zurück zum Menü</button>
+            </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
-    <script src="js/socketClient.js"></script>
-    <script src="js/settings.js"></script>
-    <script src="js/cards.js"></script>
+    <!-- Screen 3: Join Room -->
+    <div id="join-room-screen" class="screen">
+        <div class="container">
+            <h1>Raum beitreten</h1>
+            <p class="subtitle">Geben Sie den Code von Ihrem Freund ein</p>
+            <div class="input-group">
+                <label for="join-code">Raum-Code:</label>
+                <input type="text" id="join-code" placeholder="z.B. SKT-ABC123" maxlength="11" onkeyup="this.value = this.value.toUpperCase();">
+            </div>
+            <div class="input-group">
+                <label for="join-username">Ihr Spielername:</label>
+                <input type="text" id="join-username" placeholder="z.B. Bob" maxlength="20">
+            </div>
+            <button class="btn-primary" onclick="app.joinRoom()" style="margin: 30px 0;">Beitreten</button>
+            <div id="join-error" class="error-message"></div>
+            <div style="margin-top: 20px;">
+                <button class="btn-back" onclick="app.goToMenu()">← Zurück zum Menü</button>
+            </div>
+            <p class="info-text">💡 Der Code sieht so aus: <strong>SKT-ABC123</strong></p>
+        </div>
+    </div>
+
+    <!-- Screen 4: Lobby -->
+    <div id="lobby-screen" class="screen">
+        <div class="container">
+            <h1>Wartezone</h1>
+            <p class="subtitle">Bereit zum Spielen?</p>
+            <div class="player-list">
+                <h3 style="margin-bottom: 15px; color: #b0b0b0; font-size: 12px; text-transform: uppercase;">Spieler im Raum</h3>
+                <div id="lobby-players"></div>
+            </div>
+            <div id="lobby-status" class="status-message status-waiting">
+                <span class="loading-spinner"></span>Warte auf anderen Spieler...
+            </div>
+            <div id="both-ready" style="display: none;">
+                <div class="status-message status-success">✓ Beide Spieler sind bereit!</div>
+                <button class="btn-primary" onclick="app.startGame()" style="margin: 20px 0;">🎮 Spiel starten</button>
+            </div>
+            <div style="margin-top: 30px;">
+                <button class="btn-secondary" id="ready-button" onclick="app.toggleReady()" style="margin-bottom: 10px;">✓ Bereit</button>
+                <button class="btn-back" onclick="app.leaveRoom()">← Abbrechen</button>
+            </div>
+            <p class="info-text">💡 Klicken Sie auf "Bereit", wenn Sie zum Spielen bereit sind.</p>
+        </div>
+    </div>
+
     <script>
-        class SimpleMultiplayerGame {
+        class MultiplayerApp {
             constructor() {
-                this.socket = new SocketClient();
-                this.gameContainer = document.getElementById('game-container');
-                this.loadingOverlay = document.getElementById('loading-overlay');
-                this.errorOverlay = document.getElementById('error-overlay');
-                this.gameOverOverlay = document.getElementById('game-over-overlay');
-                this.scoreboard = document.getElementById('scoreboard-table');
-                this.gameHistory = [];
-                this.playerId = null;
-                this.setupEventListeners();
+                this.state = {
+                    screen: 'menu',
+                    roomCode: null,
+                    roomId: null,
+                    playerId: null,
+                    playerName: null,
+                    players: [],
+                    isReady: false,
+                    isHost: false
+                };
             }
 
-            setupEventListeners() {
-                document.getElementById('btn-home').addEventListener('click', () => {
-                    this.socket.disconnect();
-                    window.location.href = 'index.html';
-                });
-
-                document.getElementById('btn-show-scoreboard').addEventListener('click', () => {
-                    document.getElementById('scoreboard-drawer').classList.toggle('hidden');
-                });
-
-                document.getElementById('btn-close-scoreboard').addEventListener('click', () => {
-                    document.getElementById('scoreboard-drawer').classList.add('hidden');
-                });
-
-                document.getElementById('btn-restart').addEventListener('click', () => {
-                    window.location.reload();
-                });
-
-                // Socket-Events
-                this.socket.on('stateUpdate', (data) => this.onStateUpdate(data));
-                this.socket.on('gameFinished', (result) => this.onGameFinished(result));
-                this.socket.on('errorOccurred', (data) => this.onError(data));
+            showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(screenId).classList.add('active');
+                this.state.screen = screenId;
             }
 
-            async start() {
-                try {
-                    this.showLoading('Verbinde zum Server...');
-                    await this.socket.connect('http://localhost:3000');
-                    this.playerId = this.socket.playerId;
-
-                    this.showLoading('Trete Spiel bei...');
-                    const playerName = `Player_${Math.random().toString(36).substring(7)}`;
-                    await this.socket.joinGame(playerName);
-
-                    this.hideLoading();
-                    this.gameContainer.classList.remove('hidden');
-                    this.showLoading('Warte auf Spielstart...');
-                } catch (error) {
-                    this.showError(`Fehler beim Verbinden: ${error.message}`);
-                }
+            goToMenu() {
+                this.state = {
+                    screen: 'menu',
+                    roomCode: null,
+                    roomId: null,
+                    playerId: null,
+                    playerName: null,
+                    players: [],
+                    isReady: false,
+                    isHost: false
+                };
+                this.showScreen('menu-screen');
             }
 
-            onStateUpdate(data) {
-                if (data.phase === 'initializing') {
-                    this.showLoading('Warte auf alle Spieler...');
+            goToCreateRoom() {
+                document.getElementById('create-username').value = '';
+                document.getElementById('create-error').classList.remove('show');
+                document.getElementById('create-error').textContent = '';
+                document.getElementById('room-created').style.display = 'none';
+                this.showScreen('create-room-screen');
+            }
+
+            goToJoinRoom() {
+                document.getElementById('join-code').value = '';
+                document.getElementById('join-username').value = '';
+                document.getElementById('join-error').classList.remove('show');
+                document.getElementById('join-error').textContent = '';
+                this.showScreen('join-room-screen');
+            }
+
+            createRoom() {
+                const username = document.getElementById('create-username').value.trim();
+                
+                if (!username) {
+                    this.showError('create-error', 'Bitte geben Sie einen Spielernamen ein');
                     return;
                 }
 
-                this.hideLoading();
-
-                // Update UI with better information
-                const declarer = data.skatEngine?.declarer !== undefined ? data.skatEngine.declarer : '-';
-                const bid = data.skatEngine?.bidValue || 0;
-                const trump = this.getTrumpName(data.skatEngine?.trumpMode);
-                
-                document.getElementById('current-declarer').textContent = `Alleinspieler: Spieler ${declarer}`;
-                document.getElementById('current-bid').textContent = `Reizwert: ${bid}`;
-                document.getElementById('current-trump').textContent = `Trumpf: ${trump}`;
-                document.getElementById('current-turn').textContent = `Zug: ${data.phase}`;
-
-                // Render cards - get filtered state for this player
-                const myState = data.filteredStates?.find(s => s.playerId === this.playerId);
-                if (myState?.state) {
-                    this.renderHand(myState.state.myHand || []);
-                    this.renderBotCards(data);
-                    this.renderCurrentTrick(myState.state.currentTrick || []);
+                if (username.length < 2) {
+                    this.showError('create-error', 'Spielername muss mindestens 2 Zeichen lang sein');
+                    return;
                 }
-            }
 
-            getTrumpName(trump) {
-                if (!trump) return '-';
-                const trumpMap = {
-                    'eichel': '🌰 Eichel',
-                    'gruen': '🍃 Grün',
-                    'rot': '❤️ Rot',
-                    'schellen': '🔔 Schellen',
-                    'grand': '🎭 Grand',
-                    'ramsch': '💥 Ramsch'
-                };
-                return trumpMap[trump] || trump;
-            }
+                const roomCode = this.generateRoomCode();
+                const roomId = this.generateRoomId();
 
-            renderBotCards(data) {
-                // Show bot card counts (not actual cards)
-                const bot1Container = document.querySelector('#bot1 .bot-cards');
-                const bot2Container = document.querySelector('#bot2 .bot-cards');
-                
-                if (bot1Container && bot2Container) {
-                    bot1Container.innerHTML = '';
-                    bot2Container.innerHTML = '';
-                    
-                    // Get number of cards for each bot
-                    const botCounts = data.skatEngine?.playerCardCounts || [10, 10, 10];
-                    
-                    for (let i = 0; i < botCounts[0]; i++) {
-                        const card = document.createElement('div');
-                        card.className = 'card card-back';
-                        bot1Container.appendChild(card);
-                    }
-                    
-                    for (let i = 0; i < botCounts[1]; i++) {
-                        const card = document.createElement('div');
-                        card.className = 'card card-back';
-                        bot2Container.appendChild(card);
-                    }
-                }
-            }
-
-            renderHand(hand) {
-                const handContainer = document.getElementById('player-hand');
-                handContainer.innerHTML = '';
-
-                if (!Array.isArray(hand)) return;
-
-                hand.forEach((card) => {
-                    const cardEl = this.createCardElement(card);
-                    cardEl.style.cursor = 'pointer';
-                    cardEl.addEventListener('click', () => this.playCard(card));
-                    handContainer.appendChild(cardEl);
-                });
-            }
-
-            renderCurrentTrick(trick) {
-                const slots = [
-                    document.getElementById('played-card-bot2'),
-                    document.getElementById('played-card-bot1'),
-                    document.getElementById('played-card-player')
+                this.state.playerName = username;
+                this.state.roomCode = roomCode;
+                this.state.roomId = roomId;
+                this.state.playerId = 0;
+                this.state.isHost = true;
+                this.state.players = [
+                    { id: 0, name: username, type: 'human', ready: false }
                 ];
 
-                slots.forEach(slot => slot.innerHTML = '');
+                document.getElementById('create-error').classList.remove('show');
+                document.getElementById('room-created').style.display = 'block';
+                document.getElementById('display-room-code').textContent = roomCode;
 
-                if (Array.isArray(trick)) {
-                    trick.forEach((card, idx) => {
-                        if (slots[idx] && card) {
-                            slots[idx].appendChild(this.createCardElement(card));
-                        }
-                    });
-                }
+                console.log('[App] Room created:', { roomCode, roomId, playerName: username });
             }
 
-            createCardElement(card) {
-                const cardEl = document.createElement('div');
-                cardEl.className = 'card';
-                
-                if (card.rank && card.suit) {
-                    // Use card display names if available
-                    const rankDisplay = {
-                        '6': '6', '7': '7', '8': '8', '9': '9', '10': '10',
-                        'J': 'B', 'Q': 'D', 'K': 'K', 'A': 'A'
-                    }[card.rank] || card.rank;
-                    
-                    const suitDisplay = {
-                        'eichel': '🌰', 'gruen': '🍃', 'rot': '❤️', 'schellen': '🔔'
-                    }[card.suit] || card.suit;
-                    
-                    cardEl.textContent = `${suitDisplay}${rankDisplay}`;
-                    cardEl.style.color = ['rot', 'schellen'].includes(card.suit) ? '#d32f2f' : '#2e7d32';
-                } else {
-                    cardEl.textContent = String(card);
-                }
-                
-                return cardEl;
+            cancelCreate() {
+                this.goToCreateRoom();
             }
 
-            playCard(card) {
-                this.socket.sendPlayerAction({
-                    type: 'PLAY_CARD',
-                    payload: { card }
+            copyRoomCode() {
+                const code = this.state.roomCode;
+                navigator.clipboard.writeText(code).then(() => {
+                    const feedback = document.getElementById('copy-feedback');
+                    feedback.classList.add('show');
+                    setTimeout(() => feedback.classList.remove('show'), 2000);
+                    console.log('[App] Room code copied:', code);
+                }).catch(err => {
+                    console.error('Copy failed:', err);
+                    alert('Kopieren fehlgeschlagen. Code: ' + code);
                 });
             }
 
-            onGameFinished(result) {
-                this.gameHistory.push(result);
-                this.updateScoreboard();
+            joinRoom() {
+                const code = document.getElementById('join-code').value.trim();
+                const username = document.getElementById('join-username').value.trim();
 
-                const resultsDiv = document.getElementById('results');
-                const won = result.declarer === this.playerId ? result.won : !result.won;
-                resultsDiv.innerHTML = `
-                    <p><strong>Spiel vorbei!</strong></p>
-                    <p>Alleinspieler: Spieler ${result.declarer}</p>
-                    <p>Punkte: ${result.points || 0}</p>
-                    <p>${won ? '✅ Du hast gewonnen!' : '❌ Du hast verloren!'}</p>
-                `;
+                if (!code) {
+                    this.showError('join-error', 'Bitte geben Sie einen Raum-Code ein');
+                    return;
+                }
 
-                this.gameOverOverlay.classList.remove('hidden');
+                if (!code.match(/^SKT-[A-Z0-9]{6}$/)) {
+                    this.showError('join-error', 'Ungültiger Code. Format: SKT-XXXXXX');
+                    return;
+                }
+
+                if (!username) {
+                    this.showError('join-error', 'Bitte geben Sie einen Spielernamen ein');
+                    return;
+                }
+
+                if (username.length < 2) {
+                    this.showError('join-error', 'Spielername muss mindestens 2 Zeichen lang sein');
+                    return;
+                }
+
+                this.state.playerName = username;
+                this.state.roomCode = code;
+                this.state.roomId = this.generateRoomId();
+                this.state.playerId = 1;
+                this.state.isHost = false;
+                this.state.players = [
+                    { id: 0, name: 'Host', type: 'human', ready: false },
+                    { id: 1, name: username, type: 'human', ready: false }
+                ];
+
+                document.getElementById('join-error').classList.remove('show');
+                this.goToLobby();
+
+                console.log('[App] Joined room:', { roomCode: code, playerName: username });
             }
 
-            updateScoreboard() {
-                const tbody = document.getElementById('scoreboard-body');
-                tbody.innerHTML = '';
+            goToLobby() {
+                this.showScreen('lobby-screen');
+                this.renderLobbyPlayers();
+            }
 
-                this.gameHistory.forEach((game, idx) => {
-                    const row = document.createElement('tr');
-                    const won = game.declarer === this.playerId ? game.won : !game.won;
-                    row.innerHTML = `
-                        <td>${idx + 1}</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>${won ? '✓' : '✗'}</td>
+            renderLobbyPlayers() {
+                const container = document.getElementById('lobby-players');
+                container.innerHTML = '';
+
+                this.state.players.forEach((player) => {
+                    const div = document.createElement('div');
+                    div.className = 'player-item';
+                    
+                    const icon = player.id === this.state.playerId ? '👤' : '👥';
+                    const label = player.id === this.state.playerId ? ' (Du)' : '';
+                    const status = player.ready ? 'Bereit ✓' : 'Wartet...';
+                    const statusClass = player.ready ? 'ready' : '';
+
+                    div.innerHTML = `
+                        <div class="player-icon">${icon}</div>
+                        <div class="player-name">${player.name}${label}</div>
+                        <div class="player-status ${statusClass}">${status}</div>
                     `;
-                    tbody.appendChild(row);
+                    container.appendChild(div);
                 });
+
+                this.updateLobbyStatus();
             }
 
-            showLoading(message) {
-                document.getElementById('loading-status').textContent = message;
-                this.loadingOverlay.classList.remove('hidden');
+            updateLobbyStatus() {
+                const allReady = this.state.players.every(p => p.ready);
+                const waitingDiv = document.getElementById('lobby-status');
+                const readyDiv = document.getElementById('both-ready');
+
+                if (allReady && this.state.players.length === 2) {
+                    waitingDiv.style.display = 'none';
+                    readyDiv.style.display = 'block';
+                } else {
+                    waitingDiv.style.display = 'block';
+                    readyDiv.style.display = 'none';
+                }
             }
 
-            hideLoading() {
-                this.loadingOverlay.classList.add('hidden');
+            toggleReady() {
+                const myPlayer = this.state.players.find(p => p.id === this.state.playerId);
+                if (myPlayer) {
+                    myPlayer.ready = !myPlayer.ready;
+                    this.renderLobbyPlayers();
+                }
             }
 
-            showError(message) {
-                document.getElementById('error-message').textContent = message;
-                this.errorOverlay.classList.remove('hidden');
-                this.loadingOverlay.classList.add('hidden');
+            startGame() {
+                console.log('[App] Game start requested');
+                alert('🎮 Spiel würde jetzt starten!\n\nPhase 2: Server-Integration');
             }
 
-            onError(data) {
-                this.showError(data.message);
+            leaveRoom() {
+                if (confirm('Raum verlassen?')) {
+                    this.goToMenu();
+                }
+            }
+
+            generateRoomCode() {
+                const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+                let code = '';
+                for (let i = 0; i < 6; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return 'SKT-' + code;
+            }
+
+            generateRoomId() {
+                return 'room-' + Math.random().toString(36).substr(2, 9);
+            }
+
+            showError(elementId, message) {
+                const el = document.getElementById(elementId);
+                el.textContent = message;
+                el.classList.add('show');
+                console.error('[App] Error:', message);
             }
         }
 
-        // Initialize
+        let app;
         document.addEventListener('DOMContentLoaded', () => {
-            window.appSettings = new Settings();
-            const game = new SimpleMultiplayerGame();
-            game.start();
+            app = new MultiplayerApp();
+            console.log('[App] Multiplayer UI initialized');
         });
     </script>
-
-    <style>
-        #player-area {
-            width: 100%;
-            min-height: 150px;
-        }
-
-        #player-hand {
-            flex-wrap: wrap;
-        }
-
-        .card {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 80px;
-            height: 120px;
-            margin: 5px;
-            background: linear-gradient(135deg, #fff8dc, #fffacd);
-            color: #333;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 2px solid #d4af37;
-            font-weight: bold;
-            font-size: 18px;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            user-select: none;
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 16px rgba(212, 175, 55, 0.5);
-            background: linear-gradient(135deg, #fffacd, #ffff99);
-        }
-
-        .card:active {
-            transform: translateY(-4px);
-        }
-
-        .card-back {
-            background: repeating-linear-gradient(45deg,
-                    #444,
-                    #444 10px,
-                    #333 10px,
-                    #333 20px);
-            border: 2px solid #fff;
-            color: transparent !important;
-            cursor: default !important;
-        }
-
-        .card-back:hover {
-            transform: none !important;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
-            background: repeating-linear-gradient(45deg,
-                    #555,
-                    #555 10px,
-                    #444 10px,
-                    #444 20px);
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .overlay h2 {
-            color: white;
-            font-size: 2rem;
-            text-shadow: 0 0 10px rgba(63, 81, 181, 0.5);
-        }
-
-        .overlay p {
-            color: #ccc;
-            font-size: 1.1rem;
-        }
-
-        .overlay.hidden {
-            display: none !important;
-        }
-
-        .drawer {
-            position: fixed;
-            right: 0;
-            top: 0;
-            width: 400px;
-            height: 100%;
-            background: linear-gradient(180deg, #1a1a2e 0%, #121212 100%);
-            color: white;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            z-index: 999;
-            overflow-y: auto;
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .drawer:not(.hidden) {
-            transform: translateX(0);
-        }
-
-        .drawer-header {
-            padding: 20px;
-            border-bottom: 2px solid #3f51b5;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(63, 81, 181, 0.1);
-        }
-
-        .drawer-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-
-        .btn-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .btn-close:hover {
-            transform: rotate(90deg);
-        }
-
-        .drawer-content {
-            padding: 20px;
-        }
-
-        #scoreboard-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        #scoreboard-table th,
-        #scoreboard-table td {
-            padding: 12px 8px;
-            border-bottom: 1px solid #333;
-            text-align: center;
-            color: #aaa;
-        }
-
-        #scoreboard-table th {
-            background: rgba(63, 81, 181, 0.2);
-            color: #3f51b5;
-            font-weight: bold;
-        }
-
-        #scoreboard-table tr:hover {
-            background: rgba(63, 81, 181, 0.1);
-        }
-
-        .total-row {
-            background: rgba(63, 81, 181, 0.15);
-            border-top: 2px solid #3f51b5;
-            font-weight: bold;
-        }
-
-        #game-over-overlay {
-            background: rgba(0, 0, 0, 0.95);
-        }
-
-        #results {
-            background: rgba(63, 81, 181, 0.15);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #3f51b5;
-            color: white;
-        }
-
-        #results p {
-            margin: 8px 0;
-            font-size: 1rem;
-        }
-    </style>
 </body>
-
 </html>

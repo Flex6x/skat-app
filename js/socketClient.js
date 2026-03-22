@@ -109,6 +109,16 @@ class SocketClient {
         this.socket.on('chatMessage', (data) => {
             this._emit('chatMessage', data);
         });
+
+        this.socket.on('gameReady', (data) => {
+            console.log('[Socket] Game ready, waiting for other players...');
+            this._emit('gameReady', data);
+        });
+
+        this.socket.on('requestAction', (data) => {
+            console.log('[Socket] Server requesting action');
+            this._emit('requestAction', data);
+        });
     }
 
     /**

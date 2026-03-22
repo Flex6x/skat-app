@@ -20,7 +20,7 @@ class GameRoom {
      * @param {string} roomId - Eindeutige Room-ID
      * @param {Object[]} playerConfigs - [ { type, name, socketId? }, ... ] (3 Spieler)
      * @param {Object} settings - Spiel-Einstellungen
-     * @param {Object} callbacks - { onStateUpdate, onGameEnd, onBiddingUpdate }
+     * @param {Object} callbacks - { onStateUpdate, onGameEnd, onRequestAction }
      */
     constructor(roomId, playerConfigs, settings = {}, callbacks = {}) {
         this.roomId = roomId;
@@ -29,7 +29,9 @@ class GameRoom {
 
         // Spieler
         this.players = playerConfigs.map((config, idx) => 
-            new Player(idx, config.type, config.name, config.socketId)
+            new Player(idx, config.type, config.name, config.socketId, {
+                onRequestAction: callbacks.onRequestAction
+            })
         );
 
         // Game Engine
