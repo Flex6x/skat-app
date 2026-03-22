@@ -225,6 +225,10 @@ class SocketClient {
     }
 
     /**
+     * Sende einen Spielzug an den Server (OLD - deprecated)
+     */
+
+    /**
      * Sende Chat-Nachricht
      */
     sendChat(message) {

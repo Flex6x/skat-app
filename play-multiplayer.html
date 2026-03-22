@@ -471,7 +471,7 @@
                 this.gameStarting = true;
                 console.log('[App] Starting game...');
                 this.socketClient.startGame(this.state.roomCode);
-                // Das gameFinished Event wird dann kommen
+                // Game state updates kommen über stateUpdate Events
             }
 
             onServerError(data) {
@@ -500,9 +500,87 @@
             }
 
             onRequestAction(data) {
-                console.log('[App] Action requested:', data.phase);
-                // Server fragt nach eine Aktion vom Spieler
-                // Das wird später implementiert wenn wir mit dem Spiel interagieren
+                console.log('[App] Action requested:', data.type);
+                
+                // Nur der Spieler kann die Action machen
+                if (data.playerId !== this.state.playerId) {
+                    console.log('[App] Not my turn');
+                    return;
+                }
+
+                const actionDiv = document.getElementById('game-actions');
+                if (!actionDiv) return;
+
+                let html = '';
+
+                if (data.type === 'BID') {
+                    // Reiz-Phase: Gebot oder Passen
+                    html = `
+                        <div style="display: grid; gap: 10px;">
+                            <p style="color: #b0b0b0; text-align: center;">Dein Gebot?</p>
+                            <input type="number" id="bid-input" placeholder="z.B. 18" min="18" step="1" style="padding: 10px; border-radius: 6px; border: 1px solid #3f51b5; background: rgba(63,81,181,0.1); color: white; text-align: center;">
+                            <button class="btn-primary" onclick="app.submitAction('BID')">Bieten</button>
+                            <button class="btn-secondary" onclick="app.submitAction('PASS')">Passen</button>
+                        </div>
+                    `;
+                } else if (data.type === 'TRUMP_SELECTION') {
+                    // Trumpf-Auswahl
+                    const trumps = ['Eichel', 'Grün', 'Rot', 'Schellen', 'Grand', 'Null'];
+                    html = `
+                        <div style="display: grid; gap: 8px;">
+                            <p style="color: #b0b0b0; text-align: center;">Wähle den Trumpf:</p>
+                            ${trumps.map(t => `<button class="btn-secondary" onclick="app.submitAction('TRUMP_SELECTION', '${t}')" style="text-align: center;">${t}</button>`).join('')}
+                        </div>
+                    `;
+                } else if (data.type === 'SKAT_DECISION') {
+                    // Skat Aufnehmen oder Hand spielen
+                    html = `
+                        <div style="display: grid; gap: 10px;">
+                            <p style="color: #b0b0b0; text-align: center;">Skat aufnehmen oder Hand spielen?</p>
+                            <button class="btn-primary" onclick="app.submitAction('SKAT_DECISION', 'pickup')">📚 Skat aufnehmen</button>
+                            <button class="btn-secondary" onclick="app.submitAction('SKAT_DECISION', 'hand')">🎴 Hand spielen</button>
+                        </div>
+                    `;
+                } else if (data.type === 'PLAY_CARD') {
+                    // Kartenspielen - die Karten-Auswahl kommt später
+                    html = `
+                        <div style="text-align: center; color: #b0b0b0;">
+                            <p>Klicke auf eine Karte zum Spielen</p>
+                        </div>
+                    `;
+                }
+
+                actionDiv.innerHTML = html;
+            }
+
+            submitAction(type, value = null) {
+                const action = {};
+
+                if (type === 'BID') {
+                    const bidInput = document.getElementById('bid-input');
+                    const bid = parseInt(bidInput.value);
+                    if (isNaN(bid) || bid < 18) {
+                        alert('Gib ein gültiges Gebot ein (mindestens 18)');
+                        return;
+                    }
+                    action.type = 'BID';
+                    action.payload = { value: bid };
+                } else if (type === 'PASS') {
+                    action.type = 'PASS';
+                    action.payload = {};
+                } else if (type === 'TRUMP_SELECTION') {
+                    action.type = 'TRUMP_SELECTION';
+                    action.payload = { trump: value };
+                } else if (type === 'SKAT_DECISION') {
+                    action.type = 'SKAT_DECISION';
+                    action.payload = { action: value, discardCards: [] }; // TODO: Card selection UI
+                }
+
+                console.log('[App] Submitting action:', action);
+                this.socketClient.sendPlayerAction(action);
+
+                // Disable action UI
+                document.getElementById('game-actions').innerHTML = '<p style="text-align: center; color: #b0b0b0;">Aktion gesendet...</p>';
             }
 
             onGameFinished(data) {

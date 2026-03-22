@@ -204,11 +204,26 @@ class Player {
         return new Promise((resolve) => {
             this._actionResolver = resolve;
             
+            // Bestimme den Action-Typ basierend auf validActions
+            let type = 'UNKNOWN';
+            if (validActions.bidOptions) {
+                type = 'BID';
+            } else if (validActions.cardOptions) {
+                type = 'PLAY_CARD';
+            } else if (validActions.skatOptions) {
+                type = 'SKAT_DECISION';
+            } else if (validActions.trumpOptions) {
+                type = 'TRUMP_SELECTION';
+            } else if (validActions.announcementOptions) {
+                type = 'ANNOUNCEMENT';
+            }
+            
             // Rufe onRequestAction Callback auf
             if (this.callbacks.onRequestAction) {
                 this.callbacks.onRequestAction({
                     playerId: this.id,
                     playerName: this.name,
+                    type,
                     validActions,
                     gameState
                 });
