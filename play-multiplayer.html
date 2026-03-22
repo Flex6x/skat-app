@@ -187,6 +187,9 @@
                 };
                 this.socketClient = null;
                 this.gameStarting = false;
+                this.selectedDiscardCards = []; // Für Skat-Aufnahme
+                this.currentSkatCards = []; // Die aktuellen Skat-Karten zum Drücken
+                this.currentValidCards = []; // Die aktuellen gültigen Karten zum Spielen
             }
 
             async initialize() {
@@ -533,19 +536,79 @@
                         </div>
                     `;
                 } else if (data.type === 'SKAT_DECISION') {
-                    // Skat Aufnehmen oder Hand spielen
+                    // Skat Aufnehmen oder Hand spielen - mit Kartenseelektion
+                    const skatCards = data.validActions?.skatOptions || [];
+                    const myCards = data.gameState?.players?.[this.state.playerId]?.hand || [];
+                    
+                    // Speichere die Skat-Karten für submitAction
+                    this.currentSkatCards = skatCards;
+                    
+                    // Reset Kartenseelektion bei neuer Phase
+                    this.selectedDiscardCards = [];
+                    
+                    let cardsHTML = '';
+                    if (skatCards && skatCards.length > 0) {
+                        cardsHTML = `
+                            <div style="margin-bottom: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                                <p style="color: #b0b0b0; font-size: 12px; margin-bottom: 10px;">📚 Skat-Karten (falls aufgenommen zum Drücken)</p>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px;" id="skat-cards-container">
+                                    ${skatCards.map((card, i) => `
+                                        <button style="padding: 10px 8px; background: #5c6bc0; border: 2px solid #7986cb; color: white; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;" onclick="app.toggleCardSelection(${i}, this)">
+                                            ${card.rank}<br/>${card.suit}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                                <p style="color: #888; font-size: 11px; margin-top: 8px;">Wähle 2 Karten zum Drücken (wenn Skat aufnimmst)</p>
+                            </div>
+                        `;
+                    }
+                    
                     html = `
                         <div style="display: grid; gap: 10px;">
                             <p style="color: #b0b0b0; text-align: center;">Skat aufnehmen oder Hand spielen?</p>
-                            <button class="btn-primary" onclick="app.submitAction('SKAT_DECISION', 'pickup')">📚 Skat aufnehmen</button>
+                            ${cardsHTML}
+                            <button class="btn-primary" onclick="app.submitAction('SKAT_DECISION', 'pickup')">📚 Skat aufnehmen (2 drücken)</button>
                             <button class="btn-secondary" onclick="app.submitAction('SKAT_DECISION', 'hand')">🎴 Hand spielen</button>
                         </div>
                     `;
-                } else if (data.type === 'PLAY_CARD') {
-                    // Kartenspielen - die Karten-Auswahl kommt später
+                }else if (data.type === 'PLAY_CARD') {
+                    // Kartenspielen
+                    const validCards = data.validActions?.cardOptions || [];
+                    
+                    if (validCards && validCards.length > 0) {
+                        // Speichere validCards für submitAction
+                        this.currentValidCards = validCards;
+                        
+                        // Zeige eine einfache Liste von Karten
+                        html = `
+                            <div style="display: grid; gap: 10px;">
+                                <p style="color: #b0b0b0; text-align: center;">Wähle eine Karte zum Spielen:</p>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px;">
+                                    ${validCards.map((card, idx) => `
+                                        <button style="padding: 12px 8px; background: #3f51b5; border: 2px solid #3f51b5; color: white; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;" onclick="app.submitAction('PLAY_CARD', ${idx})">
+                                            ${card.rank}<br/>${card.suit}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                                <p style="color: #888; font-size: 11px;">Insgesamt ${validCards.length} gültige Karten</p>
+                            </div>
+                        `;
+                    } else {
+                        // Fehlerfall - keine gültigen Karten
+                        html = `
+                            <div style="text-align: center; color: #ef5350;">
+                                <p>⚠️ Keine gültigen Karten verfügbar!</p>
+                            </div>
+                        `;
+                    }
+                }else if (data.type === 'ANNOUNCEMENT') {
+                    // Ansagen (Schneider, Schwarz, Ouvert)
                     html = `
-                        <div style="text-align: center; color: #b0b0b0;">
-                            <p>Klicke auf eine Karte zum Spielen</p>
+                        <div style="display: grid; gap: 10px;">
+                            <p style="color: #b0b0b0; text-align: center;">Ansagen:</p>
+                            <button class="btn-secondary" onclick="app.submitAction('ANNOUNCEMENT', 'none')">❌ Keine Ansagen</button>
+                            <button class="btn-secondary" onclick="app.submitAction('ANNOUNCEMENT', 'schneider')">🎯 Schneider</button>
+                            <button class="btn-secondary" onclick="app.submitAction('ANNOUNCEMENT', 'schwarz')">⚫ Schwarz</button>
                         </div>
                     `;
                 }
@@ -573,7 +636,40 @@
                     action.payload = { trump: value };
                 } else if (type === 'SKAT_DECISION') {
                     action.type = 'SKAT_DECISION';
-                    action.payload = { action: value, discardCards: [] }; // TODO: Card selection UI
+                    if (value === 'pickup') {
+                        // Bei Aufnehmen: prüfe, dass 2 Karten gewählt sind
+                        if (this.selectedDiscardCards.length !== 2) {
+                            alert('Bitte wähle genau 2 Karten zum Drücken');
+                            return;
+                        }
+                        action.payload = { action: value, discardCards: this.selectedDiscardCards };
+                    } else {
+                        // Hand: keine Karten drücken
+                        action.payload = { action: value, discardCards: [] };
+                    }
+                } else if (type === 'PLAY_CARD') {
+                    // Kartenspielen
+                    const cardIndex = value;
+                    if (cardIndex === null || cardIndex === undefined) {
+                        alert('Bitte wähle eine Karte zum Spielen');
+                        return;
+                    }
+                    const card = this.currentValidCards[cardIndex];
+                    if (!card) {
+                        alert('Ungültige Karte');
+                        return;
+                    }
+                    action.type = 'PLAY_CARD';
+                    action.payload = { card };
+                } else if (type === 'ANNOUNCEMENT') {
+                    action.type = 'ANNOUNCEMENT';
+                    // Einfache Ansage-Logik
+                    const ansage = value || 'none';
+                    action.payload = {
+                        schneider: ansage === 'schneider',
+                        schwarz: ansage === 'schwarz',
+                        ouvert: false
+                    };
                 }
 
                 console.log('[App] Submitting action:', action);
@@ -581,6 +677,31 @@
 
                 // Disable action UI
                 document.getElementById('game-actions').innerHTML = '<p style="text-align: center; color: #b0b0b0;">Aktion gesendet...</p>';
+            }
+
+            toggleCardSelection(cardIndex, button) {
+                // Maximale Auswahl: 2 Karten
+                const card = this.currentSkatCards[cardIndex];
+                const isSelected = this.selectedDiscardCards.some(c => c.id === card.id);
+                
+                if (isSelected) {
+                    // Abwählen
+                    this.selectedDiscardCards = this.selectedDiscardCards.filter(c => c.id !== card.id);
+                    button.style.borderColor = '#7986cb';
+                    button.style.background = '#5c6bc0';
+                } else {
+                    // Auswählen (max 2)
+                    if (this.selectedDiscardCards.length < 2) {
+                        this.selectedDiscardCards.push(card);
+                        button.style.borderColor = '#4caf50';
+                        button.style.background = '#4caf50';
+                    } else {
+                        alert('Maximal 2 Karten');
+                    }
+                }
+                
+                // Debug Output
+                console.log('[App] Selected cards for discard:', this.selectedDiscardCards);
             }
 
             onGameFinished(data) {

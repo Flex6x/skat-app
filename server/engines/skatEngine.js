@@ -229,7 +229,7 @@ class SkatEngine {
             return { valid: false, reason: 'Only declarer can decide on skat' };
         }
 
-        const { action, discardCards } = payload;
+        const { action, discardCards = [] } = payload;
 
         if (!['pickup', 'hand'].includes(action)) {
             return { valid: false, reason: 'Action must be "pickup" or "hand"' };
