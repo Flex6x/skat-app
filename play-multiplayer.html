@@ -344,13 +344,19 @@
 
     <!-- Scripts -->
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/settings.js"></script>
     <script src="js/socketClient.js"></script>
     <script src="js/cards.js"></script>
+    <script src="js/cardAnimations.js"></script>
+    <script src="js/multiplayerDealer.js"></script>
     
     <script>
         class MultiplayerGameApp {
             constructor() {
                 this.socketClient = null;
+                this.dealer = null;
+                this.cardAnimations = null;
                 this.state = {
                     screen: 'menu', // menu, lobby, game, finished
                     roomCode: null,
@@ -364,10 +370,12 @@
                 this.currentSkatCards = [];
                 this.currentValidCards = [];
                 this.gameStarting = false;
+                this.dealerIndex = null;
             }
 
             async initialize() {
                 this.socketClient = new SocketClient();
+                this.dealer = new MultiplayerDealer(this.socketClient);
                 try {
                     await this.socketClient.connect();
                     console.log('[App] Connected to server');
@@ -384,6 +392,7 @@
                 this.socketClient.on('playerJoined', (data) => this.onPlayerJoined(data));
                 this.socketClient.on('playerReadyChanged', (data) => this.onPlayerReadyChanged(data));
                 this.socketClient.on('bothPlayersReady', (data) => this.onBothPlayersReady(data));
+                this.socketClient.on('dealCards', (data) => this.onDealCards(data));
                 this.socketClient.on('stateUpdate', (data) => this.onStateUpdate(data));
                 this.socketClient.on('requestAction', (data) => this.onRequestAction(data));
                 this.socketClient.on('gameFinished', (data) => this.onGameFinished(data));
@@ -535,6 +544,19 @@
                 if (this.gameStarting) return;
                 this.gameStarting = true;
                 console.log('[App] Starting game...');
+                
+                // Show game screen
+                this.showScreen('game');
+                
+                // Simulate dealer index for local deal (Server wird das später senden)
+                const dealerData = {
+                    dealerIndex: 0 // Server wird das setzen
+                };
+                
+                // Trigger card dealing
+                this.onDealCards(dealerData);
+                
+                // Send start game to server
                 this.socketClient.startGame(this.state.roomCode);
             }
 
@@ -593,14 +615,27 @@
 
             renderMyCards(hand) {
                 const container = document.getElementById('player-hand');
-                container.innerHTML = hand.map((card, idx) => {
-                    return `
-                        <div style="padding: 8px; background: #3f51b5; border-radius: 6px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px;" 
-                             onclick="app.onCardClick(${idx}, '${card.rank}', '${card.suit}', '${card.id}')">
-                            ${card.rank}<br/>${card.suit}
-                        </div>
-                    `;
-                }).join('');
+                container.innerHTML = '';
+                
+                // Render cards using Card DOM elements (wie im Singleplayer)
+                hand.forEach(card => {
+                    if (card.createDOMElement) {
+                        const cardEl = card.createDOMElement();
+                        container.appendChild(cardEl);
+                    } else {
+                        // Fallback wenn createDOMElement nicht vorhanden ist
+                        const cardDiv = document.createElement('div');
+                        cardDiv.style.padding = '8px';
+                        cardDiv.style.background = '#3f51b5';
+                        cardDiv.style.borderRadius = '6px';
+                        cardDiv.style.textAlign = 'center';
+                        cardDiv.style.cursor = 'pointer';
+                        cardDiv.style.fontWeight = 'bold';
+                        cardDiv.style.fontSize = '12px';
+                        cardDiv.textContent = `${card.rank} ${card.suit}`;
+                        container.appendChild(cardDiv);
+                    }
+                });
             }
 
             onCardClick(idx, rank, suit, cardId) {
@@ -702,6 +737,142 @@
                 document.getElementById('bidding-overlay').classList.add('hidden');
                 document.getElementById('skat-decision-overlay').classList.add('hidden');
                 document.getElementById('trump-overlay').classList.add('hidden');
+            }
+
+            async onDealCards(data) {
+                console.log('[App] Dealing cards...');
+                // Initialize dealer with dealer index from server
+                await this.dealer.initializeDeal(data.dealerIndex);
+                this.dealer.sortHands();
+                
+                // Store dealer info
+                this.dealerIndex = data.dealerIndex;
+                
+                // Get my player ID from state
+                const myPlayerId = this.state.playerId;
+                
+                // Initialize animations if not already done
+                if (!this.cardAnimations) {
+                    this.cardAnimations = new CardAnimations({
+                        els: {
+                            player0Cards: document.querySelector('#bot2 .cards-container'),
+                            player1Cards: document.querySelector('#bot1 .cards-container'),
+                            player2Cards: document.getElementById('player-hand')
+                        },
+                        playSound: (sound) => console.log('[Sound]', sound)
+                    });
+                }
+
+                // Get player data
+                const positions = this.dealer.getPlayersWithPositions();
+                
+                // Update UI with positions
+                this.updatePlayerNamesWithPositions(positions);
+                
+                // Animate card dealing
+                await this.animateCardDealing();
+                
+                // Show cards to human player
+                const myHand = this.dealer.getPlayerHand(myPlayerId);
+                this.renderMyCards(myHand);
+                
+                console.log('[App] Card dealing complete');
+            }
+
+            updatePlayerNamesWithPositions(positions) {
+                const positionMap = {};
+                positions.forEach(p => {
+                    positionMap[p.id] = p.position;
+                });
+
+                // Update name boxes with position labels
+                if (this.state.players.length > 0) {
+                    const player0Label = this.state.players[0]?.name || 'Bot';
+                    const player1Label = this.state.players[1]?.name || 'Bot';
+                    const playerLabel = this.state.playerName || 'Du';
+
+                    document.querySelector('#bot2 .player-info').textContent = `${player0Label} (${positionMap[0] || '?'})`;
+                    document.querySelector('#bot1 .player-info').textContent = `${player1Label} (${positionMap[1] || '?'})`;
+                    document.getElementById('my-name').textContent = `${playerLabel} (${positionMap[2] || '?'})`;
+                }
+            }
+
+            async animateCardDealing() {
+                console.log('[App] Starting card animation...');
+                
+                // Clear card zones first
+                document.querySelector('#bot2 .cards-container').innerHTML = '';
+                document.querySelector('#bot1 .cards-container').innerHTML = '';
+                document.getElementById('player-hand').innerHTML = '';
+                
+                // Animate dealing sequence (3-4-3 pattern)
+                const sequence = [
+                    // First round: 3 cards each
+                    { target: 0, count: 3, position: 'VH' },
+                    { target: 1, count: 3, position: 'MH' },
+                    { target: 2, count: 3, position: 'HH' },
+                    // Skat: 2 cards (nur visuell, wird nicht animiert)
+                    // Second round: 4 cards each
+                    { target: 0, count: 4, position: 'VH' },
+                    { target: 1, count: 4, position: 'MH' },
+                    { target: 2, count: 4, position: 'HH' },
+                    // Third round: 3 cards each
+                    { target: 0, count: 3, position: 'VH' },
+                    { target: 1, count: 3, position: 'MH' },
+                    { target: 2, count: 3, position: 'HH' }
+                ];
+
+                const deckEl = document.getElementById('deck-zone');
+                const skatPile = document.getElementById('pile-skat');
+                
+                // Create deck mockup
+                deckEl.innerHTML = '';
+                const deckMockup = this.cardAnimations.createTempCard();
+                deckEl.appendChild(deckMockup);
+                skatPile.classList.add('hidden');
+
+                // Animate each packet
+                for (const step of sequence) {
+                    const targetEl = step.target === 0 ? document.querySelector('#bot2 .cards-container') :
+                                    step.target === 1 ? document.querySelector('#bot1 .cards-container') :
+                                    document.getElementById('player-hand');
+
+                    // Create card packet
+                    const tempPacket = this.cardAnimations.createTempPacket(step.count);
+                    
+                    // Animate card move
+                    await this.cardAnimations.animateCardMove(tempPacket, deckEl, targetEl, 450);
+                    
+                    // Add visual card backs to target zone
+                    for (let i = 0; i < step.count; i++) {
+                        const cardBack = this.cardAnimations.createTempCard();
+                        targetEl.appendChild(cardBack);
+                    }
+                    
+                    await this.cardAnimations.delay(50);
+                }
+
+                // Show skat pile (just visual)
+                this.renderSkatPile();
+                
+                // Clean up deck mockup
+                deckEl.innerHTML = '';
+            }
+
+            renderSkatPile() {
+                const skatPile = document.getElementById('pile-skat');
+                skatPile.classList.remove('hidden');
+                skatPile.innerHTML = '';
+                
+                for (let i = 0; i < 2; i++) {
+                    const cardBack = document.createElement('div');
+                    cardBack.classList.add('card', 'card-back');
+                    cardBack.style.position = 'absolute';
+                    cardBack.style.top = `${i * 2}px`;
+                    cardBack.style.left = `${i * 2}px`;
+                    cardBack.style.transform = `rotate(${-5 + Math.random() * 10}deg)`;
+                    skatPile.appendChild(cardBack);
+                }
             }
 
             onGameFinished(data) {
