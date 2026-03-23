@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Skat - Room</title>
+    <link rel="icon" type="image/jpeg" href="media/logo.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .screen { display: none; width: 100%; max-width: 500px; padding: 20px; animation: fadeIn 0.3s ease-in; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .container { background: linear-gradient(180deg, #0f3460 0%, #16213e 100%); border: 2px solid #3f51b5; border-radius: 12px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        h1 { font-size: 28px; margin-bottom: 10px; text-align: center; color: #e0e0e0; }
+        .subtitle { text-align: center; color: #b0b0b0; margin-bottom: 30px; font-size: 14px; }
+        .button-group { display: flex; flex-direction: column; gap: 15px; margin: 30px 0; }
+        button { padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; width: 100%; }
+        .btn-primary { background: linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(63,81,181,0.4); }
+        .btn-secondary, .btn-back { background: rgba(255,255,255,0.1); color: #e0e0e0; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-back { font-size: 14px; color: #b0b0b0; }
+        .btn-secondary:hover, .btn-back:hover { background: rgba(255,255,255,0.15); }
+        .input-group { margin: 20px 0; }
+        label { display: block; margin-bottom: 8px; color: #b0b0b0; font-size: 14px; font-weight: 600; }
+        input { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; background: rgba(255,255,255,0.05); color: white; font-size: 16px; font-family: 'Courier New', monospace; }
+        input:focus { outline: none; border-color: #3f51b5; background: rgba(63,81,181,0.1); box-shadow: 0 0 10px rgba(63,81,181,0.2); }
+        .room-code-display { background: rgba(255,255,255,0.08); border: 2px solid #3f51b5; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
+        .room-code-label { color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .room-code { font-size: 32px; font-weight: 700; font-family: 'Courier New', monospace; color: #3f51b5; letter-spacing: 3px; margin: 15px 0; }
+        .copy-feedback { display: none; color: #4caf50; font-size: 12px; margin-top: 8px; }
+        .copy-feedback.show { display: block; }
+        .status-message { text-align: center; padding: 15px; border-radius: 6px; margin: 20px 0; font-size: 14px; }
+        .status-waiting { background: rgba(33,150,243,0.1); border: 1px solid rgba(33,150,243,0.3); color: #64b5f6; }
+        .status-success { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.3); color: #81c784; }
+        .player-list { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .player-item { display: flex; align-items: center; padding: 12px; margin: 10px 0; background: rgba(63,81,181,0.1); border-radius: 6px; border-left: 3px solid #3f51b5; }
+        .player-icon { font-size: 24px; margin-right: 12px; }
+        .player-name { flex: 1; font-weight: 600; }
+        .player-status { font-size: 12px; color: #b0b0b0; }
+        .player-status.ready { color: #4caf50; font-weight: 600; }
+        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(63,81,181,0.3); border-top-color: #3f51b5; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-message { display: none; padding: 15px; background: rgba(244,67,54,0.1); border: 1px solid rgba(244,67,54,0.3); border-radius: 6px; color: #ef5350; font-size: 14px; margin: 15px 0; text-align: center; }
+        .error-message.show { display: block; }
+        .info-text { color: #b0b0b0; font-size: 13px; margin: 15px 0; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <!-- Screen 1: Menu -->
+    <div id="menu-screen" class="screen active">
+        <div class="container">
+            <h1>🎴 Skat Multiplayer</h1>
+            <p class="subtitle">Spielen Sie mit einem Freund</p>
+            <div class="button-group">
+                <button class="btn-primary" onclick="app.goToCreateRoom()">➕ Neuen Raum erstellen</button>
+                <button class="btn-primary" onclick="app.goToJoinRoom()">🔗 Raum beitreten</button>
+            </div>
+            <p class="info-text" style="text-align: center; margin-top: 40px;">Spielen Sie Skat gegen echte Spieler im Multiplayer-Modus</p>
+        </div>
+    </div>
+
+    <!-- Screen 2: Create Room -->
+    <div id="create-room-screen" class="screen">
+        <div class="container">
+            <h1>Neuen Raum erstellen</h1>
+            <p class="subtitle">Laden Sie einen Freund zum Spielen ein</p>
+            <div class="input-group">
+                <label for="create-username">Ihr Spielername:</label>
+                <input type="text" id="create-username" placeholder="z.B. Alice" maxlength="20">
+            </div>
+            <button class="btn-primary" onclick="app.createRoom()" style="margin: 30px 0;">Raum erstellen</button>
+            <div id="create-error" class="error-message"></div>
+            <div id="room-created" style="display: none;">
+                <div class="status-message status-success">✓ Raum erstellt! Geben Sie diesen Code Ihrem Freund:</div>
+                <div class="room-code-display">
+                    <div class="room-code-label">Raum-Code</div>
+                    <div class="room-code" id="display-room-code">SKT-000000</div>
+                    <button class="btn-secondary" onclick="app.copyRoomCode()" style="margin-top: 15px;">📋 Kopieren</button>
+                    <div class="copy-feedback" id="copy-feedback">✓ Kopiert!</div>
+                </div>
+                <div class="status-message status-waiting"><span class="loading-spinner"></span>Warte auf Spieler 2...</div>
+                <button class="btn-back" onclick="app.cancelCreate()" style="margin-top: 20px;">← Abbrechen</button>
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="btn-back" onclick="app.goToMenu()">← Zurück zum Menü</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 3: Join Room -->
+    <div id="join-room-screen" class="screen">
+        <div class="container">
+            <h1>Raum beitreten</h1>
+            <p class="subtitle">Geben Sie den Code von Ihrem Freund ein</p>
+            <div class="input-group">
+                <label for="join-code">Raum-Code:</label>
+                <input type="text" id="join-code" placeholder="z.B. SKT-ABC123" maxlength="11" onkeyup="this.value = this.value.toUpperCase();">
+            </div>
+            <div class="input-group">
+                <label for="join-username">Ihr Spielername:</label>
+                <input type="text" id="join-username" placeholder="z.B. Bob" maxlength="20">
+            </div>
+            <button class="btn-primary" onclick="app.joinRoom()" style="margin: 30px 0;">Beitreten</button>
+            <div id="join-error" class="error-message"></div>
+            <div style="margin-top: 20px;">
+                <button class="btn-back" onclick="app.goToMenu()">← Zurück zum Menü</button>
+            </div>
+            <p class="info-text">💡 Der Code sieht so aus: <strong>SKT-ABC123</strong></p>
+        </div>
+    </div>
+
+    <!-- Screen 5: Game Playing -->
+    <div id="game-screen" class="screen">
+        <div style="padding: 20px; color: #fff;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 id="game-phase-title">Spiel lädt...</h2>
+                <p id="game-current-player" style="color: #b0b0b0; font-size: 14px;"></p>
+            </div>
+            
+            <div id="game-board" style="min-height: 400px; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                <!-- Game state will be rendered here -->
+                <div style="text-align: center; color: #b0b0b0;">
+                    <p>🎴 Spiel lädt...</p>
+                </div>
+            </div>
+
+            <div id="game-actions" style="margin-bottom: 20px;">
+                <!-- Action buttons will appear here -->
+            </div>
+
+            <button class="btn-back" onclick="app.leaveRoom()" style="width: 100%;">← Spiel verlassen</button>
+        </div>
+    </div>
+
+    <!-- Screen 4: Lobby -->
+    <div id="lobby-screen" class="screen">
+        <div class="container">
+            <h1>Wartezone</h1>
+            <p class="subtitle">Bereit zum Spielen?</p>
+            <div class="player-list">
+                <h3 style="margin-bottom: 15px; color: #b0b0b0; font-size: 12px; text-transform: uppercase;">Spieler im Raum</h3>
+                <div id="lobby-players"></div>
+            </div>
+            <div id="lobby-status" class="status-message status-waiting">
+                <span class="loading-spinner"></span>Warte auf anderen Spieler...
+            </div>
+            <div id="both-ready" style="display: none;">
+                <div class="status-message status-success">✓ Beide Spieler sind bereit!</div>
+                <button class="btn-primary" onclick="app.startGame()" style="margin: 20px 0;">🎮 Spiel starten</button>
+            </div>
+            <div style="margin-top: 30px;">
+                <button class="btn-secondary" id="ready-button" onclick="app.toggleReady()" style="margin-bottom: 10px;">✓ Bereit</button>
+                <button class="btn-back" onclick="app.leaveRoom()">← Abbrechen</button>
+            </div>
+            <p class="info-text">💡 Klicken Sie auf "Bereit", wenn Sie zum Spielen bereit sind.</p>
+        </div>
+    </div>
+
+    <!-- Screen 6: Game Finished -->
+    <div id="finished-screen" class="screen">
+        <div class="container">
+            <h1>🎉 Spiel beendet!</h1>
+            <p class="subtitle" id="finished-message">Ergebnisse laden...</p>
+            <div id="finished-results" style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <!-- Results will appear here -->
+            </div>
+            <button class="btn-primary" onclick="app.goToMenu()" style="margin: 20px 0;">← Zurück zum Menü</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="js/socketClient.js"></script>
+    <script>
+        class MultiplayerApp {
+            constructor() {
+                this.state = {
+                    screen: 'menu',
+                    roomCode: null,
+                    roomId: null,
+                    playerId: null,
+                    playerName: null,
+                    players: [],
+                    isReady: false,
+                    isHost: false
+                };
+                this.socketClient = null;
+                this.gameStarting = false;
+                this.selectedDiscardCards = []; // Für Skat-Aufnahme
+                this.currentSkatCards = []; // Die aktuellen Skat-Karten zum Drücken
+                this.currentValidCards = []; // Die aktuellen gültigen Karten zum Spielen
+            }
+
+            async initialize() {
+                this.socketClient = new SocketClient();
+                try {
+                    await this.socketClient.connect();
+                    console.log('[App] Connected to server');
+                    this.setupSocketListeners();
+                } catch (error) {
+                    console.error('[App] Failed to connect:', error);
+                    this.showError('create-error', 'Verbindung zum Server fehlgeschlagen');
+                }
+            }
+
+            setupSocketListeners() {
+                this.socketClient.on('roomCreated', (data) => {
+                    this.onRoomCreated(data);
+                });
+
+                this.socketClient.on('roomJoined', (data) => {
+                    this.onRoomJoined(data);
+                });
+
+                this.socketClient.on('playerJoined', (data) => {
+                    this.onPlayerJoined(data);
+                });
+
+                this.socketClient.on('playerReadyChanged', (data) => {
+                    this.onPlayerReadyChanged(data);
+                });
+
+                this.socketClient.on('bothPlayersReady', (data) => {
+                    this.onBothPlayersReady(data);
+                });
+
+                this.socketClient.on('errorOccurred', (data) => {
+                    this.onServerError(data);
+                });
+
+                this.socketClient.on('stateUpdate', (data) => {
+                    this.onStateUpdate(data);
+                });
+
+                this.socketClient.on('requestAction', (data) => {
+                    this.onRequestAction(data);
+                });
+
+                this.socketClient.on('gameFinished', (data) => {
+                    this.onGameFinished(data);
+                });
+
+                this.socketClient.on('gameError', (data) => {
+                    console.error('[App] Game error:', data);
+                    alert('Fehler: ' + data.message);
+                });
+
+                this.socketClient.on('disconnected', () => {
+                    alert('Verbindung zum Server unterbrochen');
+                    this.goToMenu();
+                });
+            }
+
+            showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(screenId).classList.add('active');
+                this.state.screen = screenId;
+            }
+
+            goToMenu() {
+                this.state = {
+                    screen: 'menu',
+                    roomCode: null,
+                    roomId: null,
+                    playerId: null,
+                    playerName: null,
+                    players: [],
+                    isReady: false,
+                    isHost: false
+                };
+                this.showScreen('menu-screen');
+            }
+
+            goToCreateRoom() {
+                document.getElementById('create-username').value = '';
+                document.getElementById('create-error').classList.remove('show');
+                document.getElementById('create-error').textContent = '';
+                document.getElementById('room-created').style.display = 'none';
+                this.showScreen('create-room-screen');
+            }
+
+            goToJoinRoom() {
+                document.getElementById('join-code').value = '';
+                document.getElementById('join-username').value = '';
+                document.getElementById('join-error').classList.remove('show');
+                document.getElementById('join-error').textContent = '';
+                this.showScreen('join-room-screen');
+            }
+
+            async createRoom() {
+                const username = document.getElementById('create-username').value.trim();
+                
+                if (!username) {
+                    this.showError('create-error', 'Bitte geben Sie einen Spielernamen ein');
+                    return;
+                }
+
+                if (username.length < 2) {
+                    this.showError('create-error', 'Spielername muss mindestens 2 Zeichen lang sein');
+                    return;
+                }
+
+                try {
+                    const data = await this.socketClient.createRoom(username);
+                    this.onRoomCreated(data);
+                } catch (error) {
+                    this.showError('create-error', error.message);
+                }
+            }
+
+            onRoomCreated(data) {
+                this.state.playerName = data.playerName;
+                this.state.roomCode = data.roomCode;
+                this.state.roomId = data.roomId;
+                this.state.playerId = data.playerId;
+                this.state.isHost = true;
+                this.state.players = [
+                    { id: 0, name: data.playerName, type: 'human', ready: false }
+                ];
+
+                document.getElementById('create-error').classList.remove('show');
+                document.getElementById('room-created').style.display = 'block';
+                document.getElementById('display-room-code').textContent = data.roomCode;
+
+                console.log('[App] Room created:', data.roomCode);
+                
+                // Auto-navigate to lobby after 1.5 seconds
+                setTimeout(() => this.goToLobby(), 1500);
+            }
+
+            cancelCreate() {
+                this.goToCreateRoom();
+            }
+
+            copyRoomCode() {
+                const code = this.state.roomCode;
+                navigator.clipboard.writeText(code).then(() => {
+                    const feedback = document.getElementById('copy-feedback');
+                    feedback.classList.add('show');
+                    setTimeout(() => feedback.classList.remove('show'), 2000);
+                    console.log('[App] Room code copied:', code);
+                }).catch(err => {
+                    console.error('Copy failed:', err);
+                    alert('Kopieren fehlgeschlagen. Code: ' + code);
+                });
+            }
+
+            async joinRoom() {
+                const code = document.getElementById('join-code').value.trim();
+                const username = document.getElementById('join-username').value.trim();
+
+                if (!code) {
+                    this.showError('join-error', 'Bitte geben Sie einen Raum-Code ein');
+                    return;
+                }
+
+                if (!code.match(/^SKT-[A-Z0-9]{6}$/)) {
+                    this.showError('join-error', 'Ungültiger Code. Format: SKT-XXXXXX');
+                    return;
+                }
+
+                if (!username) {
+                    this.showError('join-error', 'Bitte geben Sie einen Spielernamen ein');
+                    return;
+                }
+
+                if (username.length < 2) {
+                    this.showError('join-error', 'Spielername muss mindestens 2 Zeichen lang sein');
+                    return;
+                }
+
+                try {
+                    const data = await this.socketClient.joinRoom(code, username);
+                    this.onRoomJoined(data);
+                } catch (error) {
+                    this.showError('join-error', error.message);
+                }
+            }
+
+            onRoomJoined(data) {
+                this.state.playerName = data.playerName;
+                this.state.roomCode = data.roomCode;
+                this.state.roomId = data.roomId;
+                this.state.playerId = data.playerId;
+                this.state.isHost = false;
+                this.state.players = data.players;
+
+                document.getElementById('join-error').classList.remove('show');
+                this.goToLobby();
+
+                console.log('[App] Joined room:', data.roomCode);
+            }
+
+            onPlayerJoined(data) {
+                this.state.players = data.players;
+                this.renderLobbyPlayers();
+                console.log('[App] Player joined, now:', data.players);
+            }
+
+            goToLobby() {
+                this.showScreen('lobby-screen');
+                this.renderLobbyPlayers();
+            }
+
+            renderLobbyPlayers() {
+                const container = document.getElementById('lobby-players');
+                container.innerHTML = '';
+
+                this.state.players.forEach((player) => {
+                    const div = document.createElement('div');
+                    div.className = 'player-item';
+                    
+                    const icon = player.id === this.state.playerId ? '👤' : '👥';
+                    const label = player.id === this.state.playerId ? ' (Du)' : '';
+                    const status = player.ready ? 'Bereit ✓' : 'Wartet...';
+                    const statusClass = player.ready ? 'ready' : '';
+
+                    div.innerHTML = `
+                        <div class="player-icon">${icon}</div>
+                        <div class="player-name">${player.name}${label}</div>
+                        <div class="player-status ${statusClass}">${status}</div>
+                    `;
+                    container.appendChild(div);
+                });
+
+                this.updateLobbyStatus();
+            }
+
+            updateLobbyStatus() {
+                const allReady = this.state.players.every(p => p.ready);
+                const waitingDiv = document.getElementById('lobby-status');
+                const readyDiv = document.getElementById('both-ready');
+
+                if (allReady && this.state.players.length === 2) {
+                    waitingDiv.style.display = 'none';
+                    readyDiv.style.display = 'block';
+                } else {
+                    waitingDiv.style.display = 'block';
+                    readyDiv.style.display = 'none';
+                }
+            }
+
+            toggleReady() {
+                const myPlayer = this.state.players.find(p => p.id === this.state.playerId);
+                if (myPlayer) {
+                    const newReadyState = !myPlayer.ready;
+                    this.socketClient.setPlayerReady(this.state.roomCode, newReadyState);
+                    myPlayer.ready = newReadyState;
+                    this.renderLobbyPlayers();
+                }
+            }
+
+            onPlayerReadyChanged(data) {
+                const player = this.state.players.find(p => p.id === data.playerId);
+                if (player) {
+                    player.ready = data.isReady;
+                }
+                this.renderLobbyPlayers();
+                console.log('[App] Player ready changed:', data);
+            }
+
+            onBothPlayersReady(data) {
+                console.log('[App] Both players ready - game can start');
+                this.updateLobbyStatus();
+            }
+
+            startGame() {
+                if (this.gameStarting) {
+                    console.log('[App] Game already starting, ignoring click');
+                    return;
+                }
+                
+                this.gameStarting = true;
+                console.log('[App] Starting game...');
+                this.socketClient.startGame(this.state.roomCode);
+                // Game state updates kommen über stateUpdate Events
+            }
+
+            onServerError(data) {
+                console.error('[App] Server error:', data);
+                if (this.state.screen === 'create-room-screen') {
+                    this.showError('create-error', data.message);
+                } else if (this.state.screen === 'join-room-screen') {
+                    this.showError('join-error', data.message);
+                }
+            }
+
+            onStateUpdate(data) {
+                console.log('[App] State update:', data);
+                
+                // Wechsel zum Game-Screen beim ersten State-Update
+                if (this.state.screen !== 'game-screen') {
+                    console.log('[App] Switching to game screen');
+                    this.showScreen('game-screen');
+                }
+                
+                // Finde meinen gefilterten State
+                const myFiltered = data.filteredStates?.find(f => f.playerId === this.state.playerId);
+                if (myFiltered) {
+                    this.renderGameState(myFiltered.state);
+                }
+            }
+
+            onRequestAction(data) {
+                console.log('[App] Action requested:', data.type);
+                
+                // Nur der Spieler kann die Action machen
+                if (data.playerId !== this.state.playerId) {
+                    console.log('[App] Not my turn');
+                    return;
+                }
+
+                const actionDiv = document.getElementById('game-actions');
+                if (!actionDiv) return;
+
+                let html = '';
+
+                if (data.type === 'BID') {
+                    // Reiz-Phase: Gebot oder Passen
+                    html = `
+                        <div style="display: grid; gap: 10px;">
+                            <p style="color: #b0b0b0; text-align: center;">Dein Gebot?</p>
+                            <input type="number" id="bid-input" placeholder="z.B. 18" min="18" step="1" style="padding: 10px; border-radius: 6px; border: 1px solid #3f51b5; background: rgba(63,81,181,0.1); color: white; text-align: center;">
+                            <button class="btn-primary" onclick="app.submitAction('BID')">Bieten</button>
+                            <button class="btn-secondary" onclick="app.submitAction('PASS')">Passen</button>
+                        </div>
+                    `;
+                } else if (data.type === 'TRUMP_SELECTION') {
+                    // Trumpf-Auswahl
+                    const trumps = ['Eichel', 'Grün', 'Rot', 'Schellen', 'Grand', 'Null'];
+                    html = `
+                        <div style="display: grid; gap: 8px;">
+                            <p style="color: #b0b0b0; text-align: center;">Wähle den Trumpf:</p>
+                            ${trumps.map(t => `<button class="btn-secondary" onclick="app.submitAction('TRUMP_SELECTION', '${t}')" style="text-align: center;">${t}</button>`).join('')}
+                        </div>
+                    `;
+                } else if (data.type === 'SKAT_DECISION') {
+                    // Skat Aufnehmen oder Hand spielen - mit Kartenseelektion
+                    const skatCards = data.validActions?.skatOptions || [];
+                    const myCards = data.gameState?.players?.[this.state.playerId]?.hand || [];
+                    
+                    // Speichere die Skat-Karten für submitAction
+                    this.currentSkatCards = skatCards;
+                    
+                    // Reset Kartenseelektion bei neuer Phase
+                    this.selectedDiscardCards = [];
+                    
+                    let cardsHTML = '';
+                    if (skatCards && skatCards.length > 0) {
+                        cardsHTML = `
+                            <div style="margin-bottom: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                                <p style="color: #b0b0b0; font-size: 12px; margin-bottom: 10px;">📚 Skat-Karten (falls aufgenommen zum Drücken)</p>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px;" id="skat-cards-container">
+                                    ${skatCards.map((card, i) => `
+                                        <button style="padding: 10px 8px; background: #5c6bc0; border: 2px solid #7986cb; color: white; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;" onclick="app.toggleCardSelection(${i}, this)">
+                                            ${card.rank}<br/>${card.suit}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                                <p style="color: #888; font-size: 11px; margin-top: 8px;">Wähle 2 Karten zum Drücken (wenn Skat aufnimmst)</p>
+                            </div>
+                        `;
+                    }
+                    
+                    html = `
+                        <div style="display: grid; gap: 10px;">
+                            <p style="color: #b0b0b0; text-align: center;">Skat aufnehmen oder Hand spielen?</p>
+                            ${cardsHTML}
+                            <button class="btn-primary" onclick="app.submitAction('SKAT_DECISION', 'pickup')">📚 Skat aufnehmen (2 drücken)</button>
+                            <button class="btn-secondary" onclick="app.submitAction('SKAT_DECISION', 'hand')">🎴 Hand spielen</button>
+                        </div>
+                    `;
+                }else if (data.type === 'PLAY_CARD') {
+                    // Kartenspielen
+                    const validCards = data.validActions?.cardOptions || [];
+                    
+                    if (validCards && validCards.length > 0) {
+                        // Speichere validCards für submitAction
+                        this.currentValidCards = validCards;
+                        
+                        // Zeige eine einfache Liste von Karten
+                        html = `
+                            <div style="display: grid; gap: 10px;">
+                                <p style="color: #b0b0b0; text-align: center;">Wähle eine Karte zum Spielen:</p>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px;">
+                                    ${validCards.map((card, idx) => `
+                                        <button style="padding: 12px 8px; background: #3f51b5; border: 2px solid #3f51b5; color: white; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;" onclick="app.submitAction('PLAY_CARD', ${idx})">
+                                            ${card.rank}<br/>${card.suit}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                                <p style="color: #888; font-size: 11px;">Insgesamt ${validCards.length} gültige Karten</p>
+                            </div>
+                        `;
+                    } else {
+                        // Fehlerfall - keine gültigen Karten
+                        html = `
+                            <div style="text-align: center; color: #ef5350;">
+                                <p>⚠️ Keine gültigen Karten verfügbar!</p>
+                            </div>
+                        `;
+                    }
+                }else if (data.type === 'ANNOUNCEMENT') {
+                    // Ansagen (Schneider, Schwarz, Ouvert)
+                    html = `
+                        <div style="display: grid; gap: 10px;">
+                            <p style="color: #b0b0b0; text-align: center;">Ansagen:</p>
+                            <button class="btn-secondary" onclick="app.submitAction('ANNOUNCEMENT', 'none')">❌ Keine Ansagen</button>
+                            <button class="btn-secondary" onclick="app.submitAction('ANNOUNCEMENT', 'schneider')">🎯 Schneider</button>
+                            <button class="btn-secondary" onclick="app.submitAction('ANNOUNCEMENT', 'schwarz')">⚫ Schwarz</button>
+                        </div>
+                    `;
+                }
+
+                actionDiv.innerHTML = html;
+            }
+
+            submitAction(type, value = null) {
+                const action = {};
+
+                if (type === 'BID') {
+                    const bidInput = document.getElementById('bid-input');
+                    const bid = parseInt(bidInput.value);
+                    if (isNaN(bid) || bid < 18) {
+                        alert('Gib ein gültiges Gebot ein (mindestens 18)');
+                        return;
+                    }
+                    action.type = 'BID';
+                    action.payload = { value: bid };
+                } else if (type === 'PASS') {
+                    action.type = 'PASS';
+                    action.payload = {};
+                } else if (type === 'TRUMP_SELECTION') {
+                    action.type = 'TRUMP_SELECTION';
+                    action.payload = { trump: value };
+                } else if (type === 'SKAT_DECISION') {
+                    action.type = 'SKAT_DECISION';
+                    if (value === 'pickup') {
+                        // Bei Aufnehmen: prüfe, dass 2 Karten gewählt sind
+                        if (this.selectedDiscardCards.length !== 2) {
+                            alert('Bitte wähle genau 2 Karten zum Drücken');
+                            return;
+                        }
+                        action.payload = { action: value, discardCards: this.selectedDiscardCards };
+                    } else {
+                        // Hand: keine Karten drücken
+                        action.payload = { action: value, discardCards: [] };
+                    }
+                } else if (type === 'PLAY_CARD') {
+                    // Kartenspielen
+                    const cardIndex = value;
+                    if (cardIndex === null || cardIndex === undefined) {
+                        alert('Bitte wähle eine Karte zum Spielen');
+                        return;
+                    }
+                    const card = this.currentValidCards[cardIndex];
+                    if (!card) {
+                        alert('Ungültige Karte');
+                        return;
+                    }
+                    action.type = 'PLAY_CARD';
+                    action.payload = { card };
+                } else if (type === 'ANNOUNCEMENT') {
+                    action.type = 'ANNOUNCEMENT';
+                    // Einfache Ansage-Logik
+                    const ansage = value || 'none';
+                    action.payload = {
+                        schneider: ansage === 'schneider',
+                        schwarz: ansage === 'schwarz',
+                        ouvert: false
+                    };
+                }
+
+                console.log('[App] Submitting action:', action);
+                this.socketClient.sendPlayerAction(action);
+
+                // Disable action UI
+                document.getElementById('game-actions').innerHTML = '<p style="text-align: center; color: #b0b0b0;">Aktion gesendet...</p>';
+            }
+
+            toggleCardSelection(cardIndex, button) {
+                // Maximale Auswahl: 2 Karten
+                const card = this.currentSkatCards[cardIndex];
+                const isSelected = this.selectedDiscardCards.some(c => c.id === card.id);
+                
+                if (isSelected) {
+                    // Abwählen
+                    this.selectedDiscardCards = this.selectedDiscardCards.filter(c => c.id !== card.id);
+                    button.style.borderColor = '#7986cb';
+                    button.style.background = '#5c6bc0';
+                } else {
+                    // Auswählen (max 2)
+                    if (this.selectedDiscardCards.length < 2) {
+                        this.selectedDiscardCards.push(card);
+                        button.style.borderColor = '#4caf50';
+                        button.style.background = '#4caf50';
+                    } else {
+                        alert('Maximal 2 Karten');
+                    }
+                }
+                
+                // Debug Output
+                console.log('[App] Selected cards for discard:', this.selectedDiscardCards);
+            }
+
+            onGameFinished(data) {
+                console.log('[App] Game finished:', data);
+                this.renderGameResults(data);
+                this.showScreen('finished-screen');
+            }
+
+            renderGameState(state) {
+                const board = document.getElementById('game-board');
+                if (!board) return;
+
+                // Einfache Anzeige des Spiel-Status
+                let html = '<div style="text-align: center; color: #e0e0e0;">';
+                
+                if (state.phase === 'bidding') {
+                    html += '<h3>🎴 Reizphase</h3>';
+                } else if (state.phase === 'trump') {
+                    html += '<h3>♠ Trumpf wählen</h3>';
+                } else if (state.phase === 'skat') {
+                    html += '<h3>📚 Skat annehmen/ablehnen</h3>';
+                } else if (state.phase === 'play') {
+                    html += '<h3>🎮 Kartenspielen</h3>';
+                }
+
+                html += '<p style="color: #b0b0b0; margin-top: 20px;">Phase: <strong>' + state.phase + '</strong></p>';
+                
+                if (state.hand) {
+                    html += '<p>Meine Karten: ' + state.hand.length + '</p>';
+                }
+
+                html += '</div>';
+                board.innerHTML = html;
+            }
+
+            renderGameResults(result) {
+                const resultsDiv = document.getElementById('finished-results');
+                let html = '<h3 style="color: #e0e0e0; margin-bottom: 15px;">Ergebnisse:</h3>';
+                
+                if (result.scores) {
+                    html += '<div style="display: grid; gap: 10px;">';
+                    Object.entries(result.scores).forEach(([name, score]) => {
+                        html += `<div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(63,81,181,0.1); border-radius: 6px;">
+                            <span>${name}</span>
+                            <strong>${score} Punkte</strong>
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
+
+                document.getElementById('finished-message').textContent = 'Spiel abgeschlossen!';
+                resultsDiv.innerHTML = html;
+            }
+
+            leaveRoom() {
+                if (confirm('Raum verlassen?')) {
+                    this.goToMenu();
+                }
+            }
+
+            showError(elementId, message) {
+                const el = document.getElementById(elementId);
+                el.textContent = message;
+                el.classList.add('show');
+                console.error('[App] Error:', message);
+            }
+        }
+
+        let app;
+        document.addEventListener('DOMContentLoaded', async () => {
+            app = new MultiplayerApp();
+            await app.initialize();
+            console.log('[App] Multiplayer UI initialized');
+        });
+    </script>
+</body>
+</html>
