@@ -548,15 +548,7 @@
                 // Show game screen
                 this.showScreen('game');
                 
-                // Simulate dealer index for local deal (Server wird das später senden)
-                const dealerData = {
-                    dealerIndex: 0 // Server wird das setzen
-                };
-                
-                // Trigger card dealing
-                this.onDealCards(dealerData);
-                
-                // Send start game to server
+                // Send start game to server - Er wird die Kartenvergabe koordinieren
                 this.socketClient.startGame(this.state.roomCode);
             }
 
@@ -571,7 +563,17 @@
                 // Get my filtered state
                 const myFiltered = data.filteredStates?.find(f => f.playerId === this.state.playerId);
                 if (myFiltered) {
-                    this.renderGameState(myFiltered.state, data);
+                    // Wenn Kartenvergabe beginnt, animiere die Karten DANN rendere sie
+                    if (data.phase === 'DEALING' && myFiltered.state.myHand && myFiltered.state.myHand.length > 0) {
+                        // Animiere Kartenvergabe synchronisiert bei BEIDEN Spielern
+                        this.onDealCards(data).then(() => {
+                            // Nach Animation: Rendern mit echten Kartendaten vom Server
+                            this.renderGameState(myFiltered.state, data);
+                        });
+                    } else {
+                        // Nicht in DEALING Phase: Normale Verarbeitung
+                        this.renderGameState(myFiltered.state, data);
+                    }
                 }
             }
 
@@ -603,8 +605,8 @@
                 }
 
                 // Render my hand (if available)
-                if (state.hand && state.hand.length > 0) {
-                    this.renderMyCards(state.hand);
+                if (state.myHand && state.myHand.length > 0) {
+                    this.renderMyCards(state.myHand);
                 }
             }
 
@@ -740,16 +742,7 @@
             }
 
             async onDealCards(data) {
-                console.log('[App] Dealing cards...');
-                // Initialize dealer with dealer index from server
-                await this.dealer.initializeDeal(data.dealerIndex);
-                this.dealer.sortHands();
-                
-                // Store dealer info
-                this.dealerIndex = data.dealerIndex;
-                
-                // Get my player ID from state
-                const myPlayerId = this.state.playerId;
+                console.log('[App] Dealing cards - Phase:', data.phase);
                 
                 // Initialize animations if not already done
                 if (!this.cardAnimations) {
@@ -763,20 +756,16 @@
                     });
                 }
 
-                // Get player data
-                const positions = this.dealer.getPlayersWithPositions();
+                // Get player data (positions are always fixed)
+                const positions = [{id: 0, position: 'VH'}, {id: 1, position: 'MH'}, {id: 2, position: 'HH'}];
                 
                 // Update UI with positions
                 this.updatePlayerNamesWithPositions(positions);
                 
-                // Animate card dealing
+                // Animate card dealing (nur visuelle Animation, echte Karten vom Server)
                 await this.animateCardDealing();
                 
-                // Show cards to human player
-                const myHand = this.dealer.getPlayerHand(myPlayerId);
-                this.renderMyCards(myHand);
-                
-                console.log('[App] Card dealing complete');
+                console.log('[App] Card dealing animation complete');
             }
 
             updatePlayerNamesWithPositions(positions) {

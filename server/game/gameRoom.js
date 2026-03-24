@@ -103,19 +103,20 @@ class GameRoom {
      * PHASE 1: KARTENAUSTEILUNG
      * ========================================================================
      */
-    async _dealPhase() {
-        console.log(`[GameRoom ${this.roomId}] Dealing cards...`);
-        
-        const dealt = this.skatEngine.initializeDeal();
+     async _dealPhase() {
+         console.log(`[GameRoom ${this.roomId}] Dealing cards...`);
+         
+         const dealt = this.skatEngine.initializeDeal();
 
-        // Übergebe Karten an Player-Objekte
-        this.players.forEach((p, idx) => {
-            p.hand = dealt[`p${idx + 1}`];
-        });
+         // Übergebe Karten an Player-Objekte
+         this.players.forEach((p, idx) => {
+             p.hand = dealt[`p${idx + 1}`];
+         });
 
-        this._broadcastStateUpdate('DEALING');
-        await this._delay(1500);
-    }
+         this._broadcastStateUpdate('DEALING');
+         // Warte lange genug, damit Client-Animationen fertig sind (~5-6 Sekunden für 3-4-3 Pattern)
+         await this._delay(5500);
+     }
 
     /**
      * ========================================================================
