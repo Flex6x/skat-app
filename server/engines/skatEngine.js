@@ -88,6 +88,13 @@ class SkatEngine {
         const hinterhandIndex = this.dealerIndex;
         this.turnIndex = this.forehandIndex;
 
+        // Position Zuordnungen (VH = Vorhand, MH = Mittelhand, HH = Hinterhand)
+        this.positions = {
+            [this.forehandIndex]: 'VH',
+            [mittelhandIndex]: 'MH',
+            [hinterhandIndex]: 'HH'
+        };
+
         // Spielers Karten zurücksetzen
         this.players.forEach(p => {
             p.hand = [];
@@ -377,7 +384,8 @@ class SkatEngine {
             announcedSchneider: this.announcedSchneider,
             announcedSchwarz: this.announcedSchwarz,
             isOuvert: this.isOuvert,
-            trickCount: this.trickCount
+            trickCount: this.trickCount,
+            positions: this.positions
         };
 
         // Aktueller Trick (Spieler können bereits gespielte Karten sehen)

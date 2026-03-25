@@ -193,12 +193,12 @@
         <!-- Top Players Area -->
         <div id="bots-area">
             <div id="bot2" class="player-zone">
-                <div class="player-info"><span id="opponent0-name">Spieler 1</span></div>
+                <div class="player-info"><span id="opponent0-name">Spieler 1</span> <span id="opponent0-position" class="position-badge"></span></div>
                 <div class="cards-container bot-cards"></div>
                 <div class="speech-bubble hidden"></div>
             </div>
             <div id="bot1" class="player-zone">
-                <div class="player-info" id="bot-aiden-name"><span class="ai-text">🤖</span> Aiden</div>
+                <div class="player-info"><span class="ai-text">Ai</span>den <span id="bot-aiden-position" class="position-badge"></span></div>
                 <div class="cards-container bot-cards"></div>
                 <div class="speech-bubble hidden"></div>
             </div>
@@ -281,7 +281,7 @@
 
         <!-- Bottom Player Area -->
         <div id="player-area" class="player-zone">
-            <div class="player-info" id="my-name">Du</div>
+            <div class="player-info"><span id="my-name">Du</span> <span id="my-position" class="position-badge"></span></div>
             <div id="player-hand" class="cards-container player-cards"></div>
             <div class="declarer-actions">
                 <button id="btn-claim-rest" class="btn claim-rest-btn hidden" onclick="app.claimRest()">Der Rest ist meine</button>
@@ -609,7 +609,10 @@
                     
                     // The bot gets its name from server (should be 'Aiden')
                     const botName = serverPlayers[2]?.name || 'Aiden';
-                    document.getElementById('bot-aiden-name').innerHTML = `<span class="ai-text">🤖</span> ${botName}`;
+                    const botNameEl = document.querySelector('#bot1 .player-info');
+                    if (botNameEl) {
+                        botNameEl.innerHTML = `<span class="ai-text">Ai</span>den`;
+                    }
                     
                     // Update opponent names in top areas (use visible opponents only)
                     if (state.opponents && state.opponents.length >= 3) {
@@ -618,6 +621,37 @@
                             const oppName = document.getElementById('opponent0-name');
                             if (oppName) {
                                 oppName.textContent = visibleOpponents[0].name || 'Gegner 1';
+                            }
+                        }
+                    }
+                }
+                
+                // Update positions (VH, MH, HH)
+                if (state.positions) {
+                    // Find my position
+                    const myPosition = state.positions[this.state.playerId];
+                    if (myPosition) {
+                        const myPosEl = document.getElementById('my-position');
+                        if (myPosEl) myPosEl.textContent = myPosition;
+                    }
+                    
+                    // Find visible opponents and show their positions
+                    if (state.opponents && state.opponents.length >= 3) {
+                        const visibleOpponents = state.opponents.filter(o => o.cardCount !== undefined);
+                        
+                        if (visibleOpponents.length >= 1) {
+                            const opponent0Position = state.positions[visibleOpponents[0].id];
+                            if (opponent0Position) {
+                                const oppPosBadge = document.getElementById('opponent0-position');
+                                if (oppPosBadge) oppPosBadge.textContent = opponent0Position;
+                            }
+                        }
+                        
+                        if (visibleOpponents.length >= 2) {
+                            const opponent1Position = state.positions[visibleOpponents[1].id];
+                            if (opponent1Position) {
+                                const botPosBadge = document.getElementById('bot-aiden-position');
+                                if (botPosBadge) botPosBadge.textContent = opponent1Position;
                             }
                         }
                     }
@@ -640,7 +674,7 @@
                 // Render my hand (if available)
                 if (state.myHand && state.myHand.length > 0) {
                     console.log('[renderGameState] Rendering my cards:', state.myHand.length);
-                    this.renderMyCards(state.myHand);
+                    this.renderMyCards(state.myHand, state.trumpMode);
                 } else {
                     console.log('[renderGameState] No hand to render');
                 }
@@ -667,14 +701,17 @@
                 return `${gameState.currentPlayer} am Zug`;
             }
 
-            renderMyCards(hand) {
+            renderMyCards(hand, trumpMode) {
                 const container = document.getElementById('player-hand');
                 container.innerHTML = '';
                 
                 console.log('[renderMyCards] Rendering', hand.length, 'cards');
                 
+                // Sort hand before rendering
+                const sortedHand = this.sortHand([...hand], trumpMode);
+                
                 // Render cards using Card DOM elements (wie im Singleplayer)
-                hand.forEach((card, idx) => {
+                sortedHand.forEach((card, idx) => {
                     let cardEl;
                     
                     console.log(`[renderMyCards] Card ${idx}:`, card);
@@ -708,7 +745,69 @@
                 console.log('[renderMyCards] Done, rendered', container.children.length, 'elements');
             }
 
-            onCardClick(idx, rank, suit, cardId) {
+            sortHand(hand, trumpMode) {
+                // Sort cards by: Trumps first, then other suits, then by rank power
+                // Same logic as singleplayer
+                const RANK_POWER = {
+                    '7': 1, '8': 2, '9': 3, 'O': 4, 'K': 5, '10': 6, 'A': 7
+                };
+                
+                const NULL_RANK_POWER = {
+                    '7': 1, '8': 2, '9': 3, '10': 4, 'U': 5, 'O': 6, 'K': 7, 'A': 8
+                };
+
+                const SUITS = {
+                    EICHEL: 'Eichel',
+                    GRUEN: 'Grün',
+                    ROT: 'Rot',
+                    SCHELLEN: 'Schellen'
+                };
+
+                const rp = trumpMode === 'Null' ? NULL_RANK_POWER : RANK_POWER;
+                
+                hand.sort((a, b) => {
+                    const aTrump = this.isTrump(a, trumpMode);
+                    const bTrump = this.isTrump(b, trumpMode);
+                    
+                    if (aTrump && !bTrump) return -1;
+                    if (!aTrump && bTrump) return 1;
+                    
+                    if (aTrump && bTrump) {
+                        if (a.rank === 'U' && b.rank !== 'U') return -1;
+                        if (a.rank !== 'U' && b.rank === 'U') return 1;
+                        if (a.rank === 'U' && b.rank === 'U') {
+                            const order = [SUITS.SCHELLEN, SUITS.ROT, SUITS.GRUEN, SUITS.EICHEL];
+                            return order.indexOf(b.suit) - order.indexOf(a.suit); // Eichel first
+                        }
+                        return rp[b.rank] - rp[a.rank];
+                    }
+                    
+                    // Neither is trump
+                    if (a.suit !== b.suit) {
+                        return a.suit.localeCompare(b.suit);
+                    }
+                    
+                    return rp[b.rank] - rp[a.rank];
+                });
+                
+                return hand;
+            }
+
+            isTrump(card, trumpMode) {
+                if (!trumpMode || trumpMode === 'Grand') {
+                    // Grand: only Unters are trump
+                    return card.rank === 'U';
+                }
+                
+                if (trumpMode === 'Null') {
+                    // Null: no trumps (Unters are regular cards)
+                    return false;
+                }
+                
+                // Suit trump: Unters + suit cards are trump
+                return card.rank === 'U' || card.suit === trumpMode;
+            }
+
                 // Will be used for card playing (future enhancement)
                 console.log('[App] Card clicked:', rank, suit);
             }
