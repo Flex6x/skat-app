@@ -63,7 +63,7 @@ export default function gameEvents(io, gameRooms, playerSockets, socketPlayers) 
                 const playerConfigs = [
                     { type: 'human', name: playerName },
                     { type: 'human', name: 'Warte auf Spieler 2...' },
-                    { type: 'bot', name: 'Bot' }
+                    { type: 'bot', name: 'Aiden' }
                 ];
 
                 const room = new GameRoom(

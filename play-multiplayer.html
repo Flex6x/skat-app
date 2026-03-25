@@ -193,12 +193,12 @@
         <!-- Top Players Area -->
         <div id="bots-area">
             <div id="bot2" class="player-zone">
-                <div class="player-info"><span id="opponent1-name">Spieler 2</span></div>
+                <div class="player-info"><span id="opponent0-name">Spieler 1</span></div>
                 <div class="cards-container bot-cards"></div>
                 <div class="speech-bubble hidden"></div>
             </div>
             <div id="bot1" class="player-zone">
-                <div class="player-info"><span>🤖 Bot</span></div>
+                <div class="player-info" id="bot-aiden-name"><span class="ai-text">🤖</span> Aiden</div>
                 <div class="cards-container bot-cards"></div>
                 <div class="speech-bubble hidden"></div>
             </div>
@@ -584,29 +584,57 @@
                 document.getElementById('bid-value').textContent = state.bidValue || '-';
                 document.getElementById('trump-value').textContent = state.trumpMode || '-';
 
-                // Update player names from room data
-                if (fullData.filteredStates) {
-                    const allPlayers = [];
-                    fullData.filteredStates.forEach((f, idx) => {
-                        if (f.state.playerName) {
-                            allPlayers.push(f.state.playerName);
-                        }
-                    });
+                // Update player names from server data
+                if (fullData.players && fullData.players.length >= 3) {
+                    // Server sends: player0, player1, player2 (where player2 is the bot)
+                    const serverPlayers = fullData.players;
+                    document.getElementById('player0-name').textContent = serverPlayers[0]?.name || 'Spieler 1';
+                    document.getElementById('player1-name').textContent = serverPlayers[1]?.name || 'Spieler 2';
                     
-                    // Set names in UI
-                    if (this.state.players.length > 0) {
-                        document.getElementById('player0-name').textContent = this.state.players[0]?.name || 'Spieler 1';
-                        if (this.state.players.length > 1) {
-                            document.getElementById('player1-name').textContent = this.state.players[1]?.name || 'Spieler 2';
-                            document.getElementById('opponent1-name').textContent = this.state.players[1]?.name || 'Spieler 2';
+                    // The bot gets its name from server (should be 'Aiden')
+                    const botName = serverPlayers[2]?.name || 'Aiden';
+                    document.getElementById('bot-aiden-name').innerHTML = `<span class="ai-text">🤖</span> ${botName}`;
+                    
+                    // Update opponent names in top areas (use visible opponents only)
+                    if (state.opponents && state.opponents.length >= 3) {
+                        const visibleOpponents = state.opponents.filter(o => o.cardCount !== undefined);
+                        if (visibleOpponents.length >= 2) {
+                            document.getElementById('opponent0-name').textContent = visibleOpponents[0].name || 'Gegner 1';
+                            // For now, we only have 2 visible opponent zones, so we don't need opponent1-name
                         }
                     }
-                    document.getElementById('my-name').textContent = this.state.playerName || 'Du';
+                }
+                
+                document.getElementById('my-name').textContent = this.state.playerName || 'Du';
+
+                // Render bot hands (opponent card counts as card-back divs - just like singleplayer)
+                if (state.opponents && state.opponents.length >= 3) {
+                    const visibleOpponents = state.opponents.filter(o => o.cardCount !== undefined);
+                    if (visibleOpponents.length >= 2) {
+                        this.renderBotCards(0, visibleOpponents[0].cardCount);  // bot2 (left)
+                        this.renderBotCards(1, visibleOpponents[1].cardCount);  // bot1 (right)
+                    }
                 }
 
                 // Render my hand (if available)
                 if (state.myHand && state.myHand.length > 0) {
                     this.renderMyCards(state.myHand);
+                }
+            }
+
+            renderBotCards(botId, count) {
+                // botId: 0 = bot2 (left), 1 = bot1 (right)
+                const container = botId === 0 ? 
+                    document.querySelector('#bot2 .cards-container') : 
+                    document.querySelector('#bot1 .cards-container');
+                
+                if (!container) return;
+                
+                container.innerHTML = '';
+                for (let i = 0; i < count; i++) {
+                    const cardBack = document.createElement('div');
+                    cardBack.classList.add('card', 'card-back');
+                    container.appendChild(cardBack);
                 }
             }
 
