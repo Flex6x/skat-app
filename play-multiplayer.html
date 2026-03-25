@@ -371,6 +371,7 @@
                 this.currentValidCards = [];
                 this.gameStarting = false;
                 this.dealerIndex = null;
+                this.animationInProgress = false; // Flag um Animation nur einmal aufzurufen
             }
 
             async initialize() {
@@ -567,13 +568,22 @@
                     console.log('[App] myHand length:', myFiltered.state.myHand?.length);
                     // Wenn Kartenvergabe beginnt, animiere die Karten DANN rendere sie
                     if (data.phase === 'DEALING' && myFiltered.state.myHand && myFiltered.state.myHand.length > 0) {
-                        // Animiere Kartenvergabe synchronisiert bei BEIDEN Spielern
-                        console.log('[App] Starting dealing animation...');
-                        this.onDealCards(data).then(() => {
-                            // Nach Animation: Rendern mit echten Kartendaten vom Server
-                            console.log('[App] Animation done, calling renderGameState...');
+                        // Animiere nur einmal für alle Spieler (Flag verhindert Doppelung)
+                        if (!this.animationInProgress) {
+                            this.animationInProgress = true;
+                            console.log('[App] Starting dealing animation...');
+                            this.onDealCards(data).then(() => {
+                                // Nach Animation: Rendern mit echten Kartendaten vom Server
+                                console.log('[App] Animation done, calling renderGameState...');
+                                this.renderGameState(myFiltered.state, data);
+                                // Reset flag
+                                this.animationInProgress = false;
+                            });
+                        } else {
+                            // Animation läuft bereits, nur renderGameState aufrufen
+                            console.log('[App] Animation already in progress, just rendering...');
                             this.renderGameState(myFiltered.state, data);
-                        });
+                        }
                     } else {
                         // Nicht in DEALING Phase: Normale Verarbeitung
                         console.log('[App] Not in dealing phase, calling renderGameState...');
