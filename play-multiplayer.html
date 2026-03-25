@@ -554,7 +554,7 @@
 
             // ========== Game ==========
             onStateUpdate(data) {
-                console.log('[App] State update:', data.phase);
+                console.log('[App] State update:', data.phase, 'filteredStates:', data.filteredStates?.length);
                 
                 if (this.state.screen !== 'game') {
                     this.showScreen('game');
@@ -562,16 +562,21 @@
 
                 // Get my filtered state
                 const myFiltered = data.filteredStates?.find(f => f.playerId === this.state.playerId);
+                console.log('[App] myFiltered for playerId', this.state.playerId, ':', myFiltered ? 'found' : 'NOT FOUND');
                 if (myFiltered) {
+                    console.log('[App] myHand length:', myFiltered.state.myHand?.length);
                     // Wenn Kartenvergabe beginnt, animiere die Karten DANN rendere sie
                     if (data.phase === 'DEALING' && myFiltered.state.myHand && myFiltered.state.myHand.length > 0) {
                         // Animiere Kartenvergabe synchronisiert bei BEIDEN Spielern
+                        console.log('[App] Starting dealing animation...');
                         this.onDealCards(data).then(() => {
                             // Nach Animation: Rendern mit echten Kartendaten vom Server
+                            console.log('[App] Animation done, calling renderGameState...');
                             this.renderGameState(myFiltered.state, data);
                         });
                     } else {
                         // Nicht in DEALING Phase: Normale Verarbeitung
+                        console.log('[App] Not in dealing phase, calling renderGameState...');
                         this.renderGameState(myFiltered.state, data);
                     }
                 }
@@ -579,6 +584,7 @@
 
             renderGameState(state, fullData) {
                 // Update phase info - jetzt "Zug" statt "Phase"
+                console.log('[renderGameState] myHand:', state.myHand?.length, 'opponents:', state.opponents?.length);
                 document.getElementById('phase-name').textContent = this.getTurnDisplay(fullData) || '-';
                 document.getElementById('declarer-name').textContent = state.declarer?.name || '-';
                 document.getElementById('bid-value').textContent = state.bidValue || '-';
@@ -599,13 +605,18 @@
                     if (state.opponents && state.opponents.length >= 3) {
                         const visibleOpponents = state.opponents.filter(o => o.cardCount !== undefined);
                         if (visibleOpponents.length >= 2) {
-                            document.getElementById('opponent0-name').textContent = visibleOpponents[0].name || 'Gegner 1';
-                            // For now, we only have 2 visible opponent zones, so we don't need opponent1-name
+                            const oppName = document.getElementById('opponent0-name');
+                            if (oppName) {
+                                oppName.textContent = visibleOpponents[0].name || 'Gegner 1';
+                            }
                         }
                     }
                 }
                 
-                document.getElementById('my-name').textContent = this.state.playerName || 'Du';
+                const myNameEl = document.getElementById('my-name');
+                if (myNameEl) {
+                    myNameEl.textContent = this.state.playerName || 'Du';
+                }
 
                 // Render bot hands (opponent card counts as card-back divs - just like singleplayer)
                 if (state.opponents && state.opponents.length >= 3) {
@@ -618,7 +629,10 @@
 
                 // Render my hand (if available)
                 if (state.myHand && state.myHand.length > 0) {
+                    console.log('[renderGameState] Rendering my cards:', state.myHand.length);
                     this.renderMyCards(state.myHand);
+                } else {
+                    console.log('[renderGameState] No hand to render');
                 }
             }
 
@@ -647,25 +661,41 @@
                 const container = document.getElementById('player-hand');
                 container.innerHTML = '';
                 
+                console.log('[renderMyCards] Rendering', hand.length, 'cards');
+                
                 // Render cards using Card DOM elements (wie im Singleplayer)
-                hand.forEach(card => {
+                hand.forEach((card, idx) => {
+                    let cardEl;
+                    
+                    console.log(`[renderMyCards] Card ${idx}:`, card);
+                    
+                    // If card has createDOMElement method, use it (already a Card object)
                     if (card.createDOMElement) {
-                        const cardEl = card.createDOMElement();
-                        container.appendChild(cardEl);
+                        console.log(`[renderMyCards] Card ${idx} has createDOMElement`);
+                        cardEl = card.createDOMElement();
+                    } else if (card.suit && card.rank) {
+                        // Card is a plain object from server - convert to Card class and render
+                        console.log(`[renderMyCards] Card ${idx} is plain object: ${card.rank} ${card.suit}`);
+                        const cardObj = new Card(card.suit, card.rank);
+                        cardEl = cardObj.createDOMElement();
                     } else {
-                        // Fallback wenn createDOMElement nicht vorhanden ist
-                        const cardDiv = document.createElement('div');
-                        cardDiv.style.padding = '8px';
-                        cardDiv.style.background = '#3f51b5';
-                        cardDiv.style.borderRadius = '6px';
-                        cardDiv.style.textAlign = 'center';
-                        cardDiv.style.cursor = 'pointer';
-                        cardDiv.style.fontWeight = 'bold';
-                        cardDiv.style.fontSize = '12px';
-                        cardDiv.textContent = `${card.rank} ${card.suit}`;
-                        container.appendChild(cardDiv);
+                        // Fallback: display as text
+                        console.log(`[renderMyCards] Card ${idx} fallback`);
+                        cardEl = document.createElement('div');
+                        cardEl.style.padding = '8px';
+                        cardEl.style.background = '#3f51b5';
+                        cardEl.style.borderRadius = '6px';
+                        cardEl.style.textAlign = 'center';
+                        cardEl.style.cursor = 'pointer';
+                        cardEl.style.fontWeight = 'bold';
+                        cardEl.style.fontSize = '12px';
+                        cardEl.textContent = `${card.rank} ${card.suit}`;
                     }
+                    
+                    container.appendChild(cardEl);
                 });
+                
+                console.log('[renderMyCards] Done, rendered', container.children.length, 'elements');
             }
 
             onCardClick(idx, rank, suit, cardId) {
@@ -784,13 +814,8 @@
                     });
                 }
 
-                // Get player data (positions are always fixed)
-                const positions = [{id: 0, position: 'VH'}, {id: 1, position: 'MH'}, {id: 2, position: 'HH'}];
-                
-                // Update UI with positions
-                this.updatePlayerNamesWithPositions(positions);
-                
                 // Animate card dealing (nur visuelle Animation, echte Karten vom Server)
+                // NOT calling updatePlayerNamesWithPositions here - renderGameState will set names from server
                 await this.animateCardDealing();
                 
                 console.log('[App] Card dealing animation complete');
@@ -802,15 +827,27 @@
                     positionMap[p.id] = p.position;
                 });
 
-                // Update name boxes with position labels
+                // Update name boxes with position labels - preserve HTML structure!
                 if (this.state.players.length > 0) {
                     const player0Label = this.state.players[0]?.name || 'Bot';
                     const player1Label = this.state.players[1]?.name || 'Bot';
                     const playerLabel = this.state.playerName || 'Du';
 
-                    document.querySelector('#bot2 .player-info').textContent = `${player0Label} (${positionMap[0] || '?'})`;
-                    document.querySelector('#bot1 .player-info').textContent = `${player1Label} (${positionMap[1] || '?'})`;
-                    document.getElementById('my-name').textContent = `${playerLabel} (${positionMap[2] || '?'})`;
+                    // Update ONLY the span text, preserve the ID
+                    const bot2Name = document.querySelector('#bot2 .player-info span');
+                    if (bot2Name) {
+                        bot2Name.textContent = `${player0Label} (${positionMap[0] || '?'})`;
+                    }
+                    
+                    const bot1Name = document.querySelector('#bot1 .player-info');
+                    if (bot1Name) {
+                        bot1Name.innerHTML = `<span class="ai-text">🤖</span> ${player1Label} (${positionMap[1] || '?'})`;
+                    }
+                    
+                    const myName = document.getElementById('my-name');
+                    if (myName) {
+                        myName.textContent = `${playerLabel} (${positionMap[2] || '?'})`;
+                    }
                 }
             }
 
