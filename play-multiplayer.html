@@ -22,7 +22,7 @@
                 
                 <div id="room-code-section" class="hidden" style="background: rgba(255,255,255,0.08); border: 2px solid #3f51b5; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
                     <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">🔐 Raum-Code (zum Teilen)</div>
-                    <div id="display-room-code" style="font-size: 32px; font-weight: 700; font-family: 'Courier New', monospace; color: #3f51b5; letter-spacing: 3px; margin: 15px 0; user-select: all;">SKT-000000</div>
+                    <div id="display-room-code" style="font-size: 32px; font-weight: 700; font-family: monospace; color: #3f51b5; letter-spacing: 3px; margin: 15px 0; user-select: all;">SKT-000000</div>
                     <button class="btn-secondary" onclick="app.copyRoomCode()" style="background: rgba(63, 81, 181, 0.3); border: 1px solid #3f51b5; color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer;">📋 Kopieren</button>
                     <div id="copy-feedback" style="color: #4caf50; font-size: 12px; margin-top: 8px; opacity: 0; transition: opacity 0.3s;">✓ Kopiert!</div>
                 </div>
@@ -419,7 +419,6 @@
             goToMenu() {
                 this.showScreen('menu');
                 this.state = { ...this.state, roomCode: null, roomId: null, playerId: null, playerName: null, players: [], isReady: false };
-                // Hide room code display
                 document.getElementById('room-code-section').classList.add('hidden');
             }
 
@@ -502,7 +501,7 @@
                 console.log('[App] Room created:', data.roomCode);
                 this.showLobby();
                 
-                // Display room code on the page instead of alert
+                // Display room code on the page
                 document.getElementById('display-room-code').textContent = data.roomCode;
                 document.getElementById('room-code-section').classList.remove('hidden');
             }
@@ -833,6 +832,10 @@
                 return card.rank === 'U' || card.suit === trumpMode;
             }
 
+                // Will be used for card playing (future enhancement)
+                console.log('[App] Card clicked:', rank, suit);
+            }
+
             onRequestAction(data) {
                 console.log('[App] Action requested:', data.type);
                 
@@ -1089,123 +1092,6 @@
                 console.error('[App] Server error:', data);
                 alert('Fehler: ' + data.message);
             }
-
-            leaveGame() {
-                if (confirm('Raum verlassen?')) {
-                    this.goToMenu();
-                }
-            }
-
-            showError(elementId, message) {
-                const el = document.getElementById(elementId);
-                el.textContent = message;
-                el.style.display = 'block';
-            }
-
-            formatPhase(phase) {
-                const phases = {
-                    'DEALING': '🃏 Kartenvergabe',
-                    'BIDDING': '💰 Reizen',
-                    'TRUMP_SELECTION': '👑 Trumpf wählen',
-                    'SKAT_DECISION': '🎯 Skat-Entscheidung',
-                    'PLAYING': '🎮 Spiel läuft',
-                    'FINISHED': '✅ Spiel vorbei'
-                };
-                return phases[phase] || phase;
-            }
-
-            getTurnDisplay(fullData) {
-                if (!fullData) return '...';
-                const phase = fullData.phase || 'initializing';
-                return this.formatPhase(phase);
-            }
-
-            toggleReady() {
-                const isReady = !this.state.isReady;
-                this.state.isReady = isReady;
-                this.socketClient.setPlayerReady(this.state.roomCode, isReady);
-                
-                document.getElementById('lobby-ready-btn').style.backgroundColor = isReady ? '#4caf50' : '';
-                document.getElementById('lobby-ready-btn').textContent = isReady ? '✓ Bereit (klick zum Abmelden)' : '✓ Bereit';
-                
-                if (isReady) {
-                    document.getElementById('lobby-ready-message').classList.remove('hidden');
-                } else {
-                    document.getElementById('lobby-ready-message').classList.add('hidden');
-                    document.getElementById('start-game-container').classList.add('hidden');
-                }
-            }
-
-            startGame() {
-                this.socketClient.startGame(this.state.roomCode);
-            }
-
-            submitAction(type, payload = null) {
-                const action = { type, payload };
-                this.socketClient.sendPlayerAction(action);
-            }
-
-            showScoreboard() {
-                document.getElementById('scoreboard-overlay').classList.remove('hidden');
-            }
-
-            showLastTrick() {
-                document.getElementById('last-trick-overlay').classList.remove('hidden');
-                document.getElementById('last-trick-overlay').onclick = (e) => {
-                    if (e.target.id === 'last-trick-overlay') {
-                        document.getElementById('last-trick-overlay').classList.add('hidden');
-                    }
-                };
-            }
-
-            showReiztabelle() {
-                document.getElementById('reiztabelle-overlay').classList.remove('hidden');
-            }
-
-            closeReiztabelle() {
-                document.getElementById('reiztabelle-overlay').classList.add('hidden');
-            }
-
-            showBidInput() {
-                const bidInput = prompt('Gib dein Gebot ein (>=18):');
-                if (bidInput !== null) {
-                    const bid = parseInt(bidInput);
-                    if (!isNaN(bid) && bid >= 18) {
-                        const action = {
-                            type: 'BID',
-                            payload: { value: bid }
-                        };
-                        console.log('[App] Submitting:', action);
-                        this.socketClient.sendPlayerAction(action);
-                        document.getElementById('bidding-overlay').classList.add('hidden');
-                    } else {
-                        alert('Gültiges Gebot erforderlich (>=18)');
-                    }
-                }
-            }
-
-            showSkatDiscard() {
-                alert('Skat-Karten drücken wird noch implementiert');
-            }
-
-            claimRest() {
-                this.submitAction('CLAIM_REST');
-            }
-
-            giftRest() {
-                this.submitAction('GIFT_REST');
-            }
-        }
-
-        let app;
-        document.addEventListener('DOMContentLoaded', async () => {
-            app = new MultiplayerGameApp();
-            await app.initialize();
-            console.log('[App] Ready');
-        });
-    </script>
-</body>
-</html>
 
             leaveGame() {
                 if (confirm('Raum verlassen?')) {
