@@ -159,9 +159,20 @@ class SocketClient {
      * PHASE 2: Erstelle einen neuen Room
      */
     createRoom(playerName) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             this.socket.emit('createRoom', { playerName });
-            this._once('roomCreated', resolve);
+            
+            const onCreated = (data) => {
+                resolve(data);
+                this._off('errorOccurred', onError);
+            };
+            const onError = (data) => {
+                reject(new Error(data.message));
+                this._off('roomCreated', onCreated);
+            };
+            
+            this._once('roomCreated', onCreated);
+            this.on('errorOccurred', onError);
         });
     }
 
