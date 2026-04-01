@@ -20,6 +20,13 @@
                     <!-- Players added by JS -->
                 </div>
                 
+                <div id="room-code-section" class="hidden" style="background: rgba(255,255,255,0.08); border: 2px solid #3f51b5; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <div style="color: #b0b0b0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">🔐 Raum-Code (zum Teilen)</div>
+                    <div id="display-room-code" style="font-size: 32px; font-weight: 700; font-family: 'Courier New', monospace; color: #3f51b5; letter-spacing: 3px; margin: 15px 0; user-select: all;">SKT-000000</div>
+                    <button class="btn-secondary" onclick="app.copyRoomCode()" style="background: rgba(63, 81, 181, 0.3); border: 1px solid #3f51b5; color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer;">📋 Kopieren</button>
+                    <div id="copy-feedback" style="color: #4caf50; font-size: 12px; margin-top: 8px; opacity: 0; transition: opacity 0.3s;">✓ Kopiert!</div>
+                </div>
+                
                 <div style="margin-top: 30px;">
                     <button id="lobby-ready-btn" class="btn large-btn" onclick="app.toggleReady()">✓ Bereit</button>
                 </div>
@@ -412,6 +419,8 @@
             goToMenu() {
                 this.showScreen('menu');
                 this.state = { ...this.state, roomCode: null, roomId: null, playerId: null, playerName: null, players: [], isReady: false };
+                // Hide room code display
+                document.getElementById('room-code-section').classList.add('hidden');
             }
 
             goToCreateRoom() {
@@ -433,6 +442,19 @@
                 document.getElementById('modal-overlay').classList.add('hidden');
                 document.getElementById('create-room-modal').classList.add('hidden');
                 document.getElementById('join-room-modal').classList.add('hidden');
+            }
+
+            copyRoomCode() {
+                const code = document.getElementById('display-room-code').textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    const feedback = document.getElementById('copy-feedback');
+                    feedback.style.opacity = '1';
+                    setTimeout(() => {
+                        feedback.style.opacity = '0';
+                    }, 2000);
+                }).catch(() => {
+                    alert('Fehler beim Kopieren: ' + code);
+                });
             }
 
             // ========== Room Management ==========
@@ -479,7 +501,10 @@
                 
                 console.log('[App] Room created:', data.roomCode);
                 this.showLobby();
-                setTimeout(() => alert(`Raum-Code: ${data.roomCode}\nGeben Sie diesen Code an Ihren Freund`), 500);
+                
+                // Display room code on the page instead of alert
+                document.getElementById('display-room-code').textContent = data.roomCode;
+                document.getElementById('room-code-section').classList.remove('hidden');
             }
 
             onRoomJoined(data) {

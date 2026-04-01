@@ -148,6 +148,11 @@ class SocketClient {
             console.log('[Socket] Both players ready - game can start');
             this._emit('bothPlayersReady', data);
         });
+
+        this.socket.on('dealCards', (data) => {
+            console.log('[Socket] Deal cards event received');
+            this._emit('dealCards', data);
+        });
     }
 
     /**
