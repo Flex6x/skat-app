@@ -1108,6 +1108,123 @@
 
             formatPhase(phase) {
                 const phases = {
+                    'DEALING': '🃏 Kartenvergabe',
+                    'BIDDING': '💰 Reizen',
+                    'TRUMP_SELECTION': '👑 Trumpf wählen',
+                    'SKAT_DECISION': '🎯 Skat-Entscheidung',
+                    'PLAYING': '🎮 Spiel läuft',
+                    'FINISHED': '✅ Spiel vorbei'
+                };
+                return phases[phase] || phase;
+            }
+
+            getTurnDisplay(fullData) {
+                if (!fullData) return '...';
+                const phase = fullData.phase || 'initializing';
+                return this.formatPhase(phase);
+            }
+
+            toggleReady() {
+                const isReady = !this.state.isReady;
+                this.state.isReady = isReady;
+                this.socketClient.setPlayerReady(this.state.roomCode, isReady);
+                
+                document.getElementById('lobby-ready-btn').style.backgroundColor = isReady ? '#4caf50' : '';
+                document.getElementById('lobby-ready-btn').textContent = isReady ? '✓ Bereit (klick zum Abmelden)' : '✓ Bereit';
+                
+                if (isReady) {
+                    document.getElementById('lobby-ready-message').classList.remove('hidden');
+                } else {
+                    document.getElementById('lobby-ready-message').classList.add('hidden');
+                    document.getElementById('start-game-container').classList.add('hidden');
+                }
+            }
+
+            startGame() {
+                this.socketClient.startGame(this.state.roomCode);
+            }
+
+            submitAction(type, payload = null) {
+                const action = { type, payload };
+                this.socketClient.sendPlayerAction(action);
+            }
+
+            showScoreboard() {
+                document.getElementById('scoreboard-overlay').classList.remove('hidden');
+            }
+
+            showLastTrick() {
+                document.getElementById('last-trick-overlay').classList.remove('hidden');
+                document.getElementById('last-trick-overlay').onclick = (e) => {
+                    if (e.target.id === 'last-trick-overlay') {
+                        document.getElementById('last-trick-overlay').classList.add('hidden');
+                    }
+                };
+            }
+
+            showReiztabelle() {
+                document.getElementById('reiztabelle-overlay').classList.remove('hidden');
+            }
+
+            closeReiztabelle() {
+                document.getElementById('reiztabelle-overlay').classList.add('hidden');
+            }
+
+            showBidInput() {
+                const bidInput = prompt('Gib dein Gebot ein (>=18):');
+                if (bidInput !== null) {
+                    const bid = parseInt(bidInput);
+                    if (!isNaN(bid) && bid >= 18) {
+                        const action = {
+                            type: 'BID',
+                            payload: { value: bid }
+                        };
+                        console.log('[App] Submitting:', action);
+                        this.socketClient.sendPlayerAction(action);
+                        document.getElementById('bidding-overlay').classList.add('hidden');
+                    } else {
+                        alert('Gültiges Gebot erforderlich (>=18)');
+                    }
+                }
+            }
+
+            showSkatDiscard() {
+                alert('Skat-Karten drücken wird noch implementiert');
+            }
+
+            claimRest() {
+                this.submitAction('CLAIM_REST');
+            }
+
+            giftRest() {
+                this.submitAction('GIFT_REST');
+            }
+        }
+
+        let app;
+        document.addEventListener('DOMContentLoaded', async () => {
+            app = new MultiplayerGameApp();
+            await app.initialize();
+            console.log('[App] Ready');
+        });
+    </script>
+</body>
+</html>
+
+            leaveGame() {
+                if (confirm('Raum verlassen?')) {
+                    this.goToMenu();
+                }
+            }
+
+            showError(elementId, message) {
+                const el = document.getElementById(elementId);
+                el.textContent = message;
+                el.style.display = 'block';
+            }
+
+            formatPhase(phase) {
+                const phases = {
                     'bidding': '🎴 Reizphase',
                     'skat_decision': '📚 Skat-Entscheidung',
                     'trump_selection': '♠ Trumpfwahl',
