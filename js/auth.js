@@ -643,13 +643,13 @@ class StorageService {
         if (agg.games_played >= 50) unlocked.push('stammspieler');
         if (agg.games_played >= 200) unlocked.push('veteran');
 
-        // New Badges
-        if (agg.null_no7_wins >= 10) unlocked.push('führer');
-        if (agg.eichel_wins >= 15) unlocked.push('eichel_duc');
-        if (agg.gruen_wins >= 15) unlocked.push('gruen_duc');
-        if (agg.rot_wins >= 15) unlocked.push('herz_duc');
-        if (agg.schellen_wins >= 15) unlocked.push('glockner');
-        if (agg.ramsch_zero_wins >= 10) unlocked.push('jungfrau');
+        // New Badges - Corrected IDs to match UI and DB
+        if (agg.null_no7_wins >= 5) unlocked.push('fuehrer');
+        if (agg.eichel_wins >= 15) unlocked.push('eichel_pro');
+        if (agg.gruen_wins >= 15) unlocked.push('gruen_pro');
+        if (agg.rot_wins >= 15) unlocked.push('rot_pro');
+        if (agg.schellen_wins >= 15) unlocked.push('schellen_pro');
+        if (agg.ramsch_zero_wins >= 5) unlocked.push('jungfrau');
 
         return unlocked;
     }
