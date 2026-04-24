@@ -114,14 +114,21 @@ class ChallengeManager {
 
     checkChallenge(id, result) {
         const won = result.won;
+        // Use isHuman check or index 2 to identify the player
         const isDeclarer = result.declarerId === 2;
         const wonAsDeclarer = won && isDeclarer;
         const pts = result.declarerPoints;
         const oppPts = result.defenderPoints;
         const trump = result.trumpMode;
 
+        // Normalizing Trump names to be safe
+        const isEichel = (trump === 'Eichel');
+        const isGruen = (trump === 'Grün' || trump === 'Gruen');
+        const isRot = (trump === 'Rot' || trump === 'Herz');
+        const isSchellen = (trump === 'Schellen' || trump === 'Karo');
+
         // Special case: Suit games for challenges
-        const isSuitGame = wonAsDeclarer && (trump === 'Eichel' || trump === 'Grün' || trump === 'Rot' || trump === 'Schellen');
+        const isSuitGame = wonAsDeclarer && (isEichel || isGruen || isRot || isSchellen);
 
         switch (id) {
             // Pool 10
@@ -130,13 +137,13 @@ class ChallengeManager {
             case 'sicher_ist_sicher':
                 return wonAsDeclarer && pts > 90;
             case 'eichel_experte':
-                return wonAsDeclarer && trump === 'Eichel';
+                return wonAsDeclarer && isEichel;
             case 'gruen_spezialist':
-                return wonAsDeclarer && trump === 'Grün';
+                return wonAsDeclarer && isGruen;
             case 'herz_ass':
-                return wonAsDeclarer && trump === 'Rot';
+                return wonAsDeclarer && isRot;
             case 'schellen_koenig':
-                return wonAsDeclarer && trump === 'Schellen';
+                return wonAsDeclarer && isSchellen;
             case 'null_runde':
                 return wonAsDeclarer && trump === 'Null';
             case 'grand_meister':
@@ -150,7 +157,7 @@ class ChallengeManager {
             case 'die_unberuehrbaren':
                 return isSuitGame && !result.lostJack;
             case 'schellen_bonus':
-                return wonAsDeclarer && result.lastTrickHasSeven;
+                return wonAsDeclarer && isSchellen && result.lastTrickHasSeven;
             case 'abraeumer_tag':
                 return wonAsDeclarer && pts === 61;
             case 'buben_power':
