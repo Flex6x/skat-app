@@ -436,7 +436,7 @@ const TRANSLATIONS = {
         rules_ramsch_header: "Ramsch & Rollmops",
         rules_ramsch_text: "If no one bids, Ramsch is often played: Everyone plays for themselves, goal is to get as few points as possible. Rollmops is a special form in Ramsch.",
         session_summary: "Listen-Zusammenfassung",
-        session_finished: "Liste beendet!",
+        session_finished: "Liste",
         back_to_menu: "Hauptmenü",
         login: "Login",
         summary_suit: "{n}x Suit",

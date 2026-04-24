@@ -1113,6 +1113,8 @@ class Game {
             this.animations.animateReturnToDeck();
         }
 
+        const declarerHasSevenAfterDiscard = this.players[this.declarerIndex].hand.some(c => c.rank === '7');
+
         if (this.onGameEnd) {
             this.onGameEnd({
                 passedIn: false,
@@ -1130,6 +1132,7 @@ class Game {
                 matadors: evaluation.matadors,
                 playerRollmops: this.players.map(p => p.hasRollmopsHand),
                 playerHasSeven: this.players.map(p => p.hasSeven),
+                declarerHasSevenAfterDiscard: declarerHasSevenAfterDiscard,
                 
                 // Challenge flags
                 declarerPoints: declarerPoints,
@@ -1138,7 +1141,7 @@ class Game {
                 lastTrickHasSeven: this.lastTrickHasSeven,
                 hadAllJacks: (this.originalDeclarerHand.filter(c => c.rank === 'U').length === 4),
                 skatPoints: this.calculatePoints(this.skat),
-                noAcesInHand: !this.players[this.declarerIndex].hand.some(c => c.rank === 'A') // hand is already cleared here? No, check
+                noAcesInHand: !this.players[this.declarerIndex].hand.some(c => c.rank === 'A')
             });
         }
     }

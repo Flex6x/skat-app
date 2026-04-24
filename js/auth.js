@@ -443,7 +443,8 @@ class StorageService {
         const current = await this._getFromCloud() || {
             games_played: 0, wins: 0, losses: 0, grand_wins: 0, null_wins: 0, ramsch_wins: 0, rollmops_wins: 0, big_busch: 0, trumpf_count: 0,
             schneider_wins: 0, schwarz_wins: 0, hand_wins: 0, grand_ouvert_wins: 0, null_ouvert_wins: 0, best_streak: 0, lists_played: 0,
-            won_all_in_list_count: 0, win_grand_ohne_4_wins: 0
+            won_all_in_list_count: 0, win_grand_ohne_4_wins: 0,
+            null_no7_wins: 0, eichel_wins: 0, gruen_wins: 0, rot_wins: 0, schellen_wins: 0, ramsch_zero_wins: 0
         };
 
         const isWin = listResult.scores && listResult.scores[2] > listResult.scores[0] && listResult.scores[2] > listResult.scores[1];
@@ -472,6 +473,13 @@ class StorageService {
             null_ouvert_wins: (current.null_ouvert_wins || 0) + (listResult.anzahlNullOuvert || 0),
             won_all_in_list_count: (current.won_all_in_list_count || 0) + (listResult.wonAllInList ? 1 : 0),
             win_grand_ohne_4_wins: (current.win_grand_ohne_4_wins || 0) + (listResult.winGrandOhne4Count || 0),
+            // New Badge Counters
+            null_no7_wins: (current.null_no7_wins || 0) + (listResult.winNullNo7Count || 0),
+            eichel_wins: (current.eichel_wins || 0) + (listResult.winEichelCount || 0),
+            gruen_wins: (current.gruen_wins || 0) + (listResult.winGruenCount || 0),
+            rot_wins: (current.rot_wins || 0) + (listResult.winRotCount || 0),
+            schellen_wins: (current.schellen_wins || 0) + (listResult.winSchellenCount || 0),
+            ramsch_zero_wins: (current.ramsch_zero_wins || 0) + (listResult.winRamschZeroCount || 0),
             updated_at: new Date().toISOString()
         };
 
@@ -585,7 +593,8 @@ class StorageService {
         const agg = { 
             lists_played: listStats.length,
             games_played: 0, wins: 0, losses: 0, grand_wins: 0, null_wins: 0, ramsch_wins: 0, rollmops_wins: 0, big_busch: 0, trumpf_count: 0,
-            schneider_wins: 0, schwarz_wins: 0, hand_wins: 0, grand_ouvert_wins: 0, null_ouvert_wins: 0, best_streak: 0
+            schneider_wins: 0, schwarz_wins: 0, hand_wins: 0, grand_ouvert_wins: 0, null_ouvert_wins: 0, best_streak: 0,
+            null_no7_wins: 0, eichel_wins: 0, gruen_wins: 0, rot_wins: 0, schellen_wins: 0, ramsch_zero_wins: 0
         };
         let currentStreak = 0;
         listStats.forEach(list => {
@@ -610,6 +619,14 @@ class StorageService {
             agg.hand_wins += (list.anzahlHandspiele || 0);
             agg.grand_ouvert_wins += (list.anzahlGrandOuvert || 0);
             agg.null_ouvert_wins += (list.anzahlNullOuvert || 0);
+            
+            // New Badge Counters
+            agg.null_no7_wins += (list.winNullNo7Count || 0);
+            agg.eichel_wins += (list.winEichelCount || 0);
+            agg.gruen_wins += (list.winGruenCount || 0);
+            agg.rot_wins += (list.winRotCount || 0);
+            agg.schellen_wins += (list.winSchellenCount || 0);
+            agg.ramsch_zero_wins += (list.winRamschZeroCount || 0);
         });
         return agg;
     }
@@ -625,6 +642,15 @@ class StorageService {
         if (agg.games_played >= 10) unlocked.push('anfaenger');
         if (agg.games_played >= 50) unlocked.push('stammspieler');
         if (agg.games_played >= 200) unlocked.push('veteran');
+
+        // New Badges
+        if (agg.null_no7_wins >= 10) unlocked.push('führer');
+        if (agg.eichel_wins >= 15) unlocked.push('eichel_duc');
+        if (agg.gruen_wins >= 15) unlocked.push('gruen_duc');
+        if (agg.rot_wins >= 15) unlocked.push('herz_duc');
+        if (agg.schellen_wins >= 15) unlocked.push('glockner');
+        if (agg.ramsch_zero_wins >= 10) unlocked.push('jungfrau');
+
         return unlocked;
     }
 }

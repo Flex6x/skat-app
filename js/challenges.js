@@ -120,10 +120,13 @@ class ChallengeManager {
         const oppPts = result.defenderPoints;
         const trump = result.trumpMode;
 
+        // Special case: Suit games for challenges
+        const isSuitGame = wonAsDeclarer && (trump === 'Eichel' || trump === 'Grün' || trump === 'Rot' || trump === 'Schellen');
+
         switch (id) {
             // Pool 10
             case 'schneider_meister':
-                return wonAsDeclarer && (trump !== 'Null' && trump !== 'Grand') && result.schneider;
+                return isSuitGame && result.schneider;
             case 'sicher_ist_sicher':
                 return wonAsDeclarer && pts > 90;
             case 'eichel_experte':
@@ -145,7 +148,7 @@ class ChallengeManager {
             case 'vorsichtiger_solist':
                 return wonAsDeclarer && trump === 'Grand' && oppPts < 31;
             case 'die_unberuehrbaren':
-                return wonAsDeclarer && (trump !== 'Null' && trump !== 'Grand') && !result.lostJack;
+                return isSuitGame && !result.lostJack;
             case 'schellen_bonus':
                 return wonAsDeclarer && result.lastTrickHasSeven;
             case 'abraeumer_tag':

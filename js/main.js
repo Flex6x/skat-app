@@ -137,7 +137,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         declarerTrumpCount: result.declarerTrumpCount,
                         matadors: result.matadors,
                         isOuvert: result.isOuvert,
-                        playerRollmops: result.playerRollmops
+                        playerRollmops: result.playerRollmops,
+                        playerHasSeven: result.playerHasSeven,
+                        declarerHasSevenAfterDiscard: result.declarerHasSevenAfterDiscard,
+                        lostJack: result.lostJack,
+                        lastTrickHasSeven: result.lastTrickHasSeven,
+                        hadAllJacks: result.hadAllJacks,
+                        skatPoints: result.skatPoints,
+                        noAcesInHand: result.noAcesInHand,
+                        declarerPoints: result.declarerPoints,
+                        defenderPoints: result.defenderPoints
                     });
                 }
                 ui.updateScoreboard(gameHistory);
@@ -146,31 +155,36 @@ document.addEventListener('DOMContentLoaded', () => {
             saveSessionState();
             
             if (completedRounds >= sessionRounds) {
-                // Session finished -> SAVE TO STATS
-                saveListToStats(gameHistory);
-                localStorage.removeItem('skatSessionState');
+                // List finished -> Show game over screen first, but change the button to show summary
+                const summaryLabel = ui.getTranslation('summary');
+                ui.els.btnRestart.textContent = `${summaryLabel} (${completedRounds}/${sessionRounds})`;
+                ui.els.btnRestart.onclick = () => {
+                    // Session finished -> SAVE TO STATS
+                    saveListToStats(gameHistory);
+                    localStorage.removeItem('skatSessionState');
 
-                // CALCULATE TOTALS FOR SUMMARY
-                const finalTotals = [0, 0, 0];
-                gameHistory.forEach(g => {
-                    if (g.passedIn) return;
-                    if (g.isRamsch) {
-                        // flat -25 in NORMAL mode, actual individualScores in pure mode
-                        if (isRamschMode && g.individualScores) {
-                             g.individualScores.forEach((pts, i) => finalTotals[i] -= pts);
+                    // CALCULATE TOTALS FOR SUMMARY
+                    const finalTotals = [0, 0, 0];
+                    gameHistory.forEach(g => {
+                        if (g.passedIn) return;
+                        if (g.isRamsch) {
+                            // flat -25 in NORMAL mode, actual individualScores in pure mode
+                            if (isRamschMode && g.individualScores) {
+                                 g.individualScores.forEach((pts, i) => finalTotals[i] -= pts);
+                            } else {
+                                 g.loserIndices.forEach(idx => finalTotals[idx] -= 25);
+                            }
                         } else {
-                             g.loserIndices.forEach(idx => finalTotals[idx] -= 25);
+                            const val = g.won ? g.value : -g.value;
+                            finalTotals[g.declarerId] += val;
                         }
-                    } else {
-                        const val = g.won ? g.value : -g.value;
-                        finalTotals[g.declarerId] += val;
-                    }
-                });
+                    });
 
-                // Show Session Summary Overlay
-                ui.showSessionSummary(gameHistory, finalTotals, () => {
-                    window.location.href = 'index.html';
-                });
+                    // Show Session Summary Overlay
+                    ui.showSessionSummary(gameHistory, finalTotals, () => {
+                        window.location.href = 'index.html';
+                    });
+                };
             } else {
                 const nextGameLabel = ui.getTranslation('new_game');
                 ui.els.btnRestart.textContent = `${nextGameLabel} (${completedRounds + 1}/${sessionRounds})`;
@@ -270,11 +284,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (game.isOuvert) {
                                 gameTypeCounts.anzahlNullOuvert++;
                             }
-                            // Führer Badge: Null without 7
-                            // We need to know if player had a 7. 
-                            // Since we don't store the full hand in history, we rely on a flag or assume check.
-                            // We will add `hasSeven` to game result in next step.
-                            if (game.playerHasSeven === false) {
+                            // Führer Badge: Null without 7 after discarding
+                            if (game.declarerHasSevenAfterDiscard === false) {
                                 winNullNo7Count++;
                             }
                         } else {
