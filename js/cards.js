@@ -21,6 +21,12 @@ const SUIT_SYMBOLS = {
         'Grün': '<img src="media/peak_turnier.png" class="suit-icon" alt="Pik">',
         'Rot': '<img src="media/herz_turnier.png" class="suit-icon smaller" alt="Herz">',
         'Schellen': '<img src="media/karo_turnier.png" class="suit-icon" alt="Karo">'
+    },
+    'altenburg': {
+        'Eichel': '<img src="media/Eichel_Altenburg.png" class="suit-icon" alt="Eichel">',
+        'Grün': '<img src="media/Grün_Altenburg.png" class="suit-icon" alt="Grün">',
+        'Rot': '<img src="media/Herz_Altenburg.png" class="suit-icon" alt="Rot">',
+        'Schellen': '<img src="media/Schellen_Altenburg.png" class="suit-icon" alt="Schellen">'
     }
 };
 

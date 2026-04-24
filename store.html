@@ -45,6 +45,23 @@
                             <span class="owned-label hidden" id="label-owned-turnierblatt">Im Besitz</span>
                         </div>
                     </div>
+
+                    <!-- Item: Altdeutsches Blatt -->
+                    <div class="store-card" id="item-altenburg">
+                        <div class="item-preview">
+                            <img src="media/deutsches_blatt_preview.png" alt="Altdeutsches Blatt Vorschau" class="item-preview-img">
+                        </div>
+                        <div class="item-info">
+                            <h3>Altdeutsches Blatt</h3>
+                            <p>Traditionelles deutsches Kartenbild.</p>
+                            <div class="item-price">
+                                <img src="media/coin.png" class="coin-small">
+                                <span>1200</span>
+                            </div>
+                            <button class="btn primary buy-btn" id="btn-buy-altenburg">Kaufen</button>
+                            <span class="owned-label hidden" id="label-owned-altenburg">Im Besitz</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -72,32 +89,41 @@
 
                 const purchased = await window.storageService.getPurchasedItems();
                 
-                // Update Turnierblatt state
-                if (purchased.includes('turnierblatt')) {
-                    document.getElementById('btn-buy-turnierblatt').classList.add('hidden');
-                    document.getElementById('label-owned-turnierblatt').classList.remove('hidden');
-                }
+                const items = [
+                    { id: 'turnierblatt', price: 400 },
+                    { id: 'altenburg', price: 1200 }
+                ];
 
-                document.getElementById('btn-buy-turnierblatt').onclick = async () => {
-                    const btn = document.getElementById('btn-buy-turnierblatt');
-                    btn.disabled = true;
-                    btn.textContent = '...';
+                items.forEach(item => {
+                    const buyBtn = document.getElementById(`btn-buy-${item.id}`);
+                    const ownedLabel = document.getElementById(`label-owned-${item.id}`);
 
-                    const res = await window.storageService.purchaseItem('turnierblatt', 400);
-                    
-                    if (res.success) {
-                        btn.classList.add('hidden');
-                        document.getElementById('label-owned-turnierblatt').classList.remove('hidden');
-                        // Update balance display
-                        const balanceSpan = document.querySelector('#store-balance-header span');
-                        if (balanceSpan) balanceSpan.textContent = res.newCoins;
-                        alert('Erfolgreich gekauft!');
-                    } else {
-                        btn.disabled = false;
-                        btn.textContent = 'Kaufen';
-                        alert(res.error);
+                    if (purchased.includes(item.id)) {
+                        buyBtn.classList.add('hidden');
+                        ownedLabel.classList.remove('hidden');
                     }
-                };
+
+                    buyBtn.onclick = async () => {
+                        buyBtn.disabled = true;
+                        buyBtn.textContent = '...';
+
+                        const res = await window.storageService.purchaseItem(item.id, item.price);
+                        
+                        if (res.success) {
+                            buyBtn.classList.add('hidden');
+                            ownedLabel.classList.remove('hidden');
+                            // Update balance display
+                            const balanceSpan = document.querySelector('#store-balance-header span');
+                            if (balanceSpan) balanceSpan.textContent = res.newCoins;
+                            alert('Erfolgreich gekauft!');
+                            if (window.auth) window.auth.renderTalerGroup();
+                        } else {
+                            buyBtn.disabled = false;
+                            buyBtn.textContent = 'Kaufen';
+                            alert(res.error);
+                        }
+                    };
+                });
             }
         });
     </script>

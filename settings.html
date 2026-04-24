@@ -249,6 +249,7 @@
                 try {
                     const purchased = await window.storageService.getPurchasedItems();
                     const hasTurnier = purchased.includes('turnierblatt');
+                    const hasAltenburg = purchased.includes('altenburg');
 
                     if (hasTurnier) {
                         // Check if already exists to avoid duplicates on re-init
@@ -262,6 +263,22 @@
                             `;
                             cardDesignRadios.appendChild(turnierLabel);
                         }
+                    }
+
+                    if (hasAltenburg) {
+                        if (!document.querySelector('input[name="cardDesign"][value="altenburg"]')) {
+                            const altenburgLabel = document.createElement('label');
+                            altenburgLabel.className = 'radio-label';
+                            altenburgLabel.innerHTML = `
+                                <input type="radio" name="cardDesign" value="altenburg">
+                                <span class="radio-custom"></span>
+                                <span data-i18n="altdeutsches_blatt">Altdeutsches Blatt</span>
+                            `;
+                            cardDesignRadios.appendChild(altenburgLabel);
+                        }
+                    }
+
+                    if (hasTurnier || hasAltenburg) {
                         designLockedMsg.classList.add('hidden');
                     } else {
                         designLockedMsg.classList.remove('hidden');
