@@ -2,7 +2,6 @@
 
 [![GitHub Pages](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge&logo=github)](https://flex6x.github.io/skat-app/)
 [![Version](https://img.shields.io/badge/Version-0.4.3-blue?style=for-the-badge)](https://github.com/flex6x/skat-app)
-[![Tech](https://img.shields.io/badge/Powered%20By-AI-blueviolet?style=for-the-badge)](https://github.com/flex6x/skat-app)
 
 **Skat-König** ist eine moderne, browserbasierte Skat-Simulation, die das klassische deutsche Kartenspiel mit einer eleganten Benutzeroberfläche und intelligenten Gegnern verbindet. Entwickelt mit Fokus auf Performance und Spielspaß, bietet es sowohl traditionelle Modi als auch schnelle Ramsch-Runden.
 
@@ -45,17 +44,13 @@ Wir arbeiten stetig daran, Skat-König zur ultimativen Browser-Skat-Erfahrung zu
 ### 📝 Next Steps (To-Dos)
 - [ ] **Community:** Einführung eines klareren Nickname-Systems.
 - [ ] **Leaderboard:** Erweiterung der Übersicht-Statistiken in der Bestenliste.
-- [ ] **SEO:** Optimierung für Suchmaschinen, um mehr Skat-Enthusiasten zu erreichen.
-- [ ] **Stability:** Implementierung eines robusten Bug-Reporting-Systems.
 
 ---
 
 ## 💡 Hinweise
 
-> **Skat-König** ist ein Hobby-Projekt, das größtenteils mit Unterstützung von Künstlicher Intelligenz entwickelt wurde. Es dient primär der Unterhaltung und dem Experimentieren mit Web-Technologien.
-
-- **Statistik-Fakt:** Die Wahrscheinlichkeit, nach der Skataufnahme mindestens 10 Trümpfe auf der Hand zu halten, liegt bei etwa **0,065 %**. Ein echtes Wunderblatt!
-- **Rollmops:** In allen Standardmodi (Suit, Grand, Null) gewinnbar, basierend auf der Hand vor der Skataufnahme.
+> **Skat-König** ist ein Hobby-Projekt, das größtenteils mit Unterstützung von Künstlicher Intelligenz entwickelt wurde. Es dient primär der Unterhaltung und ist die erste moderne, gut funktionierende Skat Website.
+- nur auf Desktop und Tablets spielbar
 
 ---
 
